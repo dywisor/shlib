@@ -14,9 +14,9 @@ die() {
 
    if [ -z "${F_ON_DIE:-}" ] || ! ${F_ON_DIE} "${1}" "${2}"; then
       if [ -n "${1}" ]; then
-         echo "died: ${1}" 1>&2
+         eerror "${1}" "died:"
       else
-         echo "died." 1>&2
+         eerror "" "died."
       fi
       ${DIE:-exit} ${2:-2}
    fi
@@ -33,6 +33,18 @@ die__function() {
       die "while execution function ${1%()}(): ${2}" ${3:-3}
    else
       die "while execution function ${1%()}()." ${3:-3}
+   fi
+}
+
+# void autodie ( *argv )
+#
+#  Runs *argv. Dies on non-zero return code.
+#
+autodie() {
+   if "$@"; then
+      return 0
+   else
+      die "command '$*' returned $?."
    fi
 }
 
