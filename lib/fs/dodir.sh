@@ -4,7 +4,8 @@
 #    **F_DODIR_CREATED=,
 #    **F_DODIR_EXISTED=,
 #    **MKDIR_OPTS="-p",
-#    **MKDIR_OPTS_APPEND=
+#    **MKDIR_OPTS_APPEND=,
+#    **KEEPDIR=n
 # )
 #
 #  Ensures that the given directories exist by creating them if necessary.
@@ -39,9 +40,18 @@ dodir() {
          d="${prefix}${1}"
 
          if [ -d "${d}" ]; then
+
+            [ "${KEEPDIR:-n}" != "y" ] || \
+               [ -e "${d}/.keep" ] || touch "${d}/.keep" || true
+
             [ -z "${F_DODIR_EXISTED-}" ] || \
                ${F_DODIR_EXISTED} "${d}" || return
+
+
          elif mkdir ${MKDIR_OPTS--p} ${MKDIR_OPTS_APPEND-} -- "${d}"; then
+
+            [ "${KEEPDIR:-n}" != "y" ] || touch "${d}/.keep" || true
+
             [ -z "${F_DODIR_CREATED-}" ] || \
                ${F_DODIR_CREATED} "${d}" || return
          else
@@ -53,3 +63,5 @@ dodir() {
 
    return ${fail}
 }
+
+keepdir() { KEEPDIR=y dodir "$@"; }
