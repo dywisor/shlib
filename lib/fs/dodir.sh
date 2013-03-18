@@ -1,5 +1,5 @@
 # int dodir (
-#    *dirs,
+#    *dir,
 #    **DODIR_PREFIX=,
 #    **F_DODIR_CREATED=,
 #    **F_DODIR_EXISTED=,
@@ -64,4 +64,29 @@ dodir() {
    return ${fail}
 }
 
+# int dodir_clean ( *dir )
+#
+#  Same as dodir(), but ignores all variables.
+#
+dodir_clean() {
+   DODIR_PREFIX="" \
+      F_DODIR_CREATED="" F_DODIR_EXISTED="" \
+      MKDIR_OPTS="-p" MKDIR_OPTS_APPEND="" \
+      dodir "$@"
+}
+
+# void dodir_zap_env()
+#
+#  Unsets all dodir()-related variables.
+#
+dodir_zap_env() {
+   unset DODIR_PREFIX \
+      F_DODIR_CREATED F_DODIR_EXISTED \
+      MKDIR_OPTS MKDIR_OPTS_APPEND
+}
+
+# int keepdir ( *dir, **<see dodir()> )
+#
+#  Same as dodir(), but always passes KEEPDIR=y.
+#
 keepdir() { KEEPDIR=y dodir "$@"; }
