@@ -1,6 +1,8 @@
 ## This module offers basic USE flag functionality, that is checking whether
 ## a flag is set or not (via use()) and enabling/disabling flags.
 
+readonly __USE_BASE_FUNCTIONS="use use_call disable_use enable_use"
+
 # void __use_get_prefix ( **USE_PREFIX= )
 #
 #  Sets the %prefix variable (depending on %USE_PREFIX).
@@ -46,6 +48,18 @@ use() {
    return 0
 }
 
+# int use_call ( flag, *cmdv, **USE_PREFIX )
+#
+#  Executes cmdv if flag is enabled.
+#
+use_call() {
+   if use "${1?}"; then
+      shift && "$@"
+   else
+      return 0
+   fi
+}
+
 # void __use_set_to ( value, *flag, **USE_PREFIX= )
 #
 #  Sets zero or more USE flags to value.
@@ -79,10 +93,10 @@ disable_use() { __use_set_to n "$@"; }
 #    **__USE_FUNCTIONS="",
 # )
 #
-#  Generates use(), enable_use() and disable_use() wrapper functions that
-#  have a fixed USE prefix. Also generates wrapper functions for each
-#  function listed in __USE_FUNCTIONS (private variable for functions from
-#  sub modules).
+#  Generates use(), use_call(), enable_use() and disable_use()
+#  wrapper functions that have a fixed USE prefix. Also generates wrapper
+#  functions for each function listed in __USE_FUNCTIONS (private variable
+#  for functions from sub modules).
 #  These functions pass USE_PREFIX="<fixed prefix>_<USE_PREFIX>" if
 #  propagate_prefix is set to 'y', else USE_PREFIX="<fixed_prefix>" will
 #  be passed.
@@ -93,11 +107,11 @@ eval_use_functions() {
    local func_prefix="${1:?}_" use_prefix="${2:-${1}}" fname
 
    if [ "${3:-n}" = "y" ]; then
-      for fname in use enable_use disable_use ${__USE_FUNCTIONS-}; do
+      for fname in ${__USE_BASE_FUNCTIONS} ${__USE_FUNCTIONS-}; do
          eval "${func_prefix}${fname}() { USE_PREFIX=\"${use_prefix}_\${USE_PREFIX-}\" ${fname} \"\$@\"; }"
       done
    else
-      for fname in use enable_use disable_use ${__USE_FUNCTIONS-}; do
+      for fname in ${__USE_BASE_FUNCTIONS} ${__USE_FUNCTIONS-}; do
          eval "${func_prefix}${fname}() { USE_PREFIX=\"${use_prefix}\" ${fname} \"\$@\"; }"
       done
    fi
