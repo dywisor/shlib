@@ -41,7 +41,7 @@ get_disk() {
 #  afterwards.
 #
 __waitfor_disk_action() {
-   if [ -n "${F_WAITFOR_DISK_DEV_SCAN--}" ]; then
+   if [ -n "${F_WAITFOR_DISK_DEV_SCAN-}" ]; then
       ${F_WAITFOR_DISK_DEV_SCAN}
    fi
    get_disk "${1}"
