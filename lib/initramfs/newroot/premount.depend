@@ -1,0 +1,6 @@
+fs/mount/fstab_iter
+
+initramfs/mount
+initramfs/run
+
+initramfs/newroot/base

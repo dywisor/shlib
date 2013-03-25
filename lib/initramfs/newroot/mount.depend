@@ -1,0 +1,4 @@
+initramfs/disk
+initramfs/run
+
+initramfs/newroot/premount
