@@ -1,0 +1,7 @@
+initramfs/core
+
+initramfs/cmdline/parse
+initramfs/cmdline/parser
+
+initramfs/newroot/base
+initramfs/newroot/mount
