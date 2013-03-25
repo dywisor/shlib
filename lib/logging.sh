@@ -1,3 +1,7 @@
+# function "pointer" LOGGER
+#  modules may use this when logging is optional
+LOGGER=dolog
+
 # int __logging_accept_level ( log_level )
 #
 #  Returns 0 if the given log level is (currently) accepted, else 1.
@@ -15,6 +19,7 @@ __logging_accept_level() {
 #    <var args>,
 #    **LOGFILE=,
 #    **DOLOG_PRINT=y
+#    **LOG_LEVEL=
 # )
 # DEFINES @logger <log level> <function name>
 #
@@ -31,7 +36,7 @@ dolog() {
    [ -n "${LOGFILE-}" ] || [ "${DOLOG_PRINT:-y}" = "y" ] || return ${rc}
 
    # parse args
-   local level facility= time=0 msg= prefix= suffix=
+   local level="${LOG_LEVEL-}" facility= time=0 msg= prefix= suffix=
    while [ $# -gt 0 ]; do
       case "${1}" in
          --level=*)
@@ -54,6 +59,9 @@ dolog() {
          ;;
          --suffix=*|--post=*)
             suffix="${1#*=}"
+         ;;
+         -0)
+            rc=0
          ;;
          '')
             true
@@ -153,12 +161,14 @@ msg="${1# }"
 # @logger ERROR     dolog_error
 # @logger CRITICAL  dolog_critical
 # @logger TIMESTAMP dolog_timestamp
+# @logger INFO      dolog_var
 dolog_debug()     { dolog "$@" --level=DEBUG; }
 dolog_info()      { dolog "$@" --level=INFO; }
 dolog_warn()      { dolog "$@" --level=WARN; }
 dolog_error()     { dolog "$@" --level=ERROR; }
 dolog_critical()  { dolog "$@" --level=CRITICAL; }
 dolog_timestamp() { dolog "$@" --time --level=TIMESTAMP; }
+dolog_var()       { F_PRINTVAR=dolog_info printvar "$@"; }
 
 # void get_logger ( name, [facility...] )
 #
@@ -178,13 +188,3 @@ get_logger() {
 
    eval "${logger_name}() { dolog --facility=\"${facility}\" \"\$@\"; }"
 }
-
-# @implicit void main()
-#
-#  Sets LOGFILE to /init.log if the pid of this process is 1.
-#
-if [ $$ -eq 1 ]; then
-   : ${LOGFILE=/init.log}
-else
-   : ${LOGFILE=}
-fi
