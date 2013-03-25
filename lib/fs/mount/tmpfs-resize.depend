@@ -1,0 +1,4 @@
+die
+defsym
+fs/filesize
+fs/mount/domount
