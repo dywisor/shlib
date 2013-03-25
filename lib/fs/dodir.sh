@@ -20,19 +20,11 @@
 #  any F_DODIR_* function fails.
 #
 dodir() {
-   local fail=0 d prefix=""
+   local fail=0 v0 d prefix=""
 
    if [ -n "${DODIR_PREFIX-}" ]; then
-      local d prefix
-      prefix="${DODIR_PREFIX}"
-      d="${prefix%/}"
-      while [ "${prefix}" != "${d}" ]; do
-         prefix="${d%/}"
-         d="${prefix%/}"
-      done
-      # prefix could be empty here (if DODIR_PREFIX == '/')
-      prefix="${prefix}/"
-
+      fs_doprefix "" "${DODIR_PREFIX}"
+      prefix="${v0%/}/"
    fi
 
    while [ $# -gt 0 ];do
