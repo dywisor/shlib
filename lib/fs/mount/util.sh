@@ -9,7 +9,7 @@
 #
 unmount_if_mounted() {
    disk_mounted "${2-}" "${1-}" || return 0
-   umount "${1}"
+   do_umount "${1}"
 }
 
 # @function_alias umount_if_mounted() renames unmount_if_mounted (...)

@@ -7,7 +7,7 @@ remount() {
    while [ $# -gt 0 ]; do
       if [ -n "${1-}" ]; then
          veinfo "Remounting ${1} with mode=${REMOUNT_MODE}"
-         mount "${1}" -o remount,${REMOUNT_MODE} || return
+         do_mount "${1}" -o remount,${REMOUNT_MODE} || return
       fi
       shift
    done
