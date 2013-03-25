@@ -1,0 +1,14 @@
+defsym
+die
+function_die
+logging
+
+fs/dodir
+fs/dofile
+
+initramfs/basemounts
+initramfs/disk
+initramfs/misc
+initramfs/mount
+initramfs/run
+initramfs/vars

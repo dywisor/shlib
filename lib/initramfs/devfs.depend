@@ -1,0 +1,9 @@
+function_die
+
+fs/dodir
+fs/dofile
+fs/dosym
+
+initramfs/mount
+initramfs/use
+initramfs/run
