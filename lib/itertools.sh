@@ -3,6 +3,8 @@
 #  e.g. directory/filesystem trees, file text lines, ...
 #
 
+# @extern int list_has ( word, *list_items )
+
 # @private int __itertools_kw_is_not ( word, **kw )
 #
 #  Returns true if kw != word else false.
