@@ -6,9 +6,9 @@
 print_functrace() {
    local ftrace="${FUNCNAME[*]}" kw
    ftrace=" ${ftrace#${FUNCNAME} } "
-   for kw in 'source'; do
+   for kw in 'source' 'die__minimal' 'die__extended' 'die__function'; do
       ftrace="${ftrace// ${kw} / ((${kw})) }"
    done
    ftrace="${ftrace# }"
-   ${1:-${F_FUNCTRACE_MSG:-ewarn}} "${ftrace}" "[FUNCTRACE]"
+   ${1:-${F_FUNCTRACE_MSG:-ewarn}} "${ftrace% }" "[FUNCTRACE]"
 }
