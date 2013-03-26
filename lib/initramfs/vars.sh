@@ -33,6 +33,8 @@ initramfs_vars() {
       fi
    fi
 
+   : ${PRINT_FUNCTRACE:=y}
+
    : ${LOGFILE=/init.log}
 
    : ${MOUNTOPTS_APPEND=-n}
