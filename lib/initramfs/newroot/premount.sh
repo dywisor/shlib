@@ -19,7 +19,55 @@ __newroot_premount_fstab() {
    newroot_doprefix "${mp}"
    newroot_mp="${v0}"
 
+   # busybox doesn't support the defaults/auto/noauto mount options,
+   #  the lines below provides partial support for filtering them out
+   #
+   #  *** partial := each option will be filtered out at most once ***
+   #
+   local opts="${opts}" opt opts_head opts_tail
+
+   for opt in 'defaults' 'noauto' 'auto'; do
+      case "${opts}" in
+         "${opt}")
+            opts=""
+            break
+         ;;
+         "${opt},"*)
+            opts="${opts#${opt},}"
+         ;;
+         *",${opt}")
+            opts="${opts%,${opt}}"
+         ;;
+         ?*",${opt},"?*)
+            # bash could do this with opts="${opts/,${opt},/,}"
+            opts_head="${opts%%,${opt},*}"
+            opts_tail="${opts#*,${opt},}"
+
+            opts="${opts_head},${opts_tail}"
+         ;;
+      esac
+   done
+   # -- end option filter
+
    case "${fstype}" in
+      ## from /proc/filesystems
+      ##  (TODO: grep nodev lines from /proc/filesystems at runtime)
+      ##
+      'sysfs'|\
+      'proc'|\
+      'cgroup'|\
+      'cpuset'|\
+      'tmpfs'|\
+      'devtmpfs'|\
+      'binfmt_misc'|\
+      'debugfs'|\
+      'devpts')
+         imount_fs \
+            "${newroot_mp}" "${fs}" "${opts}" "${fstype}" && \
+         mounted=1
+         return ${?}
+      ;;
+
       'cifs'|'nfs'|'aufs')
          function_die "cifs/nfs/aufs: not implemented (mountpoint=${mp})"
       ;;
@@ -59,7 +107,7 @@ newroot_premount() {
    newroot_doprefix /etc/fstab
    if [ -r "${v0}" ]; then
       # fstab_iterator() must not fail
-      irun F_FSTAB_ITER=__newroot_premount_fstab fstab_iterator "${v0}"
+      F_FSTAB_ITER=__newroot_premount_fstab irun fstab_iterator "${v0}"
    else
       ${LOGGER} -0 --level=WARN "/etc/fstab is missing in ${NEWROOT-}"
    fi
