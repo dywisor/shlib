@@ -8,11 +8,11 @@
 newroot_mount_rootfs() {
    [ -n "${CMDLINE_ROOT-}" ] || initramfs_die "CMDLINE_ROOT is not set."
 
-   local opts="${CMDLINE_ROOTFSFLAGS:-defaults}"
+   local opts="${CMDLINE_ROOTFSFLAGS-}"
    if [ "${CMDLINE_ROOT_RO:-y}" = "y" ]; then
-      opts="${opts},ro"
+      opts="${opts}${opts:+,}ro"
    else
-      opts="${opts},rw"
+      opts="${opts}${opts:+,}rw"
    fi
 
    imount_disk \
@@ -29,11 +29,11 @@ newroot_mount_etc() {
    ## since it's very likely that <NEWROOT>/etc/fstab does not exist
    [ -n "${CMDLINE_ETC-}" ] || initramfs_die "CMDLINE_ETC is not set."
 
-   local opts="${CMDLINE_ETCFSFLAGS:-defaults}"
+   local opts="${CMDLINE_ETCFSFLAGS-}"
    if [ "${CMDLINE_ETC_RO:-y}" = "y" ]; then
-      opts="${opts},ro"
+      opts="${opts}${opts:+,}ro"
    else
-      opts="${opts},rw"
+      opts="${opts}${opts:+,}rw"
    fi
 
    imount_disk \
