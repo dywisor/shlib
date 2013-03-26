@@ -1,3 +1,5 @@
 fs/dodir
 fs/doprefix
 fs/dofile
+
+initramfs/misc

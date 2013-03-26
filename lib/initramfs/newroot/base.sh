@@ -75,14 +75,15 @@ newroot_import_logfile() {
 
    local destdir
    for destdir in '/status' '/var/log' '/tmp' '/'; do
-      if [ -d "${destdir}" ]; then
-         dest="${NEWROOT}/${destdir#/}"
-         dest="${dest%/}/initramfs.log"
-
-         if cp -L -- "${LOGFILE}" "${dest}"; then
+      destdir="${NEWROOT}/${destdir#/}"
+      if [ -d "${destdir%/}" ]; then
+         if cp -L -- "${LOGFILE}" "${destdir%/}/initramfs.log"; then
             return 0
          fi
       fi
    done
+
+   ewarn "could not copy the log file, please fix this"
+   initramfs_debug_sleep 5
    return 1
 }
