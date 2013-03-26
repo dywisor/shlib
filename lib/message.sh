@@ -30,6 +30,7 @@ eerror_color() { __message_colored "${2:-[ERROR]}" '1;31m' "${1-}"; }
 #  Also affects veinfo() and printvar(), which depend on einfo().
 #
 message_bind_functions() {
+   __HAVE_MESSAGE_FUNCTIONS=n
    unset -f einfo ewarn eerror edebug message
 
    if [ "${NO_COLOR:-n}" != "y" ]; then
@@ -47,6 +48,7 @@ message_bind_functions() {
       message() { printf "${*}\n"; }
 
    fi
+   __HAVE_MESSAGE_FUNCTIONS=y
 }
 
 # void veinfo ( message, header, **DEBUG=n )
