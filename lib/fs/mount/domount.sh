@@ -2,23 +2,27 @@
 #
 #  Wrapper function that applies extra options to mount().
 #
-domount() {
-   ${MOUNT:-mount} ${MOUNTOPTS_APPEND-} "$@"
-}
-
-# @function_alias do_mount() copies domount()
 do_mount() {
+   ${LOGGER:-true} -0 --level=DEBUG "${MOUNT:-mount} ${MOUNTOPTS_APPEND-} $*"
    ${MOUNT:-mount} ${MOUNTOPTS_APPEND-} "$@"
 }
 
-# domount_fs ( mp, fs, opts=defaults, fstype=auto )
+# @function_alias domount() renames do_mount()
+domount() { do_mount "$@"; }
+
+# domount_fs ( mp, fs, opts=, fstype=auto )
 #
 #  Wrapper function for mounting filesystems.
 #  Calls dodir_clean() before mounting.
 #
 domount_fs() {
-   dodir_clean "${1:?}" && \
-      do_mount -t "${4:-auto}" -o "${3:-defaults}" "${2}" "${1}"
+   if [ -n "${3-}" ]; then
+      dodir_clean "${1:?}" && \
+         do_mount -t "${4:-auto}" -o "${3}" "${2}" "${1}"
+   else
+      dodir_clean "${1:?}" && \
+         do_mount -t "${4:-auto}" "${2}" "${1}"
+   fi
 }
 
 # int do_umount ( *argv, **UMOUNT=umount, **MOUNTOPTS_APPEND= )

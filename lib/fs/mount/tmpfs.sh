@@ -1,11 +1,11 @@
 : ${TMPFS_MOUNT_CONTAINER_OPTS=mode=0775,uid=0,gid=6,nodev,noexec,nosuid,sync}
 
-# int dotmpfs ( mp, name=none, opts=defaults,rw, fstype=tmpfs )
+# int dotmpfs ( mp, name=none, opts=rw, fstype=tmpfs )
 #
 #  Mounts a tmpfs at the given mountpoint.
 #
 dotmpfs() {
-   domount_fs "${1:?}" "${2:-none}" "${3:-defaults,rw}" "${4:-tmpfs}"
+   domount_fs "${1:?}" "${2:-none}" "${3:-rw}" "${4:-tmpfs}"
 }
 
 # dotmpfs_mount_container ( mp, container_name=<auto>, size=7m )
