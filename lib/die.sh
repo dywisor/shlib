@@ -1,7 +1,9 @@
 if [ -z "${__HAVE_SHLIB_DIE__:-}" ]; then
 readonly __HAVE_SHLIB_DIE__=y
 
-# @noreturn die ( message=, code=2, **DIE=exit, **F_ON_DIE=, **PRINT_FUNCTRACE=y )
+# @private @noreturn die__extended (
+#    message=, code=2, **DIE=exit, **F_ON_DIE=, **PRINT_FUNCTRACE=y
+# )
 #
 #  if %F_ON_DIE has is not defined / has a null value:
 #   Prints %message to stderr and calls %DIE(code) afterwards.
@@ -11,22 +13,23 @@ readonly __HAVE_SHLIB_DIE__=y
 #   Calls %F_ON_DIE ( message, code ). Does the actions above
 #   only if %F_ON_DIE() returns a non-zero value.
 #
-die() {
-   set -- "${1:-}" "${2:-2}"
-
+die__extended() {
    if [ -z "${F_ON_DIE:-}" ] || ! ${F_ON_DIE} "${1}" "${2}"; then
       if [ -n "${1}" ]; then
          eerror "${1}" "died:"
       else
          eerror "" "died."
       fi
-      if [ "${PRINT_FUNCTRACE:-y}" = "y" ] && [ -n "${FUNCNAME-}" ]; then
+      if [ "${PRINT_FUNCTRACE:-n}" = "y" ] && [ -n "${FUNCNAME-}" ]; then
          print_functrace eerror
       fi
       ${DIE:-exit} ${2:-2}
    fi
    return 0
 }
+
+# make die__extended() available
+__F_DIE=die__extended
 
 # @private @noreturn die__function ( function_name, message=, code=3 )
 #
