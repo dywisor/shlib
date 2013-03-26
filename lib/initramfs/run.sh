@@ -3,7 +3,36 @@
 #  initramfs die() function. May start a rescue shell (in future).
 #
 initramfs_die() {
-   die "$@"
+   if [ "${INITRAMFS_SHELL_ON_DIE:-y}" = "y" ]; then
+      if [ -n "${1-}" ]; then
+         eerror "${1}" "[CRITICAL]"
+      fi
+
+      ewarn "Starting a rescue shell"
+      einfo ""
+      einfo "If you\'re that you\'ve fixed whatever caused the problem,"
+      einfo "touch /RESUME_BOOT and exit the shell."
+      einfo "${0} will then continue where it failed."
+
+      if [ -c "${CONSOLE-}" ]; then
+         case "${CONSOLE-}" in
+            /dev/ttyS?*)
+               sh --login
+            ;;
+            /dev/tty?*)
+               setsid sh -c "exec sh --login <${CONSOLE} >${CONSOLE} 2>${CONSOLE}"
+            ;;
+            *)
+               sh --login
+            ;;
+         esac
+      else
+         sh --login
+      fi
+      [ -e /RESUME_BOOT ] || die "$@"
+   else
+      die "$@"
+   fi
 }
 
 # @extern void autodie ( *argv, **AUTODIE )
@@ -23,7 +52,7 @@ irun() {
       dolog --level=INFO "command '$*' succeeded."
    else
       dolog -0 --level=CRITICAL "command '$*' returned ${rc}."
-      die "cannot recover from failure"
+      initramfs_die "cannot recover from failure"
    fi
 }
 
