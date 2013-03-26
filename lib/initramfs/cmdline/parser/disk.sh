@@ -61,7 +61,7 @@ cmdline_parser_disk() {
 
       # default return
       *)
-         return -1
+         return 1
       ;;
    esac
 }

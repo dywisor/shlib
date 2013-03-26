@@ -1,4 +1,4 @@
-: ${PROC_OPTS:=rw,nosuid,nodev,noexec,relatime}
+: ${PROCFS_OPTS:=rw,nosuid,nodev,noexec,relatime}
 : ${SYSFS_OPTS:=rw,nosuid,nodev,noexec,relatime}
 
 # void basemounts_mount ( **DEVFS_TYPE=devtmpfs, **PROCFS_OPTS, **SYSFS_OPTS )
@@ -98,6 +98,7 @@ initramfs_baselayout() {
    irun busybox_overlay /busybox
    irun dodir_clean /bin /sbin "${NEWROOT:=/newroot}"
    inonfatal dodir_clean /etc /var/log /var/run /run /mnt
+   inonfatal touch /etc/fstab
    basemounts_mount
 }
 

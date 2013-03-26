@@ -16,7 +16,7 @@ __devfs_donod() {
 #  Sets DEVFS_TYPE if unset.
 #
 __devfs_configure() {
-   if [ -n "${DEVFS_TYPE-}" ]; then
+   if [ -z "${DEVFS_TYPE-}" ]; then
       if initramfs_use mdev; then
          DEVFS_TYPE=mdev
       else
