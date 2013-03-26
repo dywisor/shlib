@@ -1,4 +1,4 @@
-# @funcdef int pragma __<name>__()
+# @funcdef shbool pragma __<name>__()
 #
 #  Returns true (0) if a certain behavior is desired (e.g. "be verbose?"),
 #  else false (1).
