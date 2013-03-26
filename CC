@@ -8,5 +8,4 @@ else
 	exit 2
 fi
 
-run() { echo "$*"; "$@"; }
-run "${CC}" -S ${0%/*}/lib "$@"
+"${CC}" -S ${0%/*}/lib "$@"
