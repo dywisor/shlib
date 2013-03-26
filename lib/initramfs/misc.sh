@@ -3,7 +3,7 @@
 #  Sleeps for the specified amount of time.
 #
 initramfs_sleep() {
-	dolog_debug "initramfs sleep( $* )"
+	${LOGGER} --level=DEBUG "(initramfs) sleeping for $*"
 	sleep "$@"
 }
 
@@ -14,7 +14,7 @@ initramfs_sleep() {
 #
 initramfs_debug_sleep() {
 	if [ "${INITRAMFS_DEBUG_SLEEP:-y}" = "y" ]; then
-		dolog_info "initramfs debug sleep( $* )"
+		${LOGGER} --level=INFO "(initramfs debug) sleeping for $*"
 		sleep "$@"
 	else
 		return 0
