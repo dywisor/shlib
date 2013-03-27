@@ -1,3 +1,6 @@
+# @extern int dodir_minimal (  dir, **KEEPDIR=n )
+# @extern int dodir_clean   ( *dir, **KEEPDIR=n )
+
 # int dodir (
 #    *dir,
 #    **DODIR_PREFIX=,
@@ -54,17 +57,6 @@ dodir() {
    done
 
    return ${fail}
-}
-
-# int dodir_clean ( *dir )
-#
-#  Same as dodir(), but ignores all variables.
-#
-dodir_clean() {
-   DODIR_PREFIX="" \
-      F_DODIR_CREATED="" F_DODIR_EXISTED="" \
-      MKDIR_OPTS="-p" MKDIR_OPTS_APPEND="" \
-      dodir "$@"
 }
 
 # void dodir_zap_env()
