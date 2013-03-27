@@ -1,6 +1,6 @@
-# symlinking is atomic (even for nfs v2/v3)
+## symlinking is atomic (even for nfs v2/v3)
 
-# int __lockfile_release ( lock ), raises function_die()
+# @private int __lockfile_release ( lock ), raises function_die()
 #
 #  Releases a lock. Does a pid-based check if lock points to a directory
 #  and contains a "stat" file.
@@ -22,7 +22,7 @@ __lockfile_release() {
 }
 
 
-# int __lockfile_acquire_now ( lock, link_target, **LOCKFILE_AUTO_DELETE=n )
+# @private int __lockfile_acquire_now ( lock, link_target, **LOCKFILE_AUTO_DELETE=n )
 #
 #  Immediately acquires a symlink lock that points to link_target.
 #  Returns 0 if successful, else a non-zero value is returned.
