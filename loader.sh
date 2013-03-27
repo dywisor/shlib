@@ -2,9 +2,15 @@
 if [ -z "${__HAVE_SHLIB_LOADER__:-}" ]; then
 readonly __HAVE_SHLIB_LOADER__=y
 
-# function file loader - this is what you should source in your scripts
-# Additionally, most the lib dependency files expect that this file
-# has been loaded.
+# function file loader
+#  this is what you should source in scripts that want to load shlib
+#  modules dynamically.
+#
+#  In contrast to linked function files / scripts, this has a few drawbacks,
+#  most notably:
+#  * no dependency resolution (dependencies are loaded as soon
+#    as they\'re from the dep file)
+#  * no support for loading whole directories
 #
 # Note: you do not need this loader if you link the function files
 #       "statically" (e.g. when using shlibcc --link)
@@ -54,7 +60,7 @@ loader__run_depend() {
 # void loader_load (
 #    *module_name,
 #    **BASH_VERSION=,
-#    **SHLIB_DIR,
+#    **SHLIB_ROOT,
 #    [**LOADER_DEPTREE]
 #  ), raises exit()
 #
@@ -66,7 +72,7 @@ loader__run_depend() {
 # arguments:
 # * *module_name     -- list of modules to be loaded
 # * **BASH_VERSION   -- used to detect whether using bash
-# * **SHLIB_DIR      -- shlib root directory
+# * **SHLIB_ROOT      -- shlib root directory
 # * **LOADER_DEPTREE -- the current module dependency tree,
 #                        will passed to loader__run_depend()
 #
@@ -76,12 +82,12 @@ loader_load() {
 
       if [ -n "${1:-}" ]; then
          # locate module
-         if [ -d "${SHLIB_DIR}/${1}" ]; then
+         if [ -d "${SHLIB_ROOT}/${1}" ]; then
             echo "load module directory: not implemented." 1>&2
             exit 194
 
          elif \
-            [ -n "${BASH_VERSION}" ] && [ -f "${SHLIB_ROOT}/${1}.bash" ]
+            [ -n "${BASH_VERSION-}" ] && [ -f "${SHLIB_ROOT}/${1}.bash" ]
          then
             MODULE="${SHLIB_ROOT}/${1}.bash"
 
