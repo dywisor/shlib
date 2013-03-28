@@ -141,7 +141,7 @@ argparse_parse_from_file() {
    argparse_parse ${ARGV}
 }
 
-# void argparse_parse ( *argv, **F_ARGPARSE... )
+# void argparse_parse ( *argv, **ARGPARSE_BREAK=y, **F_ARGPARSE... )
 #
 #  Pre-parse argv and call arg parser functions for each arg.
 #
@@ -169,6 +169,7 @@ argparse_parse() {
                else
                   autodie ${F_ARGPARSE:?} "$@"
                fi
+               [ "${ARGPARSE_BREAK:-y}" != "y" ] || return 0
             ;;
             --*)
                longopt="${arg#--}"
