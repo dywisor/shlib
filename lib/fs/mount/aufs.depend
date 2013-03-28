@@ -1,0 +1,5 @@
+die
+function_die
+fs/mount/info
+fs/mount/domount
+fs/dodir_minimal
