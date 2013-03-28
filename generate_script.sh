@@ -20,7 +20,7 @@ HELP_OPTIONS="
 --bash         (-B) -- create a script that uses /bin/bash
 --list         (-l) -- list all available scripts
 "
-HELP_USAGE="Usage: ${SCRIPT_FILENAME} [option...] <script_name>"
+HELP_USAGE="Usage: ${SCRIPT_FILENAME} [option...] <script_name> -- <shlibcc args>"
 
 list_scripts() {
 	(
@@ -28,6 +28,10 @@ list_scripts() {
 			find . -type f -name '*.sh' | cut -b 3- | rev | cut -b 4- | rev | sort
 	)
 	exit $?
+}
+
+argparse_break() {
+	SHLIBCC_ARGS="$*"
 }
 
 argparse_arg() {
@@ -107,7 +111,7 @@ if [ -z "${NEEDS_SHLIB-}" ]; then
 fi
 
 if [ "${SCRIPT_STANDALONE=n}" = "y" ]; then
-	opts="-u --strip-virtual"
+	opts="${SHLIBCC_ARGS=-u --strip-virtual}"
 	if [ "${NEEDS_SHLIB}" = "y" ]; then
 		opts="${opts} -D"
 	else
