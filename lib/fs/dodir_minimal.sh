@@ -25,7 +25,8 @@ dodir_minimal() {
 dodir_clean() {
    local fail=0
    while [ $# -gt 0 ]; do
-      dodir_minimal || fail=$(( ${fail} + 1 ))
+      dodir_minimal "${1}" || fail=$(( ${fail} + 1 ))
+      shift
    done
    return ${fail}
 }
