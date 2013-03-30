@@ -77,7 +77,7 @@ printvar() {
    local val
    while [ $# -gt 0 ]; do
       eval val="\${${1}-}"
-      ${F_PRINTVAR:-einfo} "${1}=\"${val}\"${desc}"
+      ${F_PRINTVAR:-einfo} "${1}=\"${val}\""
       shift
    done
 }
