@@ -4,7 +4,7 @@ atexit
 core
 defsym
 die
-die_minimal
+die_extended
 fs/chmod
 fs/dir_empty
 fs/disk
@@ -27,9 +27,9 @@ fs/mount/util
 fs/symlink_replace
 fs/tmpdir
 fs/unless_exists
-function_defined
-function_die
-functrace
+function/defined
+function/die
+function/functrace
 interact/get_yn
 itertools
 list_has

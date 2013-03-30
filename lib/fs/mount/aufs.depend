@@ -1,5 +1,5 @@
 die
-function_die
+function/die
 fs/mount/info
 fs/mount/domount
 fs/dodir_minimal

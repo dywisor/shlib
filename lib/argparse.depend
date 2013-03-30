@@ -1,5 +1,5 @@
-function_defined
-function_die
+function/defined
+function/die
 strutil/charwise
 die
 logging

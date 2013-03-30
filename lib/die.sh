@@ -1,70 +1,22 @@
-if [ -z "${__HAVE_SHLIB_DIE__:-}" ]; then
-readonly __HAVE_SHLIB_DIE__=y
-
-# @private @noreturn die__extended (
-#    message=, code=2, **DIE=exit, **F_ON_DIE=, **PRINT_FUNCTRACE=y
-# )
+# @private @noreturn die__minimal ( message, code )
 #
-#  if %F_ON_DIE has is not defined / has a null value:
-#   Prints %message to stderr and calls %DIE(code) afterwards.
-#   Also prints the function trace if it is available (bash) and
-#   PRINT_FUNCTRACE is set to 'y'
-#  else:
-#   Calls %F_ON_DIE ( message, code ). Does the actions above
-#   only if %F_ON_DIE() returns a non-zero value.
+#  Prints %message to stderr and calls exit(code) afterwards.
 #
-die__extended() {
-   if [ -z "${F_ON_DIE:-}" ] || ! ${F_ON_DIE} "${1}" "${2}"; then
-      if [ -n "${1}" ]; then
-         eerror "${1}" "died:"
-      else
-         eerror "" "died."
-      fi
-      if [ "${PRINT_FUNCTRACE:-n}" = "y" ] && [ -n "${FUNCNAME-}" ]; then
-         print_functrace eerror
-      fi
-      ${DIE:-exit} ${2:-2}
-   fi
-   return 0
-}
-
-# make die__extended() available
-__F_DIE=die__extended
-
-# @private @noreturn die__function ( function_name, message=, code=3 )
-#
-#  Common functionality for function_die().
-#  Calls die( function_name~message, code ).
-#
-die__function() {
-   if [ -n "${2:-}" ]; then
-      die "while execution function ${1%()}(): ${2}" ${3:-3}
+die__minimal() {
+   if [ "${__HAVE_MESSAGE_FUNCTIONS:-n}" = "y" ]; then
+      eerror "${1}" "died:"
+   elif [ -n "${1}" ]; then
+      echo "died: ${1}" 1>&2
    else
-      die "while execution function ${1%()}()." ${3:-3}
+      echo "died." 1>&2
    fi
+   exit "${2}"
 }
 
-# @private void die__autodie ( *argv )
+# @noreturn die ( message=, code=2, **__F_DIE=die__minimal )
 #
-#  Runs *argv. Dies on non-zero return code.
+#  Calls __F_DIE ( message, code ).
 #
-die__autodie() {
-   if "$@"; then
-      return 0
-   else
-      die "command '$*' returned $?."
-   fi
+die() {
+   ${__F_DIE:-die__minimal} "${1-}" "${2:-2}"
 }
-
-# void autodie ( *argv, **AUTODIE=die__autodie )
-#
-#  Runs AUTODIE ( *argv ) which is supposed to let the script die on
-#  non-zero return code.
-#
-autodie() { ${AUTODIE:-die__autodie} "$@"; }
-
-# @function_alias run() copies autodie()
-#
-run() { ${AUTODIE:-die__autodie} "$@"; }
-
-fi

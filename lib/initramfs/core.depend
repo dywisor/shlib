@@ -1,6 +1,6 @@
 defsym
 die
-function_die
+function/die
 logging
 
 fs/dodir

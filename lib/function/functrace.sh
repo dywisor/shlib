@@ -3,5 +3,5 @@
 #  Function stub since %FUNCNAME is not available in sh.
 #
 print_functrace() {
-   eerror "not available" "[FUNCTRACE]"
+   ${1:-${F_FUNCTRACE_MSG:-eerror}} "not available" "[FUNCTRACE]"
 }
