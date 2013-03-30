@@ -2,3 +2,4 @@ autodie
 die
 function/die
 message
+scriptinfo
