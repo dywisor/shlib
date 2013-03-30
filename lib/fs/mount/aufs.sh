@@ -46,7 +46,7 @@ __aufs_check_support() {
 aufs_tmpfs_backed() {
    __aufs_check_support
 
-   local aufs_mp="${1:?}" tmpfs_mp="${2:?}" tmpfs_size="${3:?}" \
+   local aufs_mp="${1:?}" tmpfs_mp="${2:?}" tmpfs_size="${3?}" \
       branches_rr="${4-}" branches_ro="${5-}" \
       aufs_name="${6-}" aufs_opts="${7-}"
 
@@ -80,16 +80,14 @@ aufs_tmpfs_backed() {
    fi
 
    # mount the tmpfs
-   dodir_clean "${tmpfs_mp}" || return
    if [ -n "${tmpfs_size}" ]; then
-      do_mount -t tmpfs \
-         -o ${AUFS_TMPFS_OPTS?},size=${tmpfs_size} \
-         ${aufs_name}_mem "${tmpfs_mp}" || return
+      domount_fs "${tmpfs_mp}" "${aufs_name}_mem" \
+         "${AUFS_TMPFS_OPTS?},size=${tmpfs_size}" "tmpfs" || return
+   else
+      dodir_clean "${tmpfs_mp}" || return
    fi
 
    # mount the aufs
-   dodir_clean "${aufs_mp}" && \
-   do_mount -t aufs \
-      -o "br:${branches},nowarn_perm${aufs_opts:+,}${aufs_opts}" \
-      "${aufs_name}" "${aufs_mp}"
+   domount_fs "${aufs_mp}" "${aufs_name}" \
+      "br:${branches},nowarn_perm${aufs_opts:+,}${aufs_opts}" "aufs"
 }
