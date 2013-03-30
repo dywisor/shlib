@@ -14,13 +14,18 @@ __message_colored() {
    printf "\033[${2:?}${1:?}\033[0m${3:+ }${3-}\n"
 }
 
-# void {einfo,ewarn,eerror}_color ( message, header=<INFO,WARN,ERROR> )
+# void {einfo,ewarn,eerror}_color ( message, header=<*|INFO,WARN,ERROR> )
 #
 # Prints ${header}${message} to stdout (colored output).
 #
-einfo_color()  { __message_colored "${2:-[INFO]}"  '1;32m' "${1-}"; }
-ewarn_color()  { __message_colored "${2:-[WARN]}"  '1;33m' "${1-}"; }
-eerror_color() { __message_colored "${2:-[ERROR]}" '1;31m' "${1-}"; }
+
+#einfo_color()  { __message_colored "${2:-[INFO]}"  '1;32m' "${1-}"; }
+#ewarn_color()  { __message_colored "${2:-[WARN]}"  '1;33m' "${1-}"; }
+#eerror_color() { __message_colored "${2:-[ERROR]}" '1;31m' "${1-}"; }
+
+einfo_color()  { __message_colored "${2:-*}" '1;32m' "${1-}"; }
+ewarn_color()  { __message_colored "${2:-*}" '1;33m' "${1-}"; }
+eerror_color() { __message_colored "${2:-*}" '1;31m' "${1-}"; }
 
 # void message_bind_functions ( **NO_COLOR=n )
 #
