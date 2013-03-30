@@ -3,7 +3,7 @@
 set -u
 
 . "${0%/*}/loader.sh" "${0%/*}/lib" && \
-loader_load die_minimal message argparse scriptinfo || exit
+loader_load die message argparse scriptinfo || exit
 
 HELP_DESCRIPTION="make shell scripts"
 HELP_BODY="generate shell scripts using ${SCRIPT_DIR}/shlib
