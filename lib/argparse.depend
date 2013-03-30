@@ -1,6 +1,7 @@
 function/defined
 function/die
 strutil/charwise
+autodie
 die
 logging
 defsym
