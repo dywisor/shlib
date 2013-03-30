@@ -2,14 +2,21 @@
 #    md_identifier=<detect>,
 #    *cmdv=**F_MD_FOREACH_MEMBER=einfo,
 #    **F_MD_FOREACH_MEMBER_ONERROR=return,
+#    **DEFAULT_MD=, **MD_IMPLICIT=y, **MD_RESTRICT_NAMES=y,
 #    **v0!
 # )
 #
 #  Executes cmdv for each member of the given md device. Also stores the
 #  member's device paths (/dev/..) in v0.
 #
-#  Tries to autodetect the md device if none is given. This will fail unless
-#  the system has exactly one.
+#  Tries to autodetect the md device if none is given and DEFAULT_MD is not
+#  set (else DEFAULT_MD will be used).
+#  This will fail unless the system has exactly one.
+#
+#  The first arg will part of *cmdv if MD_IMPLICIT is set to 'y' and if it
+#  is empty or not a valid md_identifier. The latter one will only be
+#  checked if MD_RESTRICT_NAMES is set to 'y', in which case identifiers
+#  have to start with "md".
 #
 #  Passing true as cmdv (or F_MD_FOREACH_MEMBER=true) results in storing
 #  the member's device in v0 only.
@@ -18,8 +25,33 @@ md_foreach_member() {
    v0=
    local MD="${1-}"
 
-   # auto-detect md if unset (or empty)
-   if [ -z "${MD}" ]; then
+   # auto-detect md if unset (or empty) (#1)
+   if [ -n "${MD}" ]; then
+      MD="${MD##*/}"
+
+      if [ "${MD_RESTRICT_NAMES:-y}" = "y" ]; then
+         # reset MD if it does not start with "md" (or is empty)
+         if [ -z "${MD}" ] || [ "${MD#md}" = "${MD}" ]; then
+            MD=
+         fi
+      fi
+   fi
+
+   # auto-detect md if unset (or empty) (#2)
+   if [ -n "${MD}" ]; then
+      # MD is set, MD_IMPLICIT has no effect
+
+      [ $# -eq 0 ] || shift || return 3
+
+   elif [ -n "${DEFAULT_MD-}" ]; then
+      # MD is not set but DEFAULT_MD is, MD_IMPLICIT defaults to y
+
+      MD="${DEFAULT_MD##*/}"
+
+      [ "${MD_IMPLICIT:-y}" = "y" ] || [ $# -eq 0 ] || shift || return 3
+
+   else
+      # MD and DEFAULT_MD are not set, MD_IMPLICIT defaults to y
       local md
       for md in /sys/block/md?*; do
          if [ -d "${md}" ]; then
@@ -33,12 +65,11 @@ md_foreach_member() {
       done
       if [ -n "${MD}" ]; then
          einfo "no md device given, using ${MD}."
+         [ $# -eq 0 ] || [ "${MD_IMPLICIT:-y}" = "y" ] || shift || return 3
       else
          eerror "no md device given, cannot autodetect (none found)."
          return 6
       fi
-   else
-      MD="${MD##*/}"
    fi
 
    local MD_BLOCK="/sys/block/${MD}"
@@ -49,7 +80,6 @@ md_foreach_member() {
       return 2
 
    else
-      [ $# -eq 0 ] || shift || return 3
 
       # get members
       local member dev_name dev MD_MEMBERS=
