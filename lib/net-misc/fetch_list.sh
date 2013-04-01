@@ -87,7 +87,7 @@
 #  (a) calls F_FETCH_ON_ERROR ( distfile ) if set
 #  (b) returns the return value of wget/F_FETCH_ITEM unless FETCH_PASS_FAIL
 #      is set to 'y'
-#  (c) returns 0
+#  (c) removes distfile (rm -f) and returns 0
 #  -> removes the distfile if it is an empty file
 #
 fetch_item() {
@@ -141,27 +141,18 @@ fetch_item() {
       local WGET="${WGET:-wget}"
       [ "${WGET_QUIET:-y}" != "y" ] || WGET="${WGET} -q"
 
-      case "${FETCH_UNCOMPRESS-}" in
-         '')
-            ${WGET} -O "${distfile}" "${remote_uri}"
-         ;;
-         gzip|gz)
-            ${WGET} -O - "${remote_uri}" | gzip -d -c > "${distfile}"
-         ;;
-         bzip2|bz2)
-            ${WGET} -O - "${remote_uri}" | bzip2 -d -c > "${distfile}"
-         ;;
-         xz)
-            ${WGET} -O - "${remote_uri}" | xz -d -c > "${distfile}"
-         ;;
-         lzo|lzop)
-            ${WGET} -O - "${remote_uri}" | lzop -d -c > "${distfile}"
-         ;;
-         *)
-            function_die "FETCH_UNCOMPRESS '${FETCH_UNCOMPRESS}' is unkown."
-            #${WGET} -O "${distfile}" "${remote_uri}"
-         ;;
-      esac
+      if [ -z "${FETCH_UNCOMPRESS-}" ]; then
+
+         ${WGET} -O "${distfile}" "${remote_uri}"
+
+      elif compress_supports "${FETCH_UNCOMPRESS}"; then
+
+         ${WGET} -O - "${remote_uri}" | \
+            do_uncompress "${FETCH_UNCOMPRESS}" > "${distfile}"
+
+      else
+         function_die "FETCH_UNCOMPRESS '${FETCH_UNCOMPRESS}' is not supported."
+      fi
    fi || fetch_rc=$?
 
    if [ ${fetch_rc} -eq 0 ]; then
@@ -175,7 +166,7 @@ fetch_item() {
       elif [ "${FETCH_PASS_FAIL:-n}" = "y" ]; then
          return ${fetch_rc}
       else
-         [ -s "${distfile}" ] || rm -f "${distfile}"
+         rm -f "${distfile}"
       fi
    fi
    return 0

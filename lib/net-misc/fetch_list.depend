@@ -1,3 +1,4 @@
 itertools
 fs/dodir
+fs/uncompress
 function/die
