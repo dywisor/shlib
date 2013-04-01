@@ -36,6 +36,9 @@ print_external_ip() {
    esac
 }
 
+# @function_alias external_ip() renames print_external_ip()
+external_ip() { print_external_ip "$@"; }
+
 # int get_external_ip ( impl=<try all until success>, **v0! )
 #
 #  Gets the external ip and stores it in %v0.
