@@ -94,6 +94,13 @@ blocklist_update_file() {
    mv "${1:?}" "${dest}"
 }
 
+# void blocklist_prefetch_info ( **... )
+#
+blocklist_prefetch_info() {
+   einfo "fetching ${remote_uri}"
+   return 0
+}
+
 # @argparse_handle argparse_break (...)
 #
 #  Ignored.
@@ -222,9 +229,12 @@ fi
 blocklist_set_distdir "${BLOCKLIST_DISTDIR}"
 blocklist_set_infile "${BLOCKLIST_FILE}"
 
+F_FETCH_PRE=blocklist_prefetch_info
+
 if __debug__; then
    WGET_QUIET=n
 elif __quiet__; then
+   F_FETCH_PRE=
    WGET_QUIET=y
 fi
 
