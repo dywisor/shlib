@@ -1,9 +1,12 @@
 BASH         ?= 0
 SHLIBCC       = ./CC
+MAKE_SCRIPTS  = ./make_scripts.sh
 ifeq ($(BASH),1)
-SHLIBCCFLAGS  = --as-lib --strip-virtual --bash
+SHLIBCCFLAGS    = --as-lib --strip-virtual --bash
+MAKESCRIPT_BASH = y
 else
-SHLIBCCFLAGS  = --as-lib --strip-virtual
+SHLIBCCFLAGS    = --as-lib --strip-virtual
+MAKESCRIPT_BASH = n
 endif
 
 SHLIB_MODE   ?= 0644
@@ -40,6 +43,28 @@ uninstall: $(DEST)
 clean:
 	rm -rf ./build
 
+clean-scripts:
+	rm -rf ./build/scripts
+
 reinstall: clean install
 
-.PHONY: shlib install uninstall clean verify default reinstall
+scripts-linked: clean-scripts $(MAKE_SCRIPTS)
+	MAKESCRIPT_DEST=./build/scripts \
+	MAKESCRIPT_SHLIB=$(DEST) \
+	MAKESCRIPT_STANDALONE=n \
+	MAKESCRIPT_FLAT=y \
+	MAKESCRIPT_BASH=$(MAKESCRIPT_BASH) \
+	$(MAKE_SCRIPTS)
+
+scripts-standalone: clean-scripts $(MAKE_SCRIPTS)
+	MAKESCRIPT_DEST=./build/scripts \
+	MAKESCRIPT_SHLIB=$(DEST) \
+	MAKESCRIPT_STANDALONE=y \
+	MAKESCRIPT_FLAT=y \
+	MAKESCRIPT_BASH=$(MAKESCRIPT_BASH) \
+	$(MAKE_SCRIPTS)
+
+scripts: scripts-linked
+
+.PHONY: shlib install uninstall clean clean-scripts verify default reinstall \
+	scripts-linked scripts-standalone scripts
