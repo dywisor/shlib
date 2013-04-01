@@ -3,6 +3,10 @@
 ## functions from die
 
 # @extern @noreturn die ( [message], [code] )
+
+
+## functions from autodie
+
 # @extern void autodie ( *cmdv )
 
 
