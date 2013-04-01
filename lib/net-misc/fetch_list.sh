@@ -135,6 +135,8 @@ fetch_item() {
 
    local fetch_rc=0
 
+   [ -z "${F_FETCH_PRE-}" ] || ${F_FETCH_PRE} || return
+
    if [ -n "${F_FETCH_ITEM-}" ]; then
       ${F_FETCH_ITEM} "${remote_uri}" "${distfile}"
    else
