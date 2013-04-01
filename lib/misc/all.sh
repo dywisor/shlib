@@ -1,3 +1,3 @@
 EXPORT_FUNCTIONS \
    qwhich \
-   sleeploop
+   sleeploop sleeploop_retry

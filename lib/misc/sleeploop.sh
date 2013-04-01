@@ -32,3 +32,11 @@ sleeploop() {
    return 20
 }
 
+# @function_alias sleeploop_retry ( retry_count, sleep_intvl, *argv )
+#  is sleeploop (
+#     *argv, **SLEEPLOOP_RETRY=retry_count, **SLEEPLOOP_INTVL=sleep_intvl
+#  )
+sleeploop_retry() {
+   local SLEEPLOOP_RETRY="${1:?}" SLEEPLOOP_INTVL="${2:?}"
+   shift 2 && sleeploop "$@"
+}
