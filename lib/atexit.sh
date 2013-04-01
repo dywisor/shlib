@@ -29,14 +29,32 @@ __atexit_run() {
    "$@" || return 0
 }
 
+# void __atexit_clear_pipe()
+#
+#  This is an iterator function that simply notifies the user that
+#  an item has been ignored.
+#
+#  __atexit__ sets F_ITER=__atexit_clear_pipe when done in order to stop
+#  any iteration.
+#
+__atexit_clear_pipe() {
+   if [ "${HAVE_MESSAGE_FUNCTIONS:-n}" = "y" ]; then
+      eerror "atexit, clear_pipe: ignoring '$*'"
+   else
+      echo "atexit, clear_pipe: ignoring '$*'" 1>&2
+   fi
+   return 0
+}
+
 # void __atexit__()
 #
 # Runs all registered atexit functions.
 #
 __atexit__() {
    atexit_disable
-   ITER_UNPACK_ITEM=y F_ITER=__atexit_run \
-      line_iterator "${__ATEXIT_FUNCTIONS}"
+   F_ITER=__atexit_run ITER_UNPACK_ITEM=y line_iterator "${__ATEXIT_FUNCTIONS}"
+   # set F_ITER to stop any iteration
+   F_ITER=__atexit_clear_pipe
 }
 
 # void atexit_register_unsafe ( *argv )
