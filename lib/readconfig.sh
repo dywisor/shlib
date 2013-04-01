@@ -3,8 +3,8 @@
 #  Searches for a config file with the given name at the following locations,
 #  in that order:
 #
-#  * $PWD/<name>, $PWD/<name>.conf, $PWD/<name>/config, $PWD/<name>/<name>.conf
-#  * $HOME/.<name>, ...
+#  * $HOME/.<name>, $HOME/.<name>.conf,
+#     $HOME/.<name>/config, $HOME/.<name>/<name>.conf
 #  * $HOME/.config/<name>, ...
 #  * /etc/<name>, ...
 #
@@ -13,13 +13,15 @@
 #
 readconfig__search() {
    local k conf
+   [ -n "${HOME-}" ] || local HOME=/dev/null
    for k in \
-      "${PWD}/${1}" "${HOME}/.${1}" "${HOME}/.config/${1}" "/etc/${1}"
+      "${HOME}/.${1}" "${HOME}/.config/${1}" "/etc/${1}" "/etc/shlib/${1}"
    do
       if [ -f "${k}" ]; then
-
-         config_file="${k}"
-         return 0
+         if [ "$(readlink -f ${0})" != "$(readlink -f ${k})" ]; then
+            config_file="${k}"
+            return 0
+         fi
 
       elif [ -f "${k}.conf" ]; then
          config_file="${k}.conf"
