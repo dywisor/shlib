@@ -3,5 +3,5 @@ function/die
 strutil/charwise
 autodie
 die
-logging
+message
 defsym

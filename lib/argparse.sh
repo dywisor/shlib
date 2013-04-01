@@ -80,6 +80,41 @@ __argparse_handle_internal() {
    return 0
 }
 
+# @argparse_handle argparse_need_arg (...)
+#
+#  Calls die() if $1 is empty or unset. Also sets doshift to 1.
+#
+argparse_need_arg() {
+   if [ -n "${1-}" ]; then
+      doshift=1
+   else
+      die "one non-empty arg required after '${arg}'"
+   fi
+}
+
+# @argparse_handle argparse_need_args ( num_args, ... )
+#
+#  Like argparse_need_arg, but checks for num_args non-empty args.
+#  Also sets doshift to num_args.
+#
+argparse_need_args() {
+   local nargs="${1:?}"
+   shift
+   if [ $# -lt ${nargs} ]; then
+      die "${nargs} non-empty args required after '${arg}'."
+   else
+      local i=0
+      while [ ${i} -lt ${nargs} ]; do
+         if [ -z "${1-}" ]; then
+            die "${nargs} non-empty args required after '${arg}', but only ${i} found."
+         fi
+         i=$(( ${i} + 1 ))
+         shift
+      done
+   fi
+   doshift=${nargs}
+}
+
 # @argparse_handle __argparse_handle_shortopt (
 #    [ word ] :: [ *argv_remainder ], ...
 # )
@@ -89,6 +124,7 @@ __argparse_handle_internal() {
 __argparse_handle_shortopt() {
    local shortopt="${1-}"
    if [ -n "${shortopt}" ]; then
+      shift
       local opt="${shortopt}" arg="-${shortopt}"
       if ! __argparse_handle_internal; then
          if [ -n "${F_ARGPARSE_SHORTOPT-}" ]; then
@@ -114,8 +150,7 @@ argparse_unknown() {
    if [ -z "${ARGPARSE_LOG_UNKNOWN-}" ]; then
       die "cannot handle arg '${real_arg}'"
    else
-      LOG_LEVEL="${ARGPARSE_LOG_UNKNOWN}" dolog \
-         --facility=argparse.unknown "${real_arg}" || true
+      ewarn "argparse: unknown arg '${real_arg}'." || true
    fi
 }
 
