@@ -1,4 +1,22 @@
-# int host_alive ( *host_spec, **HOST_ALIVE_WAIT=2 )
+# int host_alive ( [sync_dir], *host_spec, **HOST_ALIVE_WAIT=2 )
+#
+#  Calls host_alive_multi ( sync_dir, *host_spec ) if the first arg starts
+#  with '/', else calls host_alive_serial ( *host_spec ).
+#
+#  In any case, returns 0 if all given hosts are alive, else 1.
+#
+host_alive() {
+   case "${1-}" in
+      /*)
+         host_alive_multi "$@"
+      ;;
+      *)
+         host_alive_serial "$@"
+      ;;
+   esac
+}
+
+# int host_alive_serial ( *host_spec, **HOST_ALIVE_WAIT=2 )
 #
 #  Returns true (0) if all given hosts are alive (respond to ping),
 #  else false. Returns on first failure.
@@ -7,7 +25,7 @@
 #  really long worst-case time requirements.
 #  Use host_alive_multi() if you expect "many" hosts to be down / not pingable
 #
-host_alive() {
+host_alive_serial() {
    local wait=${HOST_ALIVE_WAIT:-2}
    while [ $# -gt 0 ]; do
       [ -z "${1-}" ] || host_alive__ping "${1}" "n" || return
