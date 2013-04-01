@@ -64,7 +64,10 @@ message_bind_functions() {
 #  else does nothing.
 #
 veinfo() {
-   [ "${DEBUG:-n}" != "y" ] || einfo "${1-}" "${2:-[DEBUG]}"
+   if __verbose__ || __debug__; then
+      einfo "${1-}"
+   fi
+   return 0
 }
 
 # void printvar ( *varname, **F_PRINTVAR=einfo )
