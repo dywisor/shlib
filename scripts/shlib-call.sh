@@ -7,9 +7,27 @@
 
 LOGGER=true readconfig_optional_search "shlib-call"
 
+# int shlib_call_wrap_v0 ( *cmdv )
+#
+#  Executes *cmdv and prints v0 or FILESIZE to stdout afterwards (if set).
+#  Passes cmdv's return value.
+#
+shlib_call_wrap_v0() {
+   local v0 FILESIZE rc=0
+   "$@" || rc=$?
+
+   if [ -z "${v0-}" ]; then
+      # compat "hack" for get_filesize()
+      [ -z "${FILESIZE-}" ] || echo "${FILESIZE}"
+   else
+      echo "${v0}"
+   fi
+   return ${rc}
+}
+
 if function_defined "${SCRIPT_NAME}"; then
 
-   ${SCRIPT_NAME} "$@"
+   shlib_call_wrap_v0 ${SCRIPT_NAME} "$@"
 
 elif [ -z "$*" ] || [ "${1}" = "-h" ] || [ "${1}" = "--help" ]; then
 
@@ -28,7 +46,7 @@ elif [ -z "$*" ] || [ "${1}" = "-h" ] || [ "${1}" = "--help" ]; then
 
 elif function_defined "${1}"; then
 
-   "$@"
+   shlib_call_wrap_v0 "$@"
 
 elif [ "${1}" = "list-functions" ] || [ "${1}" = "lf" ]; then
 
@@ -91,6 +109,12 @@ elif [ "${1}" = "--install" ] || [ "${1}" = "-i" ]; then
          LINK_TARGET="${SCRIPT_FILE}"
       fi
 
+      # void symlink_self (
+      #    link_name, **DESTDIR, **SCRIPT_FILE, **LINK_TARGET
+      # )
+      #
+      #  Sets up a symlink in DESTDIR.
+      #
       symlink_self() {
          local link="${DESTDIR}/${1}"
          if [ -e "${link}" ]; then
