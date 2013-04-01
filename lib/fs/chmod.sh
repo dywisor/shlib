@@ -15,5 +15,8 @@ chmod_normalize_mode() {
       -=*)
          v0="-${1#-=}"; chmod_normalize_mode "${v0}"
       ;;
+      *)
+         v0="${1-}"
+      ;;
    esac
 }
