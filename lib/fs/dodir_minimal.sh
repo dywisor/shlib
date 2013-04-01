@@ -7,10 +7,10 @@
 #  else 1.
 #
 dodir_minimal() {
-   if [ -d "${1:?}" ] || mkdir -p -- "${1}"; then
-      [ "${KEEPDIR:-n}" != "y" ] || \
-         [ -e "${1}/.keep" || touch "${1}/.keep" || true
-   fi
+   [ -d "${1:?}" ] || mkdir -p -- "${1}" || return 1
+
+   [ "${KEEPDIR:-n}" != "y" ] || \
+      [ -e "${1}/.keep" || touch "${1}/.keep" || true
 }
 
 # int dodir_clean ( *dir, **KEEPDIR=n )
