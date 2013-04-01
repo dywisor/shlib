@@ -1,0 +1,6 @@
+fs/mount/domount
+fs/mount/info
+fs/mount/remount
+
+die
+scriptinfo
