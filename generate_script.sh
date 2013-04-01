@@ -68,7 +68,7 @@ argparse_shortopt() {
 			SCRIPT_BASH=y
 		;;
 		'l')
-			list_scripts
+			LIST_SCRIPTS=y
 		;;
 		*)
 			argparse_unknown
@@ -89,7 +89,7 @@ argparse_longopt() {
 			doshift=1
 		;;
 		'list')
-			list_scripts
+			LIST_SCRIPTS=y
 		;;
 		*)
 			argparse_unknown
@@ -99,8 +99,14 @@ argparse_longopt() {
 
 argparse_autodetect
 
-argparse_parse "$@"    || die "argparse() failed"
-[ -n "${IN_SCRIPT-}" ] || die "${HELP_USAGE}"
+argparse_parse "$@" 1>&2 || die "argparse() failed"
+
+if [ "${LIST_SCRIPTS:-n}" = "y" ]; then
+	list_scripts
+fi
+
+
+[ -n "${IN_SCRIPT-}" ]   || die "${HELP_USAGE}"
 
 if [ -z "${NEEDS_SHLIB-}" ]; then
 	if [ -e "${IN_SCRIPT}.depend" ] || [ -e "${IN_SCRIPT%.sh}.depend" ]; then
