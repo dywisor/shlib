@@ -1,0 +1,5 @@
+function/export
+
+net-misc/external_ip
+net-misc/fetch_list
+net-misc/host_alive
