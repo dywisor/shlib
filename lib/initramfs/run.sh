@@ -3,7 +3,11 @@
 #  initramfs die() function. May start a rescue shell (in future).
 #
 initramfs_die() {
-   if [ "${INITRAMFS_SHELL_ON_DIE:-y}" = "y" ]; then
+   if [ -n "${F_INITRAMFS_DIE-}" ]; then
+
+      ${F_INITRAMFS_DIE} "$@"
+
+   elif [ "${INITRAMFS_SHELL_ON_DIE:-y}" = "y" ]; then
       if [ -n "${1-}" ]; then
          eerror "${1}" "[CRITICAL]"
       fi
@@ -13,6 +17,9 @@ initramfs_die() {
       einfo "If you\'re that you\'ve fixed whatever caused the problem,"
       einfo "touch /RESUME_BOOT and exit the shell."
       einfo "${0} will then continue where it failed."
+      einfo ""
+      einfo "The /RESUME_BOOT file can also be used to inject variables,"
+      einfo "which may be required to continue booting."
 
       if [ -c "${CONSOLE-}" ]; then
          case "${CONSOLE-}" in
@@ -29,9 +36,40 @@ initramfs_die() {
       else
          sh --login
       fi
-      [ -e /RESUME_BOOT ] || die "$@"
+      if [ ! -e /RESUME_BOOT ]; then
+
+         [ ! -x /telinit ] || /telinit --
+         die "$@"
+
+      elif [ -f /RESUME_BOOT ] && [ -s /RESUME_BOOT ]; then
+
+         # read the file twice to ensure that it's actually parseable
+         if ( . /RESUME_BOOT --; ) && . /RESUME_BOOT --; then
+            return 0
+         elif initramfs_die "errors occured while reading /RESUME_BOOT"; then
+            return 0
+         fi
+
+      fi
    else
+      [ ! -x /telinit ] || /telinit --
       die "$@"
+   fi
+   return 150
+}
+
+# int initramfs_assert ( *test_condition ), raises initramfs_die()
+#
+#  Calls test ( *test_condition ) and raises initramfs_die() if the result
+#  is not 0.
+#
+initramfs_assert() {
+   if test "$@"; then
+      return 0
+   else
+      initramfs_die "an assertion failed: test $*"
+      ## initramfs_die could return
+      return 1
    fi
 }
 
@@ -62,11 +100,11 @@ irun() {
 #
 iron() { irun "$@"; }
 
-# int|void inonfatal ( *cmdv, **NONFATAL_RETURNS_VOID=n )
+# int inonfatal ( *cmdv )
 #
 #  Runs cmdv and logs the result. Warns about failure.
-#  Returns the command's return code if NONFATAL_RETURNS_VOID is not set
-#  to 'y', else returns void (always 0).
+#
+#  Returns the command's return code.
 #
 inonfatal() {
    local rc=0
@@ -76,7 +114,7 @@ inonfatal() {
    else
       dolog -0 --level=WARN "command '$*' returned ${rc}."
    fi
-   [ "${NONFATAL_RETURNS_VOID:-n}" = "y" ] || return ${rc}
+   return ${rc}
 }
 
 # @implicit void main()
