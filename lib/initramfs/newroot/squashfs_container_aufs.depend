@@ -1,0 +1,6 @@
+fs/mount/aufs
+
+initramfs/run
+
+initramfs/newroot/base
+initramfs/newroot/squashfs_container

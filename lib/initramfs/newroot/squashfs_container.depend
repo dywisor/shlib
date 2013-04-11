@@ -1,0 +1,12 @@
+fs/filesize
+
+fs/mount/dosquashfs
+fs/mount/info
+fs/mount/remount
+fs/mount/tmpfs
+fs/mount/tmpfs-resize
+
+initramfs/run
+initramfs/misc
+
+initramfs/newroot/base
