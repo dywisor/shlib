@@ -87,3 +87,30 @@ newroot_import_logfile() {
    initramfs_debug_sleep 5
    return 1
 }
+
+# void newroot_detect_home_dir ( force=n, **NEWROOT_HOME_DIR! )
+#
+#  Detect the (probably) correct value for the NEWROOT_HOME_DIR.
+#
+#  Does nothing if NEWROOT_HOME_DIR is already set and force is not set to y.
+#
+newroot_detect_home_dir() {
+   [ "${1:-n}" = "y" ] || [ -z "${NEWROOT_HOME_DIR-}" ] || return 0
+
+   if [ -h "${NEWROOT}/home" ]; then
+      v0=`readlink -f "${NEWROOT}/home"`
+      if [ -n "${v0}" ]; then
+         newroot_doprefix "${v0}"
+         NEWROOT_HOME_DIR="${v0}"
+      fi
+
+   elif [ -e "${NEWROOT}/home" ]; then
+      NEWROOT_HOME_DIR="${NEWROOT}/home"
+
+   elif [ -d "${NEWROOT}/var/users" ]; then
+      NEWROOT_HOME_DIR="${NEWROOT}/var/users"
+   fi
+
+   # else assume /home
+   : ${NEWROOT_HOME_DIR:=${NEWROOT}/home}
+}
