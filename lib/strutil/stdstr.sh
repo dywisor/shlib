@@ -27,6 +27,18 @@ str_lstrip() { sed -r -e 's,^\s+,,'; }
 # @function_alias str_field ( fieldspec, field_separator=" " ) renames cut()
 str_field() { cut -d "${2- }" -f "${1}"; }
 
+# ~int revrev ( *argv )
+#
+#  Reverse input, execute *argv, reverse again.
+#
+revrev() { rev | "$@" | rev; }
+
+# ~int revcut ( *cut_argv )
+#
+#  Reverse input, cut and reverse again.
+#
+revcut() { rev | cut "$@" | rev; }
+
 # @function_alias str_upper() renames tr()
 str_upper() { tr [:lower:] [:upper:]; }
 
