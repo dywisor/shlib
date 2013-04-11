@@ -1,0 +1,6 @@
+fs/filesize
+
+initramfs/newroot/base
+
+initramfs/newroot/liram/base
+initramfs/newroot/liram/util
