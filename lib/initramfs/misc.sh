@@ -71,3 +71,21 @@ initramfs_switch_root() {
 	exec switch_root ${opts} "${NEWROOT}" ${CMDLINE_INIT} "$@"
 	initramfs_die "switch_root failed"
 }
+
+# int initramfs_copy_file ( src, dest )
+#
+#  Copies a file verbosely using rsync or cp. rsync is preferred.
+#
+initramfs_copy_file() {
+	if qwhich rsync; then
+		${LOGGER} -0 --level=DEBUG "Copying ${1} -> ${2} using rsync"
+
+		rsync -L -W --progress -- "${1}" "${2}"
+
+	else
+		${LOGGER} -0 --level=INFO "Copying ${1} -> ${2} using cp"
+
+		cp -v -L  -- "${1}" "${2}"
+
+	fi
+}

@@ -1,6 +1,7 @@
 defsym
 
 misc/busybox
+misc/qwhich
 
 fs/dodir
 fs/dofile
