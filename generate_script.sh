@@ -18,6 +18,8 @@ HELP_OPTIONS="
 --shlib        (-L) -- shlib file to link against
                        (mutually exclusive with --standalone)
 --bash         (-B) -- create a script that uses /bin/bash
+--interpreter  (-I) -- set interpreter (defaults to /bin/sh)
+--name         (-N) -- name of the script
 --list         (-l) -- list all available scripts
 "
 HELP_USAGE="Usage: ${SCRIPT_FILENAME} [option...] <script_name> -- <shlibcc args>"
@@ -60,15 +62,23 @@ argparse_shortopt() {
 			SCRIPT_STANDALONE=y
 		;;
 		'L')
-			[ -n "${1-}" ] || die "--shlib, -L needs an arg"
+			argparse_need_arg "$@"
 			SHLIB_TARGET="${1}"
-			doshift=1
 		;;
 		'B')
 			SCRIPT_BASH=y
+			SCRIPT_INTERPRETER=/bin/bash
 		;;
 		'l')
 			LIST_SCRIPTS=y
+		;;
+		'I')
+			argparse_need_arg "$@"
+			SCRIPT_INTERPRETER="${1}"
+		;;
+		'N')
+			argparse_need_arg "$@"
+			IN_SCRIPT_NAME="${1}"
 		;;
 		*)
 			argparse_unknown
@@ -82,14 +92,22 @@ argparse_longopt() {
 		;;
 		'bash')
 			SCRIPT_BASH=y
+			SCRIPT_INTERPRETER=/bin/bash
 		;;
 		'shlib')
-			[ -n "${1-}" ] || die "--shlib, -L needs an arg"
+			argparse_need_arg "$@"
 			SHLIB_TARGET="${1}"
-			doshift=1
 		;;
 		'list')
 			LIST_SCRIPTS=y
+		;;
+		'interpreter')
+			argparse_need_arg "$@"
+			SCRIPT_INTERPRETER="${1}"
+		;;
+		'name')
+			argparse_need_arg "$@"
+			IN_SCRIPT_NAME="${1}"
 		;;
 		*)
 			argparse_unknown
@@ -127,21 +145,19 @@ if [ "${SCRIPT_STANDALONE=n}" = "y" ]; then
 
 	"${SCRIPT_DIR}/CC" ${opts} --main "${IN_SCRIPT}"
 else
-	IN_SCRIPT_NAME="${IN_SCRIPT##*/}"
-	IN_SCRIPT_NAME="${IN_SCRIPT_NAME%.*}"
+	if [ -z "${IN_SCRIPT_NAME-}" ]; then
+		IN_SCRIPT_NAME="${IN_SCRIPT##*/}"
+		IN_SCRIPT_NAME="${IN_SCRIPT_NAME%.*}"
+	fi
 
 	: ${SHLIB_TARGET:=/sh/lib/shlib.sh}
 	{
-		if [ "${SCRIPT_BASH=n}" = "y" ]; then
-			echo '#!/bin/bash'
-		else
-			echo '#!/bin/sh'
-		fi
+		echo "#!${SCRIPT_INTERPRETER:-/bin/sh}"
 		echo '# -*- coding: utf-8 -*-'
 		echo '#'
 		echo "# script ${IN_SCRIPT_NAME}"
 		echo '#'
-		if [ "${SCRIPT_BASH}" = "y" ]; then
+		if [ "${SCRIPT_BASH=n}" = "y" ]; then
 			echo "set -o nounset"
 			echo "set +o history"
 		else
