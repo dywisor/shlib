@@ -1,0 +1,5 @@
+misc/busybox
+fs/uncompress
+fs/dodir_minimal
+
+initramfs/run
