@@ -142,7 +142,7 @@ msg="${1# }"
    IFS="${IFS_DEFAULT}"
 
    while [ $# -gt 0 ]; do
-      ${print_func} "${log_head}${prefix}${1}${suffix}" "${log_head_level}"
+      ${print_func} "${log_head}${prefix}${1}${suffix}" # "${log_head_level}"
       if [ -n "${LOGFILE-}" ]; then
          echo "${log_head_level} ${log_head}${prefix}${1}${suffix}" >> "${LOGFILE}"
       fi
