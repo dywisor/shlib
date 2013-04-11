@@ -14,13 +14,13 @@ compress__detect_format() {
       '')
          return 2
       ;;
-      gzip|gz)
+      gzip|gz|tgz)
          compress_exe=gzip
       ;;
-      bzip2|bz2)
+      bzip2|bz2|tbz2)
          compress_exe=bzip2
       ;;
-      xz)
+      xz|txz)
          compress_exe=xz
       ;;
       lzo|lzop)

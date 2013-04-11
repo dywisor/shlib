@@ -35,6 +35,14 @@ disk_mounted() {
    return 0
 }
 
+# @function_alias is_mountpoint ( mp ) is disk_mounted ( "", mp )
+#
+is_mountpoint() { disk_mounted "" "$@"; }
+
+# @function_alias is_mounted ( mp ) is disk_mounted ( "", mp )
+#
+is_mounted() { disk_mounted "" "$@"; }
+
 # int fstype_supported ( *fstype )
 #
 #  Returns 0 if all given fstypes are supported (appear in /proc/filesystems),

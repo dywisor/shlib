@@ -30,6 +30,7 @@ tmpfs_resize_m() {
 #
 #  Resizes the tmpfs mounted at mp to <current_size_m> + <delta_m> while
 #  keeping lower/upper size thresholds.
+#
 #  Stores the new size in %v0.
 #
 tmpfs__resize_m_delta_minmax() {

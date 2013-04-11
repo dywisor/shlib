@@ -19,3 +19,8 @@ dofile() {
       return 0
    fi
 }
+
+# @function_alias int dofile_if ( file, str= )
+#  is dofile ( file, str=, "n" )
+#
+dofile_if() { dofile "${1-}" "${2-}" "n"; }
