@@ -1,0 +1,7 @@
+initramfs/run
+
+initramfs/newroot/tarball
+initramfs/newroot/squashfs_container_aufs
+
+initramfs/newroot/liram/tarball
+initramfs/newroot/liram/squashfs
