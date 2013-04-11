@@ -103,6 +103,8 @@
 #  Runs a command and logs the result. Returns the command's return value.
 #
 
+# @extern int initramfs_assert(), raises initramfs_die()
+
 
 ## functions from initramfs/use
 
