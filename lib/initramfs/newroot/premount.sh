@@ -19,6 +19,12 @@ __newroot_premount_fstab() {
    newroot_doprefix "${mp}"
    newroot_mp="${v0}"
 
+   # don't mount $newroot_mp twice
+   if disk_mounted "" "${newroot_mp}"; then
+      ewarn "${newroot_mp} already mounted."
+      return 0
+   fi
+
    # busybox doesn't support the defaults/auto/noauto mount options,
    #  the lines below provides partial support for filtering them out
    #
