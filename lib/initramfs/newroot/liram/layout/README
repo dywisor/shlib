@@ -1,0 +1,2 @@
+Simply symlink your <layout>.depend file to default.depend unless extra
+functionality is required.

@@ -1,0 +1,5 @@
+# liram core module, provides liram_init()
+initramfs/newroot/liram/core
+
+# layouts, provide liram_populate_layout_*()
+initramfs/newroot/liram/layout/default
