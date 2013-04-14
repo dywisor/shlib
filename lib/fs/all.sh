@@ -5,4 +5,5 @@ EXPORT_FUNCTIONS \
    md_foreach_member \
    fs_doprefix_echo fs_doprefix_call \
    dosym \
-   symlink_replace
+   symlink_replace \
+   get_fslevel get_fslevel_diff

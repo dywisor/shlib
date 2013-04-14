@@ -11,6 +11,7 @@ fs/dofile
 fs/doprefix
 fs/dosym
 fs/filesize
+fs/level
 fs/lockfile
 fs/md_each
 fs/symlink_replace
