@@ -49,7 +49,7 @@ readconfig__search() {
 #
 readconfig__read() {
    if [ -n "${1}" ]; then
-      ${LOGGER} -0 --level=INFO --facility=readconfig "reading file ${1}"
+      ${LOGGER} -0 --level=DEBUG --facility=readconfig "reading file ${1}"
       . "${1}" -- || die "errors while reading config file '${1}'"
    else
       readconfig__read "${config_file:?}"
