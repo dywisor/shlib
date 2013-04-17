@@ -7,7 +7,7 @@ cmdline_parser_core() {
       mdev)
          initramfs_enable_use mdev
       ;;
-      lvm)
+      lvm|lvm2)
          CMDLINE_LVM=y
       ;;
       mdadm|softraid)
@@ -18,6 +18,9 @@ cmdline_parser_core() {
       ;;
       rootdelay)
          CMDLINE_ROOTDELAY="${value}"
+      ;;
+      home|home_dir)
+         NEWROOT_HOME_DIR="${NEWROOT?}/${value#/}"
       ;;
       *)
          return 1
