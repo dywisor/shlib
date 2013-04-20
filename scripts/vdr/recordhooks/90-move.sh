@@ -56,7 +56,8 @@ after() {
          'ts')
             (
                run_cmd rm -f -- "${VDR_RECORD_DIR}/info" "${VDR_RECORD_DIR}/index"
-#               run_cmd rm -f -- "${VDR_RECORD_ROOT}/.sort"
+               [ "${VDR_KEEP_SORT:-n}" = "y" ] || \
+                  run_cmd rm -f -- "${VDR_RECORD_ROOT}/.sort"
                [ -e "${VDR_ROOT}/.keep" ] || run_cmd touch -- "${VDR_ROOT}/.keep"
                if cd "${VDR_ROOT}" || cd /tmp || cd /; then
                   run_cmd rmdir -p --ignore-fail-on-non-empty -- "${VDR_RECORD_DIR}" 2>/dev/null
