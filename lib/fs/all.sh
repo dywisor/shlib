@@ -6,4 +6,6 @@ EXPORT_FUNCTIONS \
    fs_doprefix_echo fs_doprefix_call \
    dosym \
    symlink_replace \
-   get_fslevel get_fslevel_diff
+   get_fslevel get_fslevel_diff \
+   atomic_file_counter \
+   atomic_file atomic_file_do

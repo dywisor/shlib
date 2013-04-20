@@ -2,6 +2,8 @@ function/export
 
 fs/mount/all
 
+fs/atomic_file
+fs/atomic_counter
 fs/chmod
 fs/dir_empty
 fs/disk
