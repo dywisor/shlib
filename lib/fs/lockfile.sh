@@ -1,22 +1,29 @@
 ## symlinking is atomic (even for nfs v2/v3)
 
-# @private int __lockfile_release ( lock ), raises function_die()
+# @private int __lockfile_release ( lock, ignore_pid_mismatch=n ),
+#  raises function_die()
 #
 #  Releases a lock. Does a pid-based check if lock points to a directory
 #  and contains a "stat" file.
 #  Returns 0 if the lock has been released or did not exist.
-#  Dies if the lock has the "stat" file and the pid check fails.
+#
+#  Does not release the lock if it has the "stat" file and the pid check fails.
+#  Dies in that case unless ignore_pid_mismatch is set to 'y'.
 #
 __lockfile_release() {
-
    if ! [ -h "${1-}" ]; then
       return 0
    elif [ -e "${1}/stat" ]; then
       local pid DONT_CARE
       read pid DONT_CARE < "${1}/stat"
 
-      [ "${pid}" = "$$" ] || \
-         function_die "attempted to release a foreign lock (our pid=$$, their pid=${pid}"
+      if [ "${pid}" != "$$" ]; then
+         if [ "${2:-n}" = "y" ]; then
+            return 0
+         else
+            function_die "attempted to release a foreign lock (our pid=$$, their pid=${pid}"
+         fi
+      fi
    fi
    rm "${1-}"
 }
@@ -32,7 +39,7 @@ __lockfile_release() {
 __lockfile_acquire_now() {
    ln -s -T -- "${2:?}" "${1:?}" 2>/dev/null || return
    [ "${LOCKFILE_AUTO_DELETE:-n}" != "y" ] || \
-      atexit_register __lockfile_release "${1}"
+      atexit_register __lockfile_release "${1}" "y"
 }
 
 # int lockfile_acquire_now ( lock, **LOCKFILE_AUTO_DELETE=n )
