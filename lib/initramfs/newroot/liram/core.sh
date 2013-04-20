@@ -109,15 +109,12 @@
 
 # @extern int liram_sfs_container_import()
 
-# @extern void newroot_sfs_container_init()
-# @extern int  newroot_sfs_container_mount()
-# @extern int  sfs_container_avail()
-# @extern int  sfs_container_downsize()
-# @extern int  sfs_container_finalize()
-# @extern int  sfs_container_import()
-# @extern void sfs_container_init()
-# @extern int  sfs_container_lock()
-# @extern int  sfs_container_mount()
-# @extern int  sfs_container_unlock()
-# @extern int sfs_container_mount_writable()
-# @extern int newroot_sfs_container_mount_writable()
+# @extern int newroot_sfs_container_mount()          -- sfs_name, mp
+# @extern void newroot_sfs_container_init()          -- mp, size_m
+# @extern int newroot_sfs_container_import()         -- sfs_file, sfs_name
+# @extern int newroot_sfs_container_lock()
+# @extern int newroot_sfs_container_unlock()
+# @extern int newroot_sfs_container_downsize()
+# @extern int newroot_sfs_container_finalize()
+# @extern int newroot_sfs_container_avail()
+# @extern int newroot_sfs_container_mount_writable() -- sfs_name, mp, size, aufs_root

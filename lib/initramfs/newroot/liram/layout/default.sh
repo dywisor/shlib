@@ -80,9 +80,9 @@ liram_populate_layout_default() {
    fi
 
    # if any sfs file imported:
-   if sfs_container_avail; then
+   if newroot_sfs_container_avail; then
 
-      irun sfs_container_finalize
+      irun newroot_sfs_container_finalize
 
       [ -z "${usr_sfs-}" ] || irun newroot_sfs_container_mount usr /usr
 

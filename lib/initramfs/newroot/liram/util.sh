@@ -1,17 +1,14 @@
 ## functions from initramfs/newroot/squashfs_container{,_aufs}
 
-# @extern void newroot_sfs_container_init()
-# @extern int  newroot_sfs_container_mount()
-# @extern int  sfs_container_avail()
-# @extern int  sfs_container_downsize()
-# @extern int  sfs_container_finalize()
-# @extern int  sfs_container_import()
-# @extern void sfs_container_init()
-# @extern int  sfs_container_lock()
-# @extern int  sfs_container_mount()
-# @extern int  sfs_container_unlock()
-# @extern int sfs_container_mount_writable()
-# @extern int newroot_sfs_container_mount_writable()
+# @extern int newroot_sfs_container_mount()          -- sfs_name, mp
+# @extern void newroot_sfs_container_init()          -- mp, size_m
+# @extern int newroot_sfs_container_import()         -- sfs_file, sfs_name
+# @extern int newroot_sfs_container_lock()
+# @extern int newroot_sfs_container_unlock()
+# @extern int newroot_sfs_container_downsize()
+# @extern int newroot_sfs_container_finalize()
+# @extern int newroot_sfs_container_avail()
+# @extern int newroot_sfs_container_mount_writable() -- sfs_name, mp, size, aufs_root
 
 # int liram_sfs_container_import ( name, sfs_name=name, **v0! )
 #
@@ -32,9 +29,10 @@ liram_sfs_container_import() {
       local sfs_file="${v0}"
       v0=
 
-      sfs_container_avail || sfs_container_init "${NEWROOT}//SFS/liram"
+      newroot_sfs_container_avail || \
+         newroot_sfs_container_init "${NEWROOT}/SFS/liram"
 
-      if irun sfs_container_import "${sfs_file}" "${2:-${1}}"; then
+      if irun newroot_sfs_container_import "${sfs_file}" "${2:-${1}}"; then
          v0="${sfs_file}"
          return 0
       else

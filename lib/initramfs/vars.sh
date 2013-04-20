@@ -33,6 +33,8 @@ initramfs_vars() {
       fi
    fi
 
+   : ${F_SFS_CONTAINER_COPYFILE=newroot_sfs_container__copy_file}
+
    : ${PRINT_FUNCTRACE:=y}
 
    : ${LOGFILE=/init.log}
