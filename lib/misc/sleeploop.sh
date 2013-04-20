@@ -12,7 +12,9 @@ sleeploop() {
       # argv empty / first run succeeded
       return 0
 
-   elif [ -n "${SLEEPLOOP_RETRY-}" ]; then
+   elif \
+      [ -n "${SLEEPLOOP_RETRY-}" ] && [ "${SLEEPLOOP_RETRY}" != "INF" ]
+   then
 
       local intvl="${SLEEPLOOP_INTVL:-0.1}" try=0
 
