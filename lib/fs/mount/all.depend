@@ -6,6 +6,8 @@ fs/mount/dosquashfs
 fs/mount/fstab_iter
 fs/mount/info
 fs/mount/remount
+fs/mount/squashfs_container
+fs/mount/squashfs_container_aufs
 fs/mount/tmpfs-resize
 fs/mount/tmpfs
 fs/mount/util
