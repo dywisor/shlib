@@ -48,7 +48,11 @@ md_foreach_member() {
 
       MD="${DEFAULT_MD##*/}"
 
-      [ "${MD_IMPLICIT:-y}" = "y" ] || [ $# -eq 0 ] || shift || return 3
+      if [ $# -eq 0 ]; then
+         true
+      elif [ -z "${1}" ] || [ "${MD_IMPLICIT:-y}" != "y" ]; then
+         shift || return 3
+      fi
 
    else
       # MD and DEFAULT_MD are not set, MD_IMPLICIT defaults to y
@@ -65,7 +69,13 @@ md_foreach_member() {
       done
       if [ -n "${MD}" ]; then
          einfo "no md device given, using ${MD}."
-         [ $# -eq 0 ] || [ "${MD_IMPLICIT:-y}" = "y" ] || shift || return 3
+
+         if [ $# -eq 0 ]; then
+            true
+         elif [ -z "${1}" ] || [ "${MD_IMPLICIT:-y}" != "y" ]; then
+            shift || return 3
+         fi
+
       else
          eerror "no md device given, cannot autodetect (none found)."
          return 6
