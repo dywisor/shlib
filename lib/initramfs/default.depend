@@ -5,3 +5,5 @@ initramfs/cmdline/parser
 
 initramfs/newroot/base
 initramfs/newroot/mount
+
+initramfs/newroot/liram/layouts

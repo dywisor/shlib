@@ -18,7 +18,8 @@
 #  when disk-hybrid =>
 #  ** mount the rootfs (mandatory)
 #  when liram =>
-#  *** NOT IMPLEMENTED *** (by the way, no one knows about 'liram' ;))
+#  ** call liram_init() which does whatever has been configured
+#  By default, this will create the whole rootfs in a tmpfs.
 #
 initramfs_default_start() {
    : ${DEVFS_TYPE:=mdev}
@@ -41,7 +42,7 @@ initramfs_default_start() {
             irun newroot_mount_rootfs
          ;;
          liram)
-            initramfs_die "liram is not implemented."
+            irun liram_init
          ;;
       esac
    fi
