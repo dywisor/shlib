@@ -1,0 +1,72 @@
+# /etc/conf.d/squashed_portage
+#
+#  squashed_portage main config file
+#
+#
+# NOTE:
+#   Mounting more than one squashed portage tree is possible.
+#   Simply copy this script to /etc/conf.d/squashed_portage.<name>
+#   and symlink /etc/init.d/squashed_portage accordingly.
+#
+#   Then, define global variables like AUFS_ROOT etc. here
+#   and tree-specific variables (usually PORTAGE_NAME and PORTAGE_MP)
+#   in the copied config file.
+#
+
+# tree image dir
+#
+#  This is the (persistent) directory where
+#  squashfs files will be stored to / loaded from.
+#
+#  Defaults to "/var/cache/portage".
+#
+#PORTAGE_SFS_IMAGE_DIR="/var/cache/portage"
+
+# default tmpfs size
+#
+#  Size in MiB that will available for writing to a portage tree.
+#
+#  Defaults to "500".
+#
+#PORTAGE_SFS_MEM_SIZE_DEFAULT="500"
+
+# size of the squashfs file container
+#
+#  Total size in MiB that will be available for storing *all* squashfs
+#  files in memory (tmpfs).
+#  A value less than zero results in not mounting any tmpfs,
+#  thus it's possible to use "normal" directories as container.
+#
+#  Defaults to "500".
+#
+#PORTAGE_SFS_CONTAINER_SIZE="500"
+
+# aufs root
+#
+#  Root directory for auxiliary mounts, e.g. tmpfs and squashfs files.
+#
+#  Defaults to "/aufs/portage".
+#
+#PORTAGE_SFS_AUFS_ROOT="/aufs/portage"
+
+# name of the portage tree
+#
+#  Used to locate the squashfs file
+#   ${PORTAGE_SFS_IMAGE_DIR}/${PORTAGE_SFS_NAME}.sfs
+#
+#  Defaults to <name> or "gentoo".
+#
+#  !!! This should not be set in the main config file.
+#
+#PORTAGE_NAME="gentoo"
+
+# portage mountpoint
+#
+#  Directory where the writable tree will be mounted.
+#
+#  Defaults to "/usr/portage" if $PORTAGE_NAME is "gentoo",
+#  else "/var/portage/tree/${PORTAGE_NAME}".
+#
+#  !!! This should not be set in the main config file.
+#
+#PORTAGE_MP="/usr/portage"

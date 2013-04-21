@@ -1,0 +1,9 @@
+die
+logging
+readconfig
+scriptinfo
+message
+
+function/defined
+
+gentoo/squashed_portage
