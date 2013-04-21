@@ -69,7 +69,7 @@ atomic_file_counter() {
          atomic_file_do atomic_file_counter__add "${1?}" "0" "${3-}"
       ;;
       'reset')
-         aomtic_file_do atomic_file_counter__reset "${1?}" "${3-}"
+         atomic_file_do atomic_file_counter__reset "${1?}" "${3-}"
       ;;
       'increment'|'inc'|'add'|'+'|'++'|'+=')
          atomic_file_do atomic_file_counter__add "${1?}" "${3:-1}" "${4-}"
