@@ -18,12 +18,7 @@
 atomic_file() {
    local lock="${1:?}.__lock__"
 
-   if [ -e "${lock}" ] && [ ! -h "${lock}" ]; then
-      # we'll probably never get that lock
-
-      function_die "lock '${lock}' exists but is not a link!"
-
-   elif \
+   if \
       shift && [ $# -gt 0 ] && \
       LOCKFILE_AUTO_DELETE=y lockfile_acquire "${lock}" \
          "${ATOMIC_FILE_MAX_RETRY-600}" "${ATOMIC_FILE_INTVL-0.1}"
