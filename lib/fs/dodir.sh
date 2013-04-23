@@ -6,6 +6,7 @@
 #    **DODIR_PREFIX=,
 #    **F_DODIR_CREATED=,
 #    **F_DODIR_EXISTED=,
+#    **F_DODIR_EXISTED_FILE=,
 #    **MKDIR_OPTS="-p",
 #    **MKDIR_OPTS_APPEND=,
 #    **KEEPDIR=n
@@ -17,10 +18,13 @@
 #  at the end of this function.
 #  Prefixes each directory with DODIR_PREFIX if set.
 #
-#  Additionally, F_DODIR_CREATED (<dir>) is called if a directory has been
-#  created, and F_DODIR_EXISTED (<dir>) is called if it already exists.
-#  This function immediately returns with a non-zero code if
-#  any F_DODIR_* function fails.
+#  Additionally,
+#  calls F_DODIR_CREATED (<dir>) for each created directory,
+#  F_DODIR_EXISTED (<dir>) for existing directories and
+#  F_DODIR_EXISTED_FILE (<dir>) if <dir> exists, but is a file.
+#
+#  This function immediately returns a non-zero code if any F_DODIR_*
+#  function fails.
 #
 dodir() {
    local fail=0 v0 d prefix=""
@@ -43,12 +47,17 @@ dodir() {
                ${F_DODIR_EXISTED} "${d}" || return
 
 
-         elif mkdir ${MKDIR_OPTS--p} ${MKDIR_OPTS_APPEND-} -- "${d}"; then
+         elif mkdir ${MKDIR_OPTS--p} ${MKDIR_OPTS_APPEND-} -- "${d}" 2>/dev/null; then
 
             [ "${KEEPDIR:-n}" != "y" ] || touch "${d}/.keep" || true
 
             [ -z "${F_DODIR_CREATED-}" ] || \
                ${F_DODIR_CREATED} "${d}" || return
+
+         elif [ -f "${d}" ] && [ -n "${F_DODIR_EXISTED_FILE-}" ]; then
+
+            ${F_DODIR_EXISTED_FILE} "${d}" || return
+
          else
             fail=$(( ${fail} + 1 )) || true
          fi
