@@ -92,7 +92,26 @@ atomic_file_counter() {
          fi
       ;;
       *)
-         return 2
+         case "${1-}" in
+            '--help'|'-h'|'--usage')
+echo "Usage: atomic_file_counter <file> <action>
+
+where action is:
+* fixup [<min_value>]
+* reset [<min_value>]
+* increment|inc|add|+|++|+= <delta> [<min_value>]
+* decrement|dec|sub|-|--|-= <delta> [<min_value>]
+* show|cat [<lock>]
+* get|load [<lock> [<min_value>]]
+
+min_value defaults to 0."
+               return 0
+            ;;
+
+            *)
+               return 2
+            ;;
+         esac
       ;;
    esac
 }
