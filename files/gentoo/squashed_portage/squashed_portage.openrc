@@ -11,10 +11,11 @@ description_reload="remount the tree (same as start)"
 description_save="create a snapshot of the current tree"
 description_save_today="create a daily snapshot if it does not already exist"
 
-: ${PORTAGE_SFS_CMD:=squashed_portage.sh}
+: ${PORTAGE_SFS_CMD:=squashed_portage}
 
 depend() {
 	need localmount
+	before nfs rsyncd
 }
 
 # --- helper functions ---
