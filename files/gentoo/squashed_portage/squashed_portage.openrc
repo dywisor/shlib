@@ -46,7 +46,7 @@ portage_sfs_run() {
 
 
 save() { portage_sfs_run save; }
-save() { portage_sfs_run save_today; }
+save_today() { portage_sfs_run save_today; }
 reload() { start; }
 
 start() {
