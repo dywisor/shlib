@@ -19,9 +19,9 @@ __message_colored() {
 # Prints ${header}${message} to stdout (colored output).
 #
 
-#einfo_color()  { __message_colored "${2:-[INFO]}"  '1;32m' "${1-}"; }
-#ewarn_color()  { __message_colored "${2:-[WARN]}"  '1;33m' "${1-}"; }
-#eerror_color() { __message_colored "${2:-[ERROR]}" '1;31m' "${1-}"; }
+##einfo_color()  { __message_colored "${2:-[INFO]}"  '1;32m' "${1-}"; }
+##ewarn_color()  { __message_colored "${2:-[WARN]}"  '1;33m' "${1-}"; }
+##eerror_color() { __message_colored "${2:-[ERROR]}" '1;31m' "${1-}"; }
 
 einfo_color()  { __message_colored "${2:-*}" '1;32m' "${1-}"; }
 ewarn_color()  { __message_colored "${2:-*}" '1;33m' "${1-}"; }
