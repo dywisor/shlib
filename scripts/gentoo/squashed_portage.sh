@@ -63,11 +63,11 @@ if \
    [ "${NO_CONFIG}" != "y" ] && \
    [ -n "${PORTAGE_NAME}" ] && [ -e "${CONFIG_FILE}.${PORTAGE_NAME}" ]
 then
-   readonly MY__PORTAGE_NAME="${PORTAGE_NAME}"
+#   readonly MY__PORTAGE_NAME="${PORTAGE_NAME}"
    readconfig "${CONFIG_FILE}.${PORTAGE_NAME}"
-   if [ "x${MY__PORTAGE_NAME}" != "x${PORTAGE_NAME}" ]; then
-      ewarn "PORTAGE_NAME has been modified while reading ${CONFIG_FILE}.${PORTAGE_NAME}."
-   fi
+#   if [ "x${MY__PORTAGE_NAME}" != "x${PORTAGE_NAME}" ]; then
+#      ewarn "PORTAGE_NAME has been modified while reading ${CONFIG_FILE}.${PORTAGE_NAME}."
+#   fi
 fi
 
 [ -z "${3-}" ] || PORTAGE_MP="${3}"
@@ -128,7 +128,7 @@ case "${mode}" in
       need_tree
       portage_sfs_generic_action "reload_tree"
    ;;
-   'save'|'test_save'|'eject')
+   'save'|'test_save'|'eject'|'save_today')
       need_tree
       portage_sfs_generic_action reset
       portage_sfs_"${mode}"

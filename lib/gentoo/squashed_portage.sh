@@ -99,6 +99,41 @@ portage_sfs__setvars_save() {
    fi
 }
 
+# @private void portage_sfs__setvars_save_today()
+#
+#  Like portage_sfs__setvars_save but doesn't try to find a file name.
+#  Useful if you want to check whether an image file has already been
+#  created (today).
+#
+portage_sfs__setvars_save_today() {
+   PORTAGE_SFS_DESTFILE="${PORTAGE_SFS_IMAGE_DIR}/${PORTAGE_SFS_NAME}_$(date +%F).sfs"
+}
+
+# @private int portage_sfs__save_to (
+#    sfs_file, update=n, **PORTAGE_SFS_MP, **...
+# )
+#
+#  Creates a snapshot file of PORTAGE_SFS_MP and stores it as sfs_file.
+#  Also updates the image file link if update is set to 'y'.
+#
+portage_sfs__save_to() {
+   if \
+      dodir_clean "${PORTAGE_SFS_IMAGE_DIR}" && \
+      mksquashfs "${PORTAGE_SFS_MP}" "${1:?}" ${PORTAGE_SFS_MKSFS_OPTS-}
+   then
+      if [ "${2:-n}" = "y" ]; then
+         portage_sfs_update_image_file "${PORTAGE_SFS_DESTFILE}"
+         return ${?}
+      else
+         return 0
+      fi
+   else
+      __quiet__ || eerror "Failed to create ${PORTAGE_SFS_DESTFILE}!"
+      return 10
+   fi
+}
+
+
 # int portage_sfs_init ( portage_tree_name, portage_tree_mp, ... )
 #
 #  Calls portage_sfs_reset() and
@@ -192,19 +227,26 @@ portage_sfs_test_save() {
 #
 portage_sfs_save() {
    portage_sfs__setvars_save
+   portage_sfs__save_to "${PORTAGE_SFS_DESTFILE}" "y"
+}
 
-   if \
-      dodir_clean "${PORTAGE_SFS_IMAGE_DIR}" && \
-      mksquashfs \
-         "${PORTAGE_SFS_MP}" \
-         "${PORTAGE_SFS_DESTFILE}" \
-         ${PORTAGE_SFS_MKSFS_OPTS-}
-   then
-      portage_sfs_update_image_file "${PORTAGE_SFS_DESTFILE}"
-      return ${?}
+# portage_sfs_save_today ( **PORTAGE_SFS_DESTFILE!, **PORTAGE_SFS_MP, **... )
+#
+#  Like portage_sfs_save(), but doesn't do anything if a snapshot file
+#  has already been created today (date +%F).
+#
+portage_sfs_save_today() {
+   portage_sfs__setvars_save_today
+   # test -e, test -f -- be a bit more accurate which requires 2 test commands
+   if [ -e "${PORTAGE_SFS_DESTFILE}" ]; then
+      if [ -f "${PORTAGE_SFS_DESTFILE}" ]; then
+         return 0
+      else
+         ${LOGGER} --level=WARN "${PORTAGE_SFS_DESTFILE} exists, but is not a file."
+         return 132
+      fi
    else
-      __quiet__ || eerror "Failed to create ${PORTAGE_SFS_DESTFILE}!"
-      return 10
+      portage_sfs__save_to "${PORTAGE_SFS_DESTFILE}" "y"
    fi
 }
 
