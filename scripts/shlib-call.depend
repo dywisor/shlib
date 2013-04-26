@@ -1,4 +1,5 @@
 scriptinfo
+autodie
 die
 readconfig
 function/defined
