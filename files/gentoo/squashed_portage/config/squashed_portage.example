@@ -1,0 +1,25 @@
+# /etc/conf.d/squashed_portage.example
+#
+#  squashed_portage tree config file
+#
+#  Copy this script to "/etc/conf.d/squashed_portage.<name>".
+#  Also see /etc/conf.d/squashed_portage.
+#
+
+# name of the portage tree
+#
+#  Used to locate the squashfs file
+#   ${PORTAGE_SFS_IMAGE_DIR}/${PORTAGE_SFS_NAME}.sfs
+#
+#  Defaults to <name> or "gentoo".
+#
+#PORTAGE_NAME="gentoo"
+
+# portage mountpoint
+#
+#  Directory where the writable tree will be mounted.
+#
+#  Defaults to "/usr/portage" if $PORTAGE_NAME is "gentoo",
+#  else "/var/portage/tree/${PORTAGE_NAME}".
+#
+#PORTAGE_MP="/usr/portage"

@@ -5,8 +5,9 @@
 #
 # NOTE:
 #   Mounting more than one squashed portage tree is possible.
-#   Simply copy this script to /etc/conf.d/squashed_portage.<name>
-#   and symlink /etc/init.d/squashed_portage accordingly.
+#   Simply copy /etc/conf.d/squashed_portage.example to
+#   /etc/conf.d/squashed_portage.<name> and symlink
+#   /etc/init.d/squashed_portage accordingly.
 #
 #   Then, define global variables like AUFS_ROOT etc. here
 #   and tree-specific variables (usually PORTAGE_NAME and PORTAGE_MP)
@@ -21,6 +22,20 @@
 #  Defaults to "/var/cache/portage".
 #
 #PORTAGE_SFS_IMAGE_DIR="/var/cache/portage"
+
+# save on stop
+#
+#  Whether to reate an image of the portage tree
+#  when stopping ("YES") or not ("NO").
+#
+#  Note that this won't check whether the current tree is newer
+#  than what's already on disk (i.e., in PORTAGE_SFS_IMAGE_DIR).
+#
+#  Uses the "save_today" command, so only one image will be created per day.
+#
+#  Defaults to "NO".
+#
+#PORTAGE_SFS_SAVE_ON_STOP="YES"
 
 # default tmpfs size
 #
@@ -49,14 +64,19 @@
 #
 #PORTAGE_SFS_AUFS_ROOT="/aufs/portage"
 
+
+# IMPORTANT:
+#  The following variables are included here for reference only, but
+#  should to be set in tree-specific config files (squashed_portage.<name>),
+#  and *not* in this file.
+#
+
 # name of the portage tree
 #
 #  Used to locate the squashfs file
 #   ${PORTAGE_SFS_IMAGE_DIR}/${PORTAGE_SFS_NAME}.sfs
 #
 #  Defaults to <name> or "gentoo".
-#
-#  !!! This should not be set in the main config file.
 #
 #PORTAGE_NAME="gentoo"
 
@@ -66,7 +86,5 @@
 #
 #  Defaults to "/usr/portage" if $PORTAGE_NAME is "gentoo",
 #  else "/var/portage/tree/${PORTAGE_NAME}".
-#
-#  !!! This should not be set in the main config file.
 #
 #PORTAGE_MP="/usr/portage"

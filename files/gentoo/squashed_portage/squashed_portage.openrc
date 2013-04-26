@@ -1,0 +1,74 @@
+#!/sbin/runscript
+
+# NOTE:
+#  starting multiple instances of this script in parallel is NOT safe;
+#  it may happen that the squashfs file container gets mounted twice.
+
+extra_started_commands="reload save save_today"
+
+description="mount a squashed portage tree in read/write mode"
+description_reload="remount the tree (same as start)"
+description_save="create a snapshot of the current tree"
+description_save_today="create a daily snapshot if it does not already exist"
+
+: ${PORTAGE_SFS_CMD:=squashed_portage.sh}
+
+depend() {
+	need localmount
+}
+
+# --- helper functions ---
+
+sanity_checks() {
+	local rc=0
+	if ! which "${PORTAGE_SFS_CMD}" 1>/dev/null 2>/dev/null; then
+		eerror "${PORTAGE_SFS_CMD} is missing!"
+		rc=1
+	fi
+
+	if [ "${RC_SVCNAME#*.}" = "${RC_SVCNAME}" ]; then
+		eerror "You have to symlink this init script."
+		rc=$(( ${rc} + 2 ))
+	fi
+
+	return ${rc}
+}
+
+# $PORTAGE_SFS_CMD wrapper function
+portage_sfs_run() {
+	local cmd="${1?}"
+	shift && \
+	${PORTAGE_SFS_CMD} "${cmd}" "${RC_SVCNAME#*.}" "$@"
+}
+
+# --- end of helper functions ---
+
+
+save() { portage_sfs_run save; }
+save() { portage_sfs_run save_today; }
+reload() { start; }
+
+start() {
+	sanity_checks || return
+	ebegin "Mounting squashed portage tree '${RC_SVCNAME#*.}'"
+	portage_sfs_run start
+	eend ${?}
+}
+
+stop() {
+	sanity_checks || return
+	if yesno ${PORTAGE_SFS_SAVE_ON_STOP:-n}; then
+		if ! save_today; then
+			eerror "Could not save the current tree!"
+			if [ "${RC_RUNLEVEL}" = "shutdown" ]; then
+				ewarn "Not aborting due to RC_RUNLEVEL=${RC_RUNLEVEL}"
+			else
+				eerror "Aborting."
+				return 5
+			fi
+		fi
+	fi
+	ebegin "Stopping portage tree '${RC_SVCNAME#*.}'"
+	portage_sfs_run stop
+	eend ${?}
+}
