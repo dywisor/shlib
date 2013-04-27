@@ -41,8 +41,8 @@ compress__detect_format() {
 compress_detect_taropt() {
    v0=
    local decompress_args compress_exe
-   compress__detect_format "${1?}"
-   if [ -n "${compress_exe-}" ]; then
+
+   if compress__detect_format "${1?}"; then
       v0="--${compress_exe}"
    fi
    return 0
