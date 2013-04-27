@@ -27,3 +27,11 @@ __verbose__() {
 __quiet__() {
    [ "${QUIET:-n}" = "y" ]
 }
+
+# @pragma interactive
+#
+#  Returns true if user interaction is allowed, else false.
+#
+__interactive__() {
+   [ "${INTERACTIVE:-n}" = "y" ]
+}
