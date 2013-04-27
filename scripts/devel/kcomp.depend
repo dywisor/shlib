@@ -1,0 +1,15 @@
+argparse
+autodie
+die
+scriptinfo
+itertools
+varcheck
+
+fs/dodir
+fs/tmpdir
+
+interact/get_yn
+
+misc/pragma
+
+devel/kernel_compilation
