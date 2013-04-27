@@ -94,7 +94,9 @@ buildenv__apply_patches() {
 
       "stepwise"|"check-during")
          for patch_file; do
-            if buildenv__try_patch_reverse; then
+            if ! buildenv__have_patch; then
+               return 98
+            elif buildenv__try_patch_reverse; then
                true
             elif buildenv__try_patch; then
                buildenv__do_patch || return
@@ -109,7 +111,11 @@ buildenv__apply_patches() {
 
       "no"|"never"|"n")
          for patch_file; do
-            buildenv__try_patch_reverse || buildenv__do_patch || return
+            if buildenv__have_patch; then
+               buildenv__try_patch_reverse || buildenv__do_patch || return
+            else
+               return 98
+            fi
          done
 
          return 0
@@ -118,7 +124,9 @@ buildenv__apply_patches() {
       "only"|"yes"|"y")
          local fail_count=0
          for patch_file; do
-            if buildenv__try_patch_reverse; then
+            if ! buildenv__have_patch; then
+               fail_count=$(( ${fail_count} + 1 ))
+            elif buildenv__try_patch_reverse; then
                true
             elif buildenv__try_patch; then
                veinfo "patch '${patch_file##*/}' can be applied without errors."
@@ -165,6 +173,17 @@ buildenv__apply_patches() {
 
 
 # helper functions for buildenv__apply_patches
+
+# @private int buildenv__have_patch ( **patch_file )
+buildenv__have_patch() {
+   if [ -f "${patch_file:?}" ]; then
+      return 0
+   else
+      [ "${BUILDENV_PATCH_REVERSE_WARN:-y}" != "y" ] || \
+         eerror "patch '${patch_file}' does not exist!"
+      return 1
+   fi
+}
 
 # @private int buildenv__do_patch ( **patch_file )
 #

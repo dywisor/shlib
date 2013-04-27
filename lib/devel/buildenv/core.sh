@@ -79,13 +79,13 @@ buildenv_make() {
 
       if \
          [ "${BUILDENV_MAKE_OUT_OF_TREE:-y}" = "y" ] || \
-         [ "x${BUILDENV_WORKDIR-}" = "x${BUILDENV_SRCDIR-}" ]
+         [ "x${BUILDENV_WORKDIR-}" != "x${BUILDENV_SRCDIR-}" ]
       then
          # ^ limited support for in-tree building
-         buildenv_printrun ${BUILDENV_MAKE:-make} ${BUILDENV_MAKEOPTS-} "$@"
-      else
          buildenv_printrun ${BUILDENV_MAKE:-make} O="${PWD}" \
             -C "${BUILDENV_SRCDIR:-${PWD}}/" ${BUILDENV_MAKEOPTS-} "$@"
+      else
+         buildenv_printrun ${BUILDENV_MAKE:-make} ${BUILDENV_MAKEOPTS-} "$@"
       fi
    )
 }

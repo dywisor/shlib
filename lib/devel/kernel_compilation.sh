@@ -77,9 +77,9 @@ kcomp_prepare_build_dir() {
       __KCOMP_KBUILD=`readlink -f "${kbuild}"`
       __KCOMP_CONFIG="${__KCOMP_KBUILD}/.config"
 
-      if [ "${__KCOMP_KBUILD}" = "${__KCOMP_KSRC}" ]; then
-         local BUILDENV_MAKE_OUT_OF_TREE=y
-      fi
+#      if [ "${__KCOMP_KBUILD}" = "${__KCOMP_KSRC}" ]; then
+#         local BUILDENV_MAKE_OUT_OF_TREE=n
+#      fi
 
       if [ -n "${initial_config}" ]; then
          [ "${initial_config}" != "@default" ] || initial_config="/proc/config.gz"
@@ -95,7 +95,7 @@ kcomp_prepare_build_dir() {
          fi
       elif [ ! -e "${__KCOMP_CONFIG}" ]; then
          dolog_info -0 "Creating default config"
-         buildenv_make -j1 defconfig || __KCOMP_CONFIG=
+         kcomp__make -j1 defconfig || __KCOMP_CONFIG=
       fi
 
       if [ -z "${__KCOMP_CONFIG}" ]; then
@@ -216,10 +216,24 @@ kcomp_make_clean() {
 #
 kcomp_get_version() {
    KVER=
-   KERNEL_RELEASE=`kcomp__make kernelrelease 2>/dev/null`
-   KERNEL_VERSION=`kcomp__make kernelversion 2>/dev/null`
+   KERNEL_RELEASE=`kcomp__make_quiet kernelrelease 2>/dev/null`
+   KERNEL_VERSION=`kcomp__make_quiet kernelversion 2>/dev/null`
    [ -z "${KERNEL_RELEASE}" ] || \
-      [ -z "${KERNEL_VERSION}" ] || KVER="${KERNEL_RELEASE%+}"
+      [ -z "${KERNEL_VERSION}" ] || KVER="${KERNEL_VERSION%+}"
+}
+
+# int kcomp_get_kver ( **KVER! )
+#
+#  Sets KVER if unset.
+#
+kcomp_get_kver() {
+   if [ -z "${KVER-}" ]; then
+      local KERNEL_VERSION=`kcomp__make_quiet kernelversion 2>/dev/null`
+      KVER="${KERNEL_VERSION%+}"
+      [ -n "${KVER}" ]
+   else
+      return 0
+   fi
 }
 
 # int kcomp_build (
@@ -425,6 +439,8 @@ kcomp__do_install() {
 #
 kcomp__prepare_do() {
    if [ "${__KCOMP_KBUILD}" = "${__KCOMP_KSRC}" ]; then
+      local BUILDENV_MAKE_OUT_OF_TREE=n
+   else
       local BUILDENV_MAKE_OUT_OF_TREE=y
    fi
    BUILDENV_ONESHOT=y buildenv_prepare_do \
@@ -437,6 +453,14 @@ kcomp__prepare_do() {
 #
 kcomp__make() {
    kcomp__prepare_do buildenv_make "$@"
+}
+
+# int kcomp__make_quiet ( *argv )
+#
+#  Sets QUIET=y and runs make *argv in kcomp's build environment.
+#
+kcomp__make_quiet() {
+   QUIET=y kcomp__prepare_do buildenv_make -s "$@"
 }
 
 # @private int kcomp__kernel_with_modules ( **__KCOMP_CONFIG )
