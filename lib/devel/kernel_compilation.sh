@@ -77,6 +77,10 @@ kcomp_prepare_build_dir() {
       __KCOMP_KBUILD=`readlink -f "${kbuild}"`
       __KCOMP_CONFIG="${__KCOMP_KBUILD}/.config"
 
+      if [ "${__KCOMP_KBUILD}" = "${__KCOMP_KSRC}" ]; then
+         local BUILDENV_MAKE_OUT_OF_TREE=y
+      fi
+
       if [ -n "${initial_config}" ]; then
          [ "${initial_config}" != "@default" ] || initial_config="/proc/config.gz"
 
@@ -420,6 +424,9 @@ kcomp__do_install() {
 #  Runs cmdv in kcomp's build environment.
 #
 kcomp__prepare_do() {
+   if [ "${__KCOMP_KBUILD}" = "${__KCOMP_KSRC}" ]; then
+      local BUILDENV_MAKE_OUT_OF_TREE=y
+   fi
    BUILDENV_ONESHOT=y buildenv_prepare_do \
       "${__KCOMP_KBUILD:?}" "${__KCOMP_KSRC:?}" "$@"
 }

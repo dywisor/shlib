@@ -65,9 +65,9 @@ buildenv_run_in_src() {
 buildenv_make() {
    (
       __BUILDENV_SUBSHELL=y
-      if [ -n "${BUILDENV_WORKDIR-}" ]; then
-         cd -P "${BUILDENV_WORKDIR}" || exit
-      fi
+      : ${BUILDENV_SRCDIR:=${PWD}}
+      cd -P "${BUILDENV_WORKDIR:?}" || exit
+
       unset -v ${BUILDENV_UNSET_VARS-}
 
       if [ "${BUILDENV_HOSTBUILD:-n}" != "y" ]; then
@@ -77,8 +77,16 @@ buildenv_make() {
          unset -v ARCH CROSS_COMPILE
       fi
 
-      buildenv_printrun ${BUILDENV_MAKE:-make} O="${PWD}" \
-         -C "${BUILDENV_SRCDIR:-${PWD}}/" ${BUILDENV_MAKEOPTS-} "$@"
+      if \
+         [ "${BUILDENV_MAKE_OUT_OF_TREE:-y}" = "y" ] || \
+         [ "x${BUILDENV_WORKDIR-}" = "x${BUILDENV_SRCDIR-}" ]
+      then
+         # ^ limited support for in-tree building
+         buildenv_printrun ${BUILDENV_MAKE:-make} ${BUILDENV_MAKEOPTS-} "$@"
+      else
+         buildenv_printrun ${BUILDENV_MAKE:-make} O="${PWD}" \
+            -C "${BUILDENV_SRCDIR:-${PWD}}/" ${BUILDENV_MAKEOPTS-} "$@"
+      fi
    )
 }
 
