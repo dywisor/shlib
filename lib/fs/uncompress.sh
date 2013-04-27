@@ -34,6 +34,20 @@ compress__detect_format() {
    return 0
 }
 
+# void compress_detect_taropt ( compression_format|file )
+#
+#  Guesses tar compression options and stores the result in %v0.
+#
+compress_detect_taropt() {
+   v0=
+   local decompress_args compress_exe
+   compress__detect_format "${1?}"
+   if [ -n "${compress_exe-}" ]; then
+      v0="--${compress_exe}"
+   fi
+   return 0
+}
+
 # int do_uncompress ( compression_format|file, *argv )
 #
 #  Uncompresses to stdout. The first arg has to be a compression format
