@@ -1,0 +1,11 @@
+bash_compat
+logging
+sudofy
+
+function/die
+
+fs/dodir
+fs/uncompress
+
+#devel/buildenv/core
+devel/buildenv/patch
