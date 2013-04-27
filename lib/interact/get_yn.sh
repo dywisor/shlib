@@ -11,7 +11,11 @@ get_yn() {
    local prompt="${1}(${2}/${3}) " yn=
    while [ "${yn}" != "${2}" ] && [ "${yn}" != "${3}" ]; do
       echo -n "${prompt}"
-      read -n1 yn
+      if [ -n "${BASH_VERSION-}" ]; then
+         read -n1 yn
+      else
+         read yn
+      fi
       echo
    done
    [ "${yn}" = "${2}" ]
