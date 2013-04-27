@@ -70,7 +70,7 @@ veinfo() {
    return 0
 }
 
-# void printvar ( *varname, **F_PRINTVAR=einfo )
+# void printvar ( *varname, **F_PRINTVAR=einfo, **PRINTVAR_SKIP_EMPTY=n )
 #
 #  Prints zero or variables (specified by name) by calling
 #  F_PRINTVAR ( "<name>=<value> ) for each variable/value pair.
@@ -80,7 +80,9 @@ printvar() {
    local val
    while [ $# -gt 0 ]; do
       eval val="\${${1}-}"
-      ${F_PRINTVAR:-einfo} "${1}=\"${val}\""
+      if [ -n "${val}" ] || [ "${PRINTVAR_SKIP_EMPTY:-n}" != "y" ]; then
+         ${F_PRINTVAR:-einfo} "${1}=\"${val}\""
+      fi
       shift
    done
 }
