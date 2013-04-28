@@ -14,6 +14,8 @@ readonly __HAVE_SHLIB_DIE__=y
 #   only if %F_ON_DIE() returns a non-zero value.
 #
 die__extended() {
+   [ "${HAVE_BREAKPOINT_SUPPORT:-n}" != "y" ] || breakpoint die
+
    if [ -z "${F_ON_DIE:-}" ] || ! ${F_ON_DIE} "${1}" "${2}"; then
       if [ -n "${1}" ]; then
          eerror "${1}" "died:"

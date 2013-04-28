@@ -3,6 +3,8 @@
 #  Prints %message to stderr and calls exit(code) afterwards.
 #
 die__minimal() {
+   [ "${HAVE_BREAKPOINT_SUPPORT:-n}" != "y" ] || breakpoint die
+
    if [ "${__HAVE_MESSAGE_FUNCTIONS:-n}" = "y" ]; then
       eerror "${1}" "died:"
    elif [ -n "${1}" ]; then
