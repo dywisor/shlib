@@ -5,8 +5,8 @@
 #
 die__function() {
    if [ -n "${2:-}" ]; then
-      die "while execution function ${1%()}(): ${2}" ${3:-3}
+      die "while executing function ${1%()}(): ${2}" ${3:-3}
    else
-      die "while execution function ${1%()}()." ${3:-3}
+      die "while executing function ${1%()}()." ${3:-3}
    fi
 }
