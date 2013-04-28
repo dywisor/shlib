@@ -11,5 +11,12 @@ fs/tmpdir
 interact/get_yn
 
 misc/pragma
+misc/qwhich
 
 devel/kernel_compilation
+
+use/base
+
+# enable breakpoints
+die_extended
+debug/breakpoint
