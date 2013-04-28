@@ -78,8 +78,8 @@ buildenv_make() {
       fi
 
       if \
-         [ "${BUILDENV_MAKE_OUT_OF_TREE:-y}" = "y" ] || \
-         [ "x${BUILDENV_WORKDIR-}" != "x${BUILDENV_SRCDIR-}" ]
+         [ "x${BUILDENV_WORKDIR-}" != "x${BUILDENV_SRCDIR-}" ] && \
+         [ "${BUILDENV_MAKE_OUT_OF_TREE:-y}" = "y" ]
       then
          # ^ limited support for in-tree building
          buildenv_printrun ${BUILDENV_MAKE:-make} O="${PWD}" \
