@@ -107,3 +107,5 @@ critical_breakpoint() {
    breakpoint "$@" "critical" || \
       breakpoint__die "at critical breakpoint ${1-} (rc=$?)" ${?}
 }
+
+HAVE_BREAKPOINT_SUPPORT=y
