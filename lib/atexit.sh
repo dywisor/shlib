@@ -8,7 +8,7 @@
 # Activates atexit for the given signals.
 #
 atexit_enable() {
-   trap __atexit__ ${*:-INT TERM EXIT}
+   trap __atexit__ ${*:-TERM EXIT}
 }
 
 # void atexit_disable ( *signals=INT, TERM, EXIT )
@@ -17,7 +17,7 @@ atexit_enable() {
 # behavior.
 #
 atexit_disable() {
-   trap - ${*:-INT TERM EXIT}
+   trap - ${*:-TERM EXIT}
 }
 
 # true __atexit_run ( *argv )
