@@ -134,6 +134,16 @@ kcomp_init_default() {
    fi
 }
 
+# int kcomp_reinit ( config_file, overwrite=y )
+#
+#
+#  Reinitializes the kernel build dir. This will overwrite the current
+#  config file if overwrite is 'y'.
+#
+kcomp_reinit() {
+   kcomp_init_default "${KSRC}" "${KBUILD}" "${1:?}" "${2:-y}"
+}
+
 # int kcomp_init_tarball (
 #    tarball_file, kernel_dir, initial_config, overwrite_config, **ARCH!
 # )
@@ -262,6 +272,16 @@ kcomp_build() {
 
    buildenv_prepare "${__KCOMP_KBUILD:?}" "${__KCOMP_KSRC:?}" || return
 
+   if kcomp__kernel_with_modules; then
+      dolog_info -0 "Building modules"
+      if buildenv_make modules; then
+         dolog_info -0 "Built a modular kernel"
+      else
+         dolog_error -0 "Failed to build the modules"
+         return 2
+      fi
+   fi
+
    dolog_info -0 "Creating kernel image ${KERNEL_TARGET}"
    if buildenv_make ${KERNEL_TARGET}; then
 
@@ -295,18 +315,6 @@ kcomp_build() {
          fi
       fi
 
-      if kcomp__kernel_with_modules; then
-         dolog_info -0 "Building modules"
-         if buildenv_make modules; then
-            dolog_info -0 "Built a modular kernel"
-         else
-            dolog_error -0 "Failed to build the modules"
-            return 2
-         fi
-      else
-         dolog_info -0 "Built a static kernel (without modules)"
-      fi
-
       return 0
    else
       dolog_error -0 "make ${KERNEL_TARGET} returned $?"
@@ -320,7 +328,12 @@ kcomp_build() {
 #
 kcomp_install() {
    local __BUILDENV_SUBSHELL=n
-   kcomp__prepare_do buildenv_run kcomp__do_install "$@"
+   __KCOMP_DESTDIR="${1:?}"
+   shift && \
+   kcomp__prepare_do \
+      buildenv_run \
+         kcomp__install_env_do \
+            kcomp__do_install "$@"
 }
 
 # int kcomp_pack ( destdir, file, compression_format=<detect> )
@@ -343,6 +356,169 @@ kcomp_pack() {
    )
 }
 
+# int kcomp_build_external ( srcdir, *cmdv, **F_MAKEOPTS_APPEND= )
+#
+#  Builds and/or installs external sources against the kernel tree.
+#
+#  F_MAKEOPTS_APPEND will be called _after_ setting up all variables and
+#  can be used to set the MAKEOPTS_APPEND variable.
+#
+#  !!! F_MAKEOPTS_APPEND must not be makeopts_append().
+#
+kcomp_build_external() {
+   [ -n "${__KCOMP_DESTDIR-}" ] || \
+      function_die "can only be called after kcomp_install()" "kcomp_build_external"
+
+   local S="${1:?}"
+   shift
+
+   BUILDENV_MAKE_OUT_OF_TREE=n \
+   BUILDENV_ONESHOT=y \
+   BUILDENV_UNSET_VARS="" \
+   buildenv_prepare_do "${S}" "${S}" \
+      buildenv_run_in_work kcomp__install_env_do "$@"
+}
+
+# int kcomp_make_external ( srcdir, *argv )
+#
+#  Like kcomp_build_external,
+#  but executes make( *argv ) with install variables.
+#
+kcomp_make_external() {
+   local S="${1:?}"
+   shift
+   kcomp_build_external "${S}" kcomp__install_env_make "$@"
+}
+
+# int kcomp_run_depmod (
+#    *argv, **DEPMOD_CMD!, **KERNEL_RELEASE, **__KCOMP_DESTDIR
+# )
+#
+#  Runs depmod for the installed kernel.
+#  Also sets DEPMOD_CMD if unset.
+#
+kcomp_run_depmod() {
+   : ${__KCOMP_DESTDIR:?}
+
+   if [ -n "${DEPMOD_CMD-}" ]; then
+      true
+   elif qwhich depmod; then
+      DEPMOD_CMD=depmod
+   elif [ -x /sbin/depmod ]; then
+      # guess
+      DEPMOD_CMD=/sbin/depmod
+   else
+      ewarn "depmod not found" "DEPENDENCY"
+      return 5
+   fi
+
+   if [ -z "${KERNEL_RELEASE-}" ]; then
+      local KERNEL_RELEASE KERNEL_VERSION KVER
+      kcomp_get_version || return
+   fi
+
+   SUDOFY_ONLY_OTHERS=n \
+   SUDOFY_USER="${SUDOFY_USER:-${USER?}}" \
+   sudofy ${DEPMOD_CMD} \
+      --basedir "${__KCOMP_DESTDIR}" "${KERNEL_RELEASE}" "$@"
+}
+
+# @private int kcomp__install_env_make ( *argv )
+#
+#  Calls make with all install-related variables.
+#
+kcomp__install_env_make() {
+   makeopts_append_var \
+      INSTALL_MOD_PATH \
+      INSTALL_FW_PATH \
+      INSTALL_HDR_PATH \
+      KSRC KBUILD KVER
+
+   [ -z "${ABI-}"  ] || makeopts_append "ABI=${ABI}"
+   [ -z "${ARCH-}" ] || makeopts_append "ARCH=${ARCH}"
+
+   [ -z "${CROSS_COMPILE-}" ] || \
+      makeopts_append "CROSS_COMPILE=${CROSS_COMPILE}"
+
+   buildenv_printrun make ${BUILDENV_MAKEOPTS-} ${MAKEOPTS_APPEND} "$@"
+}
+
+
+# @private int kcomp__install_env_do ( *cmdv, **F_MAKEOPTS_APPEND )
+#
+#  Sets up install-related variables and calls *cmdv.
+#  Expects to be called in a build env.
+#
+#  Returns on first failure.
+#
+kcomp__install_env_do() {
+   set -e
+
+   # this function is always run in a subshell
+   [ "${__BUILDENV_SUBSHELL:-n}" = "y" ] || \
+      function_die "expecting subshell" "kcomp__install_env_do"
+
+   S="${BUILDENV_WORKDIR:?}"
+   : ${__KCOMP_DESTDIR:?}
+   D="${__KCOMP_DESTDIR%/}/"
+
+   kcomp_get_version
+   unset -f makeopts_append
+
+   export INSTALL_MOD_PATH="${D}"
+   export INSTALL_FW_PATH="${D}lib/firmware"
+   export INSTALL_HDR_PATH="${D}usr"
+   export INSTALL_KERNEL_PATH="${D}boot"
+
+   export KSRC="${__KCOMP_KSRC:?}"
+   export KBUILD="${__KCOMP_KBUILD:?}"
+   export KVER
+
+   if [ -n "${KERNEL_ABI-}" ]; then
+      export KERNEL_ABI
+      [ -n "${ABI-}" ] || export ABI="${KERNEL_ABI}"
+   elif [ -n "${ABI-}" ]; then
+      export ABI
+   fi
+
+   [ -z "${ARCH-}"          ] || export ARCH
+   [ -z "${CROSS_COMPILE-}" ] || export CROSS_COMPILE
+
+   : ${KERNEL_BASENAME:=linux}
+   : ${SUDOFY_USER:=${USER?}}
+   SUDOFY_ONLY_OTHERS=n
+
+   if [ "${KCOMP_LOCAL_BUILD:-n}" = "y" ]; then
+      KCOMP_TRUE_LOCAL_BUILD=y
+   elif [ -n "${CROSS_COMPILE-}" ] && [ -z "${KCOMP_LOCAL_BUILD-}" ]; then
+      KCOMP_TRUE_LOCAL_BUILD=n
+   else
+      # default assumption
+      KCOMP_TRUE_LOCAL_BUILD=y
+   fi
+
+   MAKEOPTS_APPEND=
+   makeopts_append() { MAKEOPTS_APPEND="${MAKEOPTS_APPEND} $*"; }
+   makeopts_append_var() {
+      local val
+      while [ $# -gt 0 ]; do
+         eval "val=\${$1-}"
+         makeopts_append "${1}=${val}"
+         shift
+      done
+   }
+
+   [ -z "${F_MAKEOPTS_APPEND-}" ] || ${F_MAKEOPTS_APPEND}
+
+   # dodir() does not support sudofy
+   dodir_clean "${D}"
+
+   "$@"
+
+   set +e
+}
+
+
 # @private int kcomp__do_install (
 #    destdir,
 #    **KERNEL_BASENAME, **KERNEL_TARGET,
@@ -358,61 +534,31 @@ kcomp_pack() {
 #      It expects to be called in a subshell.
 #
 kcomp__do_install() {
-   [ "${__BUILDENV_SUBSHELL:-n}" = "y" ] || \
-      function_die "expecting subshell" "kcomp__do_install()"
-   # this function is always run in a subshell
-   set -e
+   : ${KERNEL_TARGET:?}
 
-   : ${KERNEL_TARGET:?} ${KERNEL_BASENAME:=linux} ${SUDOFY_USER:=${USER?}}
-   SUDOFY_ONLY_OTHERS=n
+   KREL="${KERNEL_RELEASE%+}"
+   KERNEL_INSTALL_NAME="${KERNEL_BASENAME}-${KREL}"
 
-   D="${1:?}/"
-
-   [ -z "${ARCH-}"          ] || export ARCH
-   [ -z "${CROSS_COMPILE-}" ] || export CROSS_COMPILE
-
-   dodir_clean "${D}"
-
-   export INSTALL_MOD_PATH="${D}"
-   export INSTALL_FW_PATH="${D}lib/firmware"
-   export INSTALL_HDR_PATH="${D}usr"
-
-   export INSTALL_KERNEL_PATH="${D}boot"
-
-   KERNEL_RELEASE=`make kernelrelease 2>/dev/null`
-   KVER="${KERNEL_RELEASE%+}"
-   : ${KVER:?}
-
-   dolog_info -0 "Install ${KERNEL_BASENAME}-${KVER} config-${KVER} into ${D} ... "
-   # dodir() does not support sudofy
+   dolog_info -0 "Install ${KERNEL_INSTALL_NAME} config-${KREL} into ${D} ... "
 
    if [ -z "${__KCOMP_KERNEL_IMAGE-}" ]; then
       __KCOMP_KERNEL_IMAGE="${__KCOMP_KBUILD}/arch/${ARCH:?}/boot/${KERNEL_TARGET}"
    fi
 
-
-
    dodir "${INSTALL_KERNEL_PATH}"
-   sudofy cp -vL -- "${__KCOMP_KERNEL_IMAGE}" "${INSTALL_KERNEL_PATH}/${KERNEL_BASENAME}-${KVER}"
-   sudofy cp -vL -- "${__KCOMP_CONFIG}"       "${INSTALL_KERNEL_PATH}/config-${KVER}"
+   sudofy cp -vL -- "${__KCOMP_KERNEL_IMAGE}" "${INSTALL_KERNEL_PATH}/${KERNEL_INSTALL_NAME}"
+   sudofy cp -vL -- "${__KCOMP_CONFIG}"       "${INSTALL_KERNEL_PATH}/config-${KREL}"
 
    if kcomp__kernel_with_modules; then
       dolog_info -0 "Installing modules into ${INSTALL_MOD_PATH} ... "
       sudofy make -j1 modules_install
 
-      if \
-         [ "${KCOMP_LOCAL_BUILD:-y}" != "y" ] || \
-         {
-            [ -n "${CROSS_COMPILE-}" ] && [ -z "${KCOMP_LOCAL_BUILD-}" ]
-         }
-      then
+      if [ "${KCOMP_TRUE_LOCAL_BUILD}" != "y" ]; then
          dolog_info -0 "Removing source/build symlinks in ${INSTALL_MOD_PATH} ... "
-         for symlink in \
-            "${INSTALL_MOD_PATH}/lib/modules/${KERNEL_RELEASE}/"{source,build}
-         do
-            if [ -h "${symlink}" ]; then
-               sudofy rm "${symlink}"
-            fi
+
+         for symlink in source build; do
+            symlink="${INSTALL_MOD_PATH}/lib/modules/${KERNEL_RELEASE}/${symlink}"
+            [ ! -h "${symlink}" ] || sudofy rm "${symlink}"
          done
       fi
    else
@@ -429,8 +575,6 @@ kcomp__do_install() {
          ;;
       esac
    done
-
-   set +e
 }
 
 # int kcomp__prepare_do ( *cmdv )
@@ -454,6 +598,11 @@ kcomp__prepare_do() {
 kcomp__make() {
    kcomp__prepare_do buildenv_make "$@"
 }
+
+# @function_alias kcomp_make ( *argv ) renames kcomp__make ( *argv )
+#
+kcomp_make() { kcomp__make "$@"; }
+
 
 # int kcomp__make_quiet ( *argv )
 #
