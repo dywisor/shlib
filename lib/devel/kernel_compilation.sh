@@ -272,7 +272,7 @@ kcomp_build() {
 
    buildenv_prepare "${__KCOMP_KBUILD:?}" "${__KCOMP_KSRC:?}" || return
 
-   if kcomp__kernel_with_modules; then
+   if kcomp_kernel_with_modules; then
       dolog_info -0 "Building modules"
       if buildenv_make modules; then
          dolog_info -0 "Built a modular kernel"
@@ -549,7 +549,7 @@ kcomp__do_install() {
    sudofy cp -vL -- "${__KCOMP_KERNEL_IMAGE}" "${INSTALL_KERNEL_PATH}/${KERNEL_INSTALL_NAME}"
    sudofy cp -vL -- "${__KCOMP_CONFIG}"       "${INSTALL_KERNEL_PATH}/config-${KREL}"
 
-   if kcomp__kernel_with_modules; then
+   if kcomp_kernel_with_modules; then
       dolog_info -0 "Installing modules into ${INSTALL_MOD_PATH} ... "
       sudofy make -j1 modules_install
 
@@ -612,21 +612,60 @@ kcomp__make_quiet() {
    QUIET=y kcomp__prepare_do buildenv_make -s "$@"
 }
 
-# @private int kcomp__kernel_with_modules ( **__KCOMP_CONFIG )
+# @DEPRECATED @private int kcomp__kernel_with_modules ( **__KCOMP_CONFIG )
 #
 #  Checks whether the configured kernel uses modules or not.
 #
 kcomp__kernel_with_modules() {
+   ewarn "kcomo__kernel_with_modules()" "DEPRECATED"
+   kcomp_config_has MODULES
+}
+
+# int kcomp_kernel_with_modules ( **__KCOMP_CONFIG )
+#
+#  Checks whether the configured kernel uses modules or not.
+#
+kcomp_kernel_with_modules() { kcomp_config_has MODULES; }
+
+# int kcomp_kernel_with_modversions ( **__KCOMP_CONFIG )
+#
+#  Checks whether the configured kernel has CONFIG_MODVERSIONS enabled
+#  or not.
+#
+kcomp_kernel_with_modversions() { kcomp_config_has -q MODVERSIONS; }
+
+# int kcomp_config_has ( ["-q"], config_option )
+#
+#  Returns 0 if config_option is set to 'y' or 'n' in the kernel's config
+#  file.
+#
+#  Else returns a non-zero value:
+#  * 5 if nothing to check
+#  * 3 if first arg was "-q"
+#    => fast and silent return if config_option not set
+#  * 1 if config_option is not set
+#  * 2 if config_option not found (also prints a warning message about that)
+#
+kcomp_config_has() {
+   local quiet
+   if [ "x${1-}" = "x-q" ]; then
+      quiet=y; shift
+   fi
+   [ -n "${1-}" ] || return 5
+
+   local key="CONFIG_${1#CONFIG_}"
    if \
-      grep -q -x -- CONFIG_MODULES=[ym] "${__KCOMP_CONFIG:?}"
+      grep -q -x -- "${key}"=[ym] "${__KCOMP_CONFIG:?}"
    then
       return 0
+   elif [ -n "${quiet-}" ]; then
+      return 3
    elif \
-      grep -q -x -- '# CONFIG_MODULES is not set' "${__KCOMP_CONFIG:?}"
+      grep -q -x -- "# ${key} is not set" "${__KCOMP_CONFIG:?}"
    then
       return 1
    else
-      dolog_warn -0 "Cannot detect value of CONFIG_MODULES"
+      dolog_warn -0 "Cannot detect value of ${key}"
       return 2
    fi
 }
