@@ -1,7 +1,7 @@
 ## This module offers basic USE flag functionality, that is checking whether
 ## a flag is set or not (via use()) and enabling/disabling flags.
 
-readonly __USE_BASE_FUNCTIONS="use use_call disable_use enable_use"
+readonly __USE_BASE_FUNCTIONS="use use_any use_call disable_use enable_use"
 
 # void __use_get_prefix ( **USE_PREFIX= )
 #
@@ -46,6 +46,23 @@ use() {
       shift
    done
    return 0
+}
+
+# int use_any ( *flag, **USE_PREFIX= )
+#
+# DEFINES @use_OR_function <USE_PREFIX> <function name>
+#
+#  Returns 0 if any of the given flags is active, else 1.
+#  Also returns 1 if the flag list is empty.
+#
+use_any() {
+   while [ $# -gt 0 ]; do
+      if use "${1}"; then
+         return 0
+      fi
+      shift
+   done
+   return 1
 }
 
 # int use_call ( flag, *cmdv, **USE_PREFIX )

@@ -1,11 +1,12 @@
 # @extern int use          ( *flag, **USE_PREFIX= )
+# @extern int use_any      ( *flag, **USE_PREFIX= )
 # @extern int use_call     ( flag, *cmdv, **USE_PREFIX= )
 # @extern void disable_use ( *flag, **USE_PREFIX= )
 # @extern void enable_use  ( *flag, **USE_PREFIX= )
 # @extern void eval_use_functions (...)
 
 # @extern void usex (...)
-# @extern void use_with ( flag, configure_option=<flag>, [configure_value] )
+# @extern void use_with   ( flag, configure_option=<flag>, [configure_value] )
 # @extern void use_enable ( flag, configure_option=<flag>, [configure_value] )
 
 # void use_option ( flag, option_name=<flag>, [option_value] )
