@@ -1,2 +1,2 @@
-test/assert_retcode
+test/assert_common
 test/assert_pipe
