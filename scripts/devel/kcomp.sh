@@ -35,6 +35,8 @@ HELP_OPTIONS="
  * vbox,
  * virtualbox   -- virtualbox modules
 
+ --with-all     -- enable all patch sets and extra modules
+
 --without-* can be used to remove features at runtime.
 
 Note: unknown --with-* options will be ignored.
@@ -88,44 +90,27 @@ einfo_action() { einfo "${1} ... " "${2-}"; }
 einfo_new_modules() { einfo "${1}" "New modules:"; }
 einfo_build_modules() { einfo "${1}" "Building external modules:"; }
 
+# void kcomp_rename_use_flag ( **flag! )
+#
+kcomp_rename_use_flag() {
+   case "${flag}" in
+      vbox)
+         flag=virtualbox
+      ;;
+      all)
+         flag="zfs tp_smapi virtualbox acpi_call"
+      ;;
+   esac
+}
+
+
 # kcomp_edit_use ( *[+-]flag_name )
 #
 #  Enables and/or disable the listed USE flags, depending on their name
 #  prefix ("-" => disable, "+" or None => "enable").
 #
-#  Also renames USE flag if required (*-* => *_*, vbox => virtualbox a.s.o.).
-#
 kcomp_edit_use() {
-   local flag mode
-
-   while [ $# -gt 0 ]; do
-      if [ -n "${1-}" ]; then
-
-         if [ "${1#-}" != "${1}" ]; then
-            mode=disable
-            flag="${1#-}"
-         elif [ "${1#+}" != "${1}" ]; then
-            mode=enable
-            flag="${1#+}"
-         else
-            mode=enable
-            flag="${1}"
-         fi
-
-         case "${flag}" in
-            vbox)
-               flag=virtualbox
-            ;;
-            *-*)
-               # dash doesn't support ${var//-/_}
-               flag=`echo "${flag}" | sed -e 's,-,_,g'`
-            ;;
-         esac
-
-         [ -z "${flag}" ] || ${mode}_use "${flag}"
-      fi
-      shift
-   done
+   F_USE_RENAME_FLAG=kcomp_rename_use_flag set_use "$@"
 }
 
 
