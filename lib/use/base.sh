@@ -125,12 +125,10 @@ set_use() {
             flag="${1#+}"
          fi
 
-         case "${flag}" in
-            *-*)
-               # dash doesn't support ${var//-/_}
-               flag=`echo "${flag}" | sed -e 's,-,_,g'`
-            ;;
-         esac
+         # dash doesn't support ${var//-/_}
+         while [ "${flag}" != "${flag#*-}" ]; do
+            flag="${flag%%-*}_${flag#*-}"
+         done
 
          [ -z "${F_USE_RENAME_FLAG-}" ] || ${F_USE_RENAME_FLAG}
 
