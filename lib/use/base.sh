@@ -1,7 +1,7 @@
 ## This module offers basic USE flag functionality, that is checking whether
 ## a flag is set or not (via use()) and enabling/disabling flags.
 
-readonly __USE_BASE_FUNCTIONS="use use_any use_call disable_use enable_use"
+readonly __USE_BASE_FUNCTIONS="use use_any use_call disable_use enable_use set_use"
 
 # void __use_get_prefix ( **USE_PREFIX= )
 #
@@ -102,6 +102,44 @@ enable_use() { __use_set_to y "$@"; }
 #  Disables zero or more USE flags.
 #
 disable_use() { __use_set_to n "$@"; }
+
+# void set_use ( *[+-]flag_name, **USE_PREFIX, *F_USE_RENAME_FLAG= )
+#
+#  Enables and/or disable the listed USE flags, depending on their name
+#  prefix ("-" => disable, "+" or None => "enable").
+#
+#  Also renames USE flags by calling F_USE_RENAME_FLAG ( **flag! ), if set,
+#  *after* replacing all dash chars '-' by underscore chars '_'.
+#
+set_use() {
+   local flag val
+
+   while [ $# -gt 0 ]; do
+      if [ -n "${1-}" ]; then
+
+         if [ "${1#-}" != "${1}" ]; then
+            val=n
+            flag="${1#-}"
+         else
+            val=y
+            flag="${1#+}"
+         fi
+
+         case "${flag}" in
+            *-*)
+               # dash doesn't support ${var//-/_}
+               flag=`echo "${flag}" | sed -e 's,-,_,g'`
+            ;;
+         esac
+
+         [ -z "${F_USE_RENAME_FLAG-}" ] || ${F_USE_RENAME_FLAG}
+
+         # "unpacking" $flag here is intentional
+         __use_set_to "${val}" ${flag-}
+      fi
+      shift
+   done
+}
 
 # void eval_use_functions (
 #    function_name_prefix,
