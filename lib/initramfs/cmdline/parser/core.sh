@@ -22,6 +22,9 @@ cmdline_parser_core() {
       home|home_dir)
          NEWROOT_HOME_DIR="${NEWROOT?}/${value#/}"
       ;;
+      debuglog)
+         DEBUG=y
+      ;;
       *)
          return 1
       ;;

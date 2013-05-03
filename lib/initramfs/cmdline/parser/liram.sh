@@ -3,7 +3,7 @@ cmdline_parser_liram
 "
 
 __cmdline_parser_liram_opts() {
-   local k="${1%%=*}" v="${v#*=}"
+   local k="${1%%=*}" v="${1#*=}"
    [ "${v}" != "${k}" ] || v=
 
    case "${k}" in
@@ -43,25 +43,21 @@ __cmdline_parser_liram_opts() {
 cmdline_parser_liram() {
    case "${arg}" in
       liram)
-         NEWROOT_TYPE=liram
+         [ -z "${value}" ] || F_ITER=__cmdline_parser_liram_opts list_iterator "${value}"
       ;;
-      liram=?*)
-         NEWROOT_TYPE=liram
-         F_ITER=__cmdline_parser_liram_opts list_iterator "${value}"
-      ;;
-      liram_disk=?*)
+      liram_disk)
          __cmdline_parser_liram_opts "disk=${value}"
       ;;
-      liram_disktype=?*)
+      liram_disktype)
          __cmdline_parser_liram_opts "disktype=${value}"
       ;;
-      liram_slot=?*)
+      liram_slot)
          __cmdline_parser_liram_opts "slot=${value}"
       ;;
-      liram_size=?*)
+      liram_size)
          __cmdline_parser_liram_opts "size=${value}"
       ;;
-      liram_layout=?*)
+      liram_layout)
          __cmdline_parser_liram_opts "layout=${value}"
       ;;
 
@@ -70,4 +66,5 @@ cmdline_parser_liram() {
          return 1
       ;;
    esac
+   NEWROOT_TYPE=liram
 }

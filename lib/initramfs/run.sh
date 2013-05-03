@@ -14,7 +14,7 @@ initramfs_die() {
 
       ewarn "Starting a rescue shell"
       einfo ""
-      einfo "If you\'re that you\'ve fixed whatever caused the problem,"
+      einfo "If you're sure that you've fixed whatever caused the problem,"
       einfo "touch /RESUME_BOOT and exit the shell."
       einfo "${0} will then continue where it failed."
       einfo ""
@@ -40,16 +40,20 @@ initramfs_die() {
 
          [ ! -x /telinit ] || /telinit --
          die "$@"
+         return 150
 
       elif [ -f /RESUME_BOOT ] && [ -s /RESUME_BOOT ]; then
 
          # read the file twice to ensure that it's actually parseable
          if ( . /RESUME_BOOT --; ) && . /RESUME_BOOT --; then
-            return 0
-         elif initramfs_die "errors occured while reading /RESUME_BOOT"; then
-            return 0
+            mv -f /RESUME_BOOT /RESUME_BOOT.last
+         else
+            initramfs_die "errors occured while reading /RESUME_BOOT"
          fi
-
+         return 0
+      else
+         mv -f /RESUME_BOOT /RESUME_BOOT.last
+         return 0
       fi
    else
       [ ! -x /telinit ] || /telinit --

@@ -33,7 +33,7 @@ liram_filescan() {
             # else $name already found
             #  (possibly not during this run, but this won't be detected here)
 
-            file="${SCAN_DIR}${name}${ext#.}"
+            file="${SCAN_DIR}${name}.${ext#.}"
             if [ -f "${file}" ]; then
                inonfatal \
                   ln -s -f -T "${file}" "${FILE_SCAN_SYNC_DIR}/${name}" && \

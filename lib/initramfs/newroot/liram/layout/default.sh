@@ -44,43 +44,82 @@
 #
 liram_populate_layout_default() {
    if [ "${LIRAM_LAYOUT:?}" = "default" ]; then
+      liram_info "default layout"
       # restrict these variables to what was known
       # at the time writing this module
       local \
          TARBALL_SCAN_NAMES="rootfs var usr etc home scripts log" \
          SFS_SCAN_NAMES="usr home etc scripts"
+   else
+      liram_info "default layout (inherited)"
    fi
 
    local usr_sfs="" home_sfs="" etc_sfs="" scripts_sfs=""
 
    irun liram_scan_files
 
-   irun liram_unpack_default rootfs "${v0}"
+   liram_log_tarball_unpacking "rootfs"
+   irun liram_unpack_default rootfs
 
-   if ! liram_unpack_optional etc; then
-      liram_sfs_container_import etc && etc_sfs="${v0}"
+   if liram_get_tarball etc; then
+      liram_log_tarball_unpacking "etc"
+      irun newroot_replace_etc "${v0:?}"
+   elif liram_sfs_container_import etc; then
+      etc_sfs="${v0}"
+      liram_log_sfs_imported "etc"
+   else
+      liram_log_nothing_found "etc"
    fi
 
-   liram_unpack_optional var
-   liram_unpack_optional log
+   if liram_unpack_optional var; then
+      liram_log_tarball_unpacked "var"
+   else
+      liram_log_nothing_found "var"
+   fi
 
-   if ! liram_unpack_optional usr; then
-      liram_sfs_container_import usr && usr_sfs="${v0}"
+   if liram_unpack_optional log; then
+      liram_log_tarball_unpacked "log"
+   else
+      liram_log_nothing_found "log"
+   fi
+
+   if liram_get_tarball usr; then
+      liram_log_tarball_unpacking "usr"
+      liram_unpack_default usr "${v0:?}"
+   elif liram_sfs_container_import usr; then
+      usr_sfs="${v0}"
+      liram_log_sfs_imported "usr"
+   else
+      liram_log_nothing_found "usr"
    fi
 
    newroot_detect_home_dir
-   ${LOGGER} --level=DEBUG "home directory is ${NEWROOT_HOME_DIR}"
+   liram_log DEBUG "home directory is ${NEWROOT_HOME_DIR}"
 
-   if ! liram_unpack_optional home; then
-      liram_sfs_container_import home && home_sfs="${v0}"
+   if liram_get_tarball home; then
+      liram_log_tarball_unpacking "home"
+      liram_unpack_default home "${v0:?}"
+   elif liram_sfs_container_import home; then
+      home_sfs="${v0}"
+      liram_log_sfs_imported "home"
+   else
+      liram_log_nothing_found "home"
    fi
 
-   if ! liram_unpack_optional scripts; then
-      liram_sfs_container_import scripts && scripts_sfs="${v0}"
+   if liram_get_tarball scripts; then
+      liram_log_tarball_unpacking "scripts"
+      liram_unpack_default scripts "${v0:?}"
+   elif liram_sfs_container_import scripts; then
+      scripts_sfs="${v0}"
+      liram_log_sfs_imported "scripts"
+   else
+      liram_log_nothing_found "scripts"
    fi
 
    # if any sfs file imported:
    if newroot_sfs_container_avail; then
+      liram_info \
+         "mounting squashfs files:${usr_sfs:+ usr}${home_sfs:+ home}${etc_sfs:+ etc}${scripts_sfs:+ scripts}"
 
       irun newroot_sfs_container_finalize
 

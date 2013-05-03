@@ -92,6 +92,7 @@ liram_mount_rootfs() {
 #  else calls liram_die().
 #
 liram_getslot() {
+   SLOT=
    if [ -n "${LIRAM_DISK_MP-}" ]; then
       SLOT="${LIRAM_DISK_MP%/}/${LIRAM_SLOT#/}"
       if [ -d "${SLOT}" ]; then
@@ -124,15 +125,13 @@ liram_populate() {
 
       # initialize variables
       local \
-         SLOT= \
-         FILESIZE= \
-         v0= \
-         SFS_CONTAINER= \
-         SFS_SCAN_DIR="${SLOT}" \
-         TARBALL_SCAN_DIR="${SLOT}" \
+         SLOT FILESIZE v0 SFS_CONTAINER TARBALL_SCAN_DIR SFS_SCAN_DIR \
          LIRAM_UNPACK_NAME_TRY="${LIRAM_UNPACK_NAME_TRY:-n}"
 
       liram_getslot || true
+
+      SFS_SCAN_DIR="${SLOT}"
+      TARBALL_SCAN_DIR="${SLOT}"
 
       inonfatal "${LIRAM_POPULATE_FUNCTION}"
       local rc=$?

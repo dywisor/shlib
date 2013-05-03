@@ -33,5 +33,5 @@ initramfs__unpack_tarball() {
 #
 initramfs_unpack_tarball() {
    : ${1:?} ${2:?}
-   inonfatal "${1}" "${2%/}/"
+   inonfatal initramfs__unpack_tarball "${1}" "${2%/}/"
 }

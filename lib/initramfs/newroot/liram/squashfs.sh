@@ -15,7 +15,7 @@ liram_scan_squashfs() {
    local \
       FILE_SCAN_EXTENSIONS="${SFS_SCAN_EXTENSIONS-}" \
       FILE_SCAN_SYNC_DIR="${SFS_SYNC_DIR}" \
-      FILE_SCAN_DIR="${SFSL_SCAN_DIR-}"
+      FILE_SCAN_DIR="${SFS_SCAN_DIR-}"
 
    if [ $# -gt 0 ]; then
       liram_filescan "$@"

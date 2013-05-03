@@ -1,3 +1,14 @@
+## functions from initramfs/newroot/liram/logging
+
+# @extern void liram_log()
+# @extern void liram_debug()
+# @extern void liram_info()
+
+# @extern void liram_log_tarball_unpacking()
+# @extern void liram_log_tarball_unpacked()
+# @extern void liram_log_sfs_imported()
+# @extern void liram_log_nothing_found()
+
 ## functions from initramfs/newroot/squashfs_container{,_aufs}
 
 # @extern int newroot_sfs_container_mount()          -- sfs_name, mp
@@ -127,7 +138,7 @@ liram_unpack_default() {
    else
       local v0
       inonfatal liram_get_tarball "${1:?}" && \
-      inonfatal newroot_unpack_tarball "${v0}" "${dest}"
+      inonfatal newroot_unpack_tarball "${v0:?}" "${dest}"
    fi
 }
 
@@ -150,7 +161,7 @@ liram_unpack_name_default() {
 
       elif liram_get_tarball "${1:?}"; then
 
-         if liram_unpack_default "${1}" "${v0}"; then
+         if liram_unpack_default "${1}" "${v0:?}"; then
             true
          elif [ "${LIRAM_UNPACK_NAME_TRY:-n}" = "y" ]; then
             rc=2
@@ -198,9 +209,9 @@ liram_unpack_optional() {
       return 0
    fi
 
-   if [ "x${3-B}" = "x${3-A}" ]; then
-      irun liram_unpack_default "${1:?}" "${v0}"
+   if [ "x${3-B}" != "x${3-A}" ]; then
+      irun liram_unpack_default "${1:?}" "${v0:?}"
    else
-      irun newroot_unpack_tarball "${v0}" "${3}"
+      irun newroot_unpack_tarball "${v0:?}" "${3}"
    fi
 }
