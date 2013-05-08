@@ -9,6 +9,7 @@
 #
 atexit_enable() {
    trap __atexit__ ${*:-TERM EXIT}
+   ATEXIT_ENABLED=y
 }
 
 # void atexit_disable ( *signals=INT, TERM, EXIT )
@@ -18,6 +19,7 @@ atexit_enable() {
 #
 atexit_disable() {
    trap - ${*:-TERM EXIT}
+   ATEXIT_ENABLED=n
 }
 
 # true __atexit_run ( *argv )
@@ -86,4 +88,6 @@ atexit_register() {
 #
 if [ "${ATEXIT_ENABLE:-y}" = "y" ]; then
    atexit_enable
+else
+   ATEXIT_ENABLED=n
 fi
