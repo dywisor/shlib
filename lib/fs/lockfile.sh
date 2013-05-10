@@ -1,5 +1,72 @@
 ## symlinking is atomic (even for nfs v2/v3)
 
+# quickref
+#
+# functions:
+#
+# int lockfile_acquire()     -- lock, retry, wait_intvl
+# int lockfile_acquire_now() -- lock
+# int lockfile_release()     -- lock
+#
+# vars:
+#
+# yesno LOCKFILE_RELEASE_AT_EXIT (=y) --
+# yesno LOCKFILE_AUTO_DELETE     (=n) -- must set before/when retrieving a lock
+#
+
+# @private void lockfile__atexit_release ( lock )
+#
+#  Releases a lock. Does nothing if the pid check fails for it.
+#  Always returns 0 (void).
+#
+lockfile__atexit_release() {
+   __lockfile_release "${1?}" "y" || true
+}
+
+# @private void lockfile__atexit_main (
+#    **LOCKFILE__LOCKS, **LOCKFILE_RELEASE_AT_EXIT=y
+# )
+#
+#  Calls lockfile__atexit_release ( %lock ) foreach %lock in %LOCKFILE__LOCKS
+#  if LOCKFILE_RELEASE_AT_EXIT is set to 'y'.
+#
+lockfile__atexit_main() {
+   if \
+      [ "${LOCKFILE_RELEASE_AT_EXIT:-y}" = "y" ] && \
+      [ -n "${LOCKFILE__LOCKS-}" ]
+   then
+      local F_ITER=lockfile__atexit_release ITER_UNPACK_ITEM="n"
+
+      line_iterator "${LOCKFILE__LOCKS}" || true
+   fi
+}
+
+# @private void lockfile_atexit_register (
+#    [lock],
+#    **LOCKFILE__ATEXIT_REGISTERED!, **LOCKFILE__LOCKS!
+# )
+#
+#  Enables the lockfile atexit function and appends %lock to the list of
+#  locks to be released at exit.
+#
+lockfile__atexit_register() {
+   if [ "${LOCKFILE__ATEXIT_REGISTERED:-n}" != "y" ]; then
+      atexit_register_unsafe lockfile__atexit_main && \
+      LOCKFILE__ATEXIT_REGISTERED=y
+   fi
+
+   if [ -n "${1-}" ]; then
+      if [ -n "${LOCKFILE__LOCKS-}" ]; then
+
+LOCKFILE__LOCKS="${LOCKFILE__LOCKS}
+${1}"
+
+      else
+         LOCKFILE__LOCKS="${1}"
+      fi
+   fi
+}
+
 # @private int __lockfile_release ( lock, ignore_pid_mismatch=n ),
 #  raises function_die()
 #
@@ -14,7 +81,8 @@ __lockfile_release() {
    if ! [ -h "${1-}" ]; then
       return 0
    elif [ -e "${1}/stat" ]; then
-      local pid DONT_CARE
+      local pid
+      local DONT_CARE
       read pid DONT_CARE < "${1}/stat"
 
       if [ "${pid}" != "$$" ]; then
@@ -39,7 +107,7 @@ __lockfile_release() {
 __lockfile_acquire_now() {
    ln -s -T -- "${2:?}" "${1:?}" 2>/dev/null || return
    [ "${LOCKFILE_AUTO_DELETE:-n}" != "y" ] || \
-      atexit_register __lockfile_release "${1}" "y"
+      lockfile__atexit_register "${1}"
 }
 
 # int lockfile_acquire_now ( lock, **LOCKFILE_AUTO_DELETE=n )
@@ -81,4 +149,3 @@ lockfile_acquire() {
 lockfile_release() {
    [ -h "${1:?}" ] && __lockfile_release "${1}"
 }
-
