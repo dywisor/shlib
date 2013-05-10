@@ -65,8 +65,10 @@ __atexit__() {
 #
 atexit_register_unsafe() {
    if [ -n "${__ATEXIT_FUNCTIONS:-}" ]; then
-      __ATEXIT_FUNCTIONS="${__ATEXIT_FUNCTIONS}
-      $*"
+
+__ATEXIT_FUNCTIONS="${__ATEXIT_FUNCTIONS}
+$*"
+
    else
       __ATEXIT_FUNCTIONS="$*"
    fi
