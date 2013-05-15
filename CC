@@ -1,5 +1,5 @@
 #!/bin/sh
-if which shlibcc 1>/dev/null 2>/dev/null; then
+if [ "${SYSTEM_SHLIBCC:-y}" = "y" ] && which shlibcc 1>/dev/null 2>/dev/null; then
 	CC=shlibcc
 elif [ -x ../shlibcc/shlibcc.py ]; then
 	CC=../shlibcc/shlibcc.py
