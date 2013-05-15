@@ -114,7 +114,8 @@ file_iterator() {
          if [ -z "${line}" ] && [ "${ITER_SKIP_EMPTY:-y}" = "y" ]; then
             true
          elif \
-            [ "${ITER_SKIP_COMMENT:-y}" ] && [ "x${line#\#}" != "x${line}" ]
+            [ "${ITER_SKIP_COMMENT:-y}" = "y" ] && \
+            [ "x${line#\#}" != "x${line}" ]
          then
             true
          elif [ "${ITER_UNPACK_ITEM:-n}" = "y" ]; then
