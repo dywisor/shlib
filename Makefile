@@ -2,10 +2,10 @@ BASH         ?= 0
 SHLIBCC       = ./CC
 MAKE_SCRIPTS  = ./make_scripts.sh
 ifeq ($(BASH),1)
-SHLIBCCFLAGS    = --as-lib --strip-virtual --bash
+SHLIBCCFLAGS    = --as-lib --strip-virtual --stable-sort --bash
 MAKESCRIPT_BASH = y
 else
-SHLIBCCFLAGS    = --as-lib --strip-virtual
+SHLIBCCFLAGS    = --as-lib --strip-virtual --stable-sort
 MAKESCRIPT_BASH = n
 endif
 

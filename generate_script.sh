@@ -143,7 +143,7 @@ if [ "${SCRIPT_STANDALONE=n}" = "y" ]; then
 	fi
 	[ "${SCRIPT_BASH=n}" != "y" ] || opts="${opts} --bash"
 
-	"${SCRIPT_DIR}/CC" ${opts} --main "${IN_SCRIPT}"
+	"${SCRIPT_DIR}/CC" ${opts} --stable-sort --main "${IN_SCRIPT}"
 else
 	if [ -z "${IN_SCRIPT_NAME-}" ]; then
 		IN_SCRIPT_NAME="${IN_SCRIPT##*/}"
