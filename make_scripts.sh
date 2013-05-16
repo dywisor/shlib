@@ -61,7 +61,7 @@ for src; do
    if yesno "${MAKESCRIPT_FLAT}"; then
       dest="${src%.sh}"
       case "${dest}" in
-         initramfs/*|lib/*|tmp/*)
+         initramfs/*|lib/*|tmp/*|vdr/*|local/*)
             dest="${MAKESCRIPT_DEST}/${dest}"
          ;;
          *)
