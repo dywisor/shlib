@@ -46,6 +46,7 @@ This section is mainly centered on using *shlibcc* in conjunction with
   dependency resolution and basic code modification at script creation time.
   See `shlibcc at github`_ for details.
 * git for getting shlib/shlibcc
+* python docutils 0.9 or later for generating doc files
 
 ------------------------------
  Installing shlib and shlibcc
