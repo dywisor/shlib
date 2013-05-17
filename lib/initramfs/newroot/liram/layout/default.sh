@@ -35,6 +35,9 @@
 # Tarballs take higher precedence, so if there's a a usr.sfs and a usr.tgz
 # available, the usr.tgz file will be used.
 #
+# Calls liram_setup_subtrees() after unpacking the rootfs and
+# newroot_setup_all() after populating newroot.
+#
 # Note: "optional" means that it is okay if the tarball does not exist,
 #       it doesn't mean that it's optional whether it can be extracted
 #       without errors or not.
@@ -60,6 +63,8 @@ liram_populate_layout_default() {
 
    liram_log_tarball_unpacking "rootfs"
    irun liram_unpack_default rootfs
+
+   inonfatal liram_setup_subtrees
 
    if liram_get_tarball etc; then
       liram_log_tarball_unpacking "etc"
@@ -148,4 +153,6 @@ liram_populate_layout_default() {
       [ -z "${scripts_sfs-}" ] || \
          irun newroot_sfs_container_mount scripts /scripts
    fi
+
+   inonfatal newroot_setup_all
 }
