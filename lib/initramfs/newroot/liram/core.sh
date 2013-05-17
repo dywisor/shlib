@@ -42,6 +42,20 @@
 #
 
 
+## functions from initramfs/newroot/liram/setup
+
+# @extern int  newroot_setup_dirs        ( *file=<default> )
+# @extern int  newroot_setup_mountpoints ( fstab_file=<default> )
+# @extern int  newroot_setup_premount    ( file=<default> )
+# @extern void newroot_setup_all()
+# @extern int liram_setup_subtrees       ( file=<default> )
+
+
+## functions from initramfs/newroot/liram/subtree
+
+# @extern void liram_mount_subtree ( mp, size_m, name, opts )
+
+
 ## functions from initramfs/newroot/liram/util
 
 # @extern void liram_scan_files()
