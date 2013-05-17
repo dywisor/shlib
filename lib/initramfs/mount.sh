@@ -17,9 +17,9 @@ iumount() {
    irun do_umount "$@"
 }
 
-# void imount_fs ( *argv )
+# void imount_fs ( mp, fs, opts=, fstype=auto )
 #
-#  Alias to irun domount_fs ( *argv ).
+#  Alias to irun domount_fs (...).
 #
 imount_fs() {
    irun domount_fs "$@"
