@@ -107,34 +107,31 @@ liram_getslot() {
    fi
 }
 
-# int liram_populate ( **LIRAM_LAYOUT=default ), raises liram_die()
+# @private int liram_populate__inherit (
+#    liram_layout,
+#    **SLOT, **SFS_CONTAINER, **TARBALL_SCAN_DIR, **SFS_SCAN_DIR,
+#    **LIRAM_UNPACK_NAME_TRY
+# ), raises liram_die()
 #
 #  Populates newroot by calling liram_populate_layout_<LIRAM_LAYOUT>().
 #  Raises liram_die() if the layout is not implemented.
 #  Passes the return value of the actual populate() function.
 #
-#  Also initializes variables required for populating NEWROOT.
+#  This function should only be called by liram_populate() and
+#  liram_populate_layout_*() functions.
 #  !!! Never call a liram_populate_layout_<LAYOUT>() function directly.
 #
-liram_populate() {
-   local LIRAM_POPULATE_FUNCTION=liram_populate_layout_${LIRAM_LAYOUT:=default}
+liram_populate__inherit() {
+   local LIRAM_LAYOUT="${1:?}"
+   local LIRAM_POPULATE_FUNCTION=liram_populate_layout_${LIRAM_LAYOUT}
 
    if function_defined "${LIRAM_POPULATE_FUNCTION}"; then
+      local FILESIZE v0
+      local rc=0
+
       # bind populate-specific die() function
       local F_INITRAMFS_DIE=liram_populate_die
-
-      # initialize variables
-      local \
-         SLOT FILESIZE v0 SFS_CONTAINER TARBALL_SCAN_DIR SFS_SCAN_DIR \
-         LIRAM_UNPACK_NAME_TRY="${LIRAM_UNPACK_NAME_TRY:-n}"
-
-      liram_getslot || true
-
-      SFS_SCAN_DIR="${SLOT}"
-      TARBALL_SCAN_DIR="${SLOT}"
-
-      inonfatal "${LIRAM_POPULATE_FUNCTION}"
-      local rc=$?
+      inonfatal "${LIRAM_POPULATE_FUNCTION}" || rc=${?}
 
       # Always sync after populating newroot, whether successful or not
       # liram_unmount_sysdisk() will sync again, but dont depend on that.
@@ -142,8 +139,52 @@ liram_populate() {
 
       return ${rc}
    else
-      liram_die "cannot populate NEWROOT using the '${LIRAM_LAYOUT}' layout."
+      liram_die "cannot populate NEWROOT using the '${1:?}' layout."
    fi
+}
+
+# int liram_populate_inherit(...)
+#  WRAPS liram_populate__inherit(...)
+#
+#  Wraps liram_populate__inherit() with irun().
+#  This is what layouts should call in order to inherit other layouts.
+#
+liram_populate_inherit() { irun liram_populate__inherit "$@"; }
+
+# int liram_populate_helper ( helper_name, *argv, **LIRAM_LAYOUT )
+#
+#  Calls a helper function.
+#  Should only be called by populate_layout functions.
+#
+liram_populate_helper() {
+   if [ $# -eq 1 ]; then
+      irun liram_layout_${LIRAM_LAYOUT:?}__${1:?}
+   else
+      local HELPER_NAME="${1:?}"; shift
+      irun liram_layout_${LIRAM_LAYOUT:?}__${HELPER_NAME} "$@"
+   fi
+}
+
+# int liram_populate ( **LIRAM_LAYOUT=default ), raises liram_die()
+#
+#  Initializes variables required for populating NEWROOT and calls
+#  liram_populate_inherit(<LIRAM_LAYOUT>), which populates NEWROOT.
+#
+liram_populate() {
+   : ${LIRAM_LAYOUT:=default}
+   local LIRAM_POPULATE_FUNCTION=liram_populate_layout_${LIRAM_LAYOUT:=default}
+
+   # initialize variables
+   local \
+      SLOT SFS_CONTAINER TARBALL_SCAN_DIR SFS_SCAN_DIR \
+      LIRAM_UNPACK_NAME_TRY="${LIRAM_UNPACK_NAME_TRY:-n}"
+
+   liram_getslot || true
+
+   SFS_SCAN_DIR="${SLOT}"
+   TARBALL_SCAN_DIR="${SLOT}"
+
+   liram_populate__inherit "${LIRAM_LAYOUT}"
 }
 
 # void liram_init(), raises *die()
