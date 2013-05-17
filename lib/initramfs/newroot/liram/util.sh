@@ -215,3 +215,27 @@ liram_unpack_optional() {
       irun newroot_unpack_tarball "${v0:?}" "${3}"
    fi
 }
+
+
+# int liram_unpack_etc (
+#    tarball_file=<detect>, **LIRAM_ETC_INCREMENTAL=n
+# )
+#
+#  Unpacks the etc tarball into newroot, either in incremental mode or
+#  by replacing etc, depending on LIRAM_ETC_INCREMENTAL.
+#
+liram_unpack_etc() {
+   local v0
+   if [ -n "${1-}" ]; then
+      [ -f "${1-}" ] && v0="${1}" || return 20
+   elif ! liram_get_tarball "etc"; then
+      return 21
+   fi
+
+   liram_log_tarball_unpacking "etc"
+   if [ "${LIRAM_ETC_INCREMENTAL:-n}" = "y" ]; then
+      irun newroot_unpack_tarball "${v0}" "/etc"
+   else
+      irun newroot_replace_etc "${v0}"
+   fi
+}
