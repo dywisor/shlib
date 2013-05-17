@@ -110,22 +110,38 @@ default_iterator() {
 file_iterator() {
    local line
    while [ $# -gt 0 ]; do
-      while read line; do
-         if [ -z "${line}" ] && [ "${ITER_SKIP_EMPTY:-y}" = "y" ]; then
-            true
-         elif \
-            [ "${ITER_SKIP_COMMENT:-y}" = "y" ] && \
-            [ "x${line#\#}" != "x${line}" ]
-         then
-            true
-         elif [ "${ITER_UNPACK_ITEM:-n}" = "y" ]; then
-            ${F_ITER:-echo} ${line}   || ${F_ITER_ON_ERROR:-return}
-         else
-            ${F_ITER:-echo} "${line}" || ${F_ITER_ON_ERROR:-return}
-         fi
-      done < "${1:?}"
+      if [ -f "${1:?}" ]; then
+         while read line; do
+            if [ -z "${line}" ] && [ "${ITER_SKIP_EMPTY:-y}" = "y" ]; then
+               true
+            elif \
+               [ "${ITER_SKIP_COMMENT:-y}" = "y" ] && \
+               [ "x${line#\#}" != "x${line}" ]
+            then
+               true
+            elif [ "${ITER_UNPACK_ITEM:-n}" = "y" ]; then
+               ${F_ITER:-echo} ${line}   || ${F_ITER_ON_ERROR:-return}
+            else
+               ${F_ITER:-echo} "${line}" || ${F_ITER_ON_ERROR:-return}
+            fi
+         done < "${1}"
+      else
+         ${F_ITER_ON_ERROR:-return} 40
+      fi
       shift
    done
+}
+
+# ~int file_list_iterator ( f_iter, *file )
+#  WRAPS file_iterator ( *file )
+#
+#  Reads zero or more list files (one item per line, ignore empty items,
+#  ignore comments) and calls f_iter for each item.
+#
+file_list_iterator() {
+   local F_ITER="${1:?}"; shift;
+
+   ITER_UNPACK_ITEM=n ITER_SKIP_COMMENT=y ITER_SKIP_EMPTY=y file_iterator "$@"
 }
 
 
