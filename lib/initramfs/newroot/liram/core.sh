@@ -47,6 +47,7 @@
 # @extern int  newroot_setup_dirs        ( *file=<default> )
 # @extern int  newroot_setup_mountpoints ( fstab_file=<default> )
 # @extern int  newroot_setup_premount    ( file=<default> )
+# @extern int newroot_setup_tmpdir       ( file=<default> )
 # @extern void newroot_setup_all()
 # @extern int liram_setup_subtrees       ( file=<default> )
 
@@ -119,6 +120,14 @@
 #
 #  Note: While existence of the file is optional, unpacking is not.
 #        This function will die if the tarball exists but cannot be extracted.
+#
+
+# @extern int liram_unpack_etc (
+#    tarball_file=<detect>, **LIRAM_ETC_INCREMENTAL=n
+# )
+#
+#  Unpacks the etc tarball into newroot, either in incremental mode or
+#  by replacing etc, depending on LIRAM_ETC_INCREMENTAL.
 #
 
 # @extern int liram_sfs_container_import()

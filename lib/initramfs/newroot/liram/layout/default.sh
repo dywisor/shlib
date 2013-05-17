@@ -13,7 +13,6 @@
 #   simply extracts the tarball into /etc/.
 #
 # !!! Make sure to set LIRAM_ETC_INCREMENTAL=y if /etc is a subtree (tmpfs).
-# *** subtrees are not implemented ***
 #
 # /var (optional)
 # * Extracts the 'var' tarball into /var
@@ -66,9 +65,8 @@ liram_populate_layout_default() {
 
    inonfatal liram_setup_subtrees
 
-   if liram_get_tarball etc; then
-      liram_log_tarball_unpacking "etc"
-      irun newroot_replace_etc "${v0:?}"
+   if liram_unpack_etc; then
+      true
    elif liram_sfs_container_import etc; then
       etc_sfs="${v0}"
       liram_log_sfs_imported "etc"

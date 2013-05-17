@@ -9,7 +9,7 @@ shell code (functions and variables) and optionally a dependency file that
 lists other modules which should be included in the linked file.
 
 As for the dependency file, simply symlink "<layout name>.depend" to
-"default.depend" unless extra functionality is required.
+"default.depend" (or copy it) unless extra functionality is required.
 
 The "<layout name>.sh" file should contain at least one function,
 int liram_populate_layout_<layout name>(), which somehow populates
