@@ -110,6 +110,8 @@ __newroot_premount_fstab() {
 #
 newroot_premount() {
    local v0 want_mp="${1:?}" mounted=0
+   # %want_mp should always be an absolute path
+   want_mp="/${want_mp#/}"
    newroot_doprefix /etc/fstab
    if [ -r "${v0}" ]; then
       # fstab_iterator() must not fail
@@ -119,6 +121,10 @@ newroot_premount() {
    fi
    [ ${mounted-0} -eq 1 ]
 }
+
+# @function_alias newroot_premount_essential ( mp )
+#
+newroot_premount_essential() { irun newroot_premount "$@"; }
 
 # void newroot_premount_all (
 #    **CMDLINE_PREMOUNT=,
@@ -135,7 +141,7 @@ newroot_premount_all() {
    if [ -n "${CMDLINE_PREMOUNT-}" ]; then
       set -- ${CMDLINE_PREMOUNT}
       while [ $# -gt 0 ]; do
-         [ -z "${1-}" ] || irun newroot_premount "${1}"
+         [ -z "${1-}" ] || newroot_premount_essential "${1}"
          shift
       done
    elif [ "${CMDLINE_NO_USR:-n}" != "y" ]; then
