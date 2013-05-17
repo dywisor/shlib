@@ -1,9 +1,7 @@
 fs/dodir
-fs/mount/fstab_iter
+fs/mount/info
 
-itertools
-
+initramfs/mount
 initramfs/run
 initramfs/newroot/base
 initramfs/newroot/premount
-initramfs/newroot/tmpdir

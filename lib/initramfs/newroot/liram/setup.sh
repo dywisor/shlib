@@ -1,6 +1,7 @@
 # @extern int  newroot_setup_dirs        ( *file=<default> )
 # @extern int  newroot_setup_mountpoints ( fstab_file=<default> )
 # @extern int  newroot_setup_premount    ( file=<default>, **CMDLINE_FSCK )
+# @extern int newroot_setup_tmpdir       ( file=<default> )
 # @extern void newroot_setup_all()
 
 : ${NEWROOT_CONFIG_DIR?}
