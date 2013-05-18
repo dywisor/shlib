@@ -58,9 +58,16 @@ newroot_setup_dirs() {
 #  creates the necessary directories in NEWROOT.
 #
 newroot_setup_mountpoints() {
+   if [ -n "${1-}" ]; then
+      [ -f "${1}" ] || return 41
+   else
+      set -- "${NEWROOT}/etc/fstab"
+      [ -f "${1}" ] || return 0
+   fi
+
    local fail=0
    F_FSTAB_ITER=newroot_setup__make_mountpoint \
-   fstab_iterator "${1:-${NEWROOT}/etc/fstab}" && return ${fail}
+   fstab_iterator "${1}" && return ${fail}
 }
 
 # int newroot_setup_premount (
