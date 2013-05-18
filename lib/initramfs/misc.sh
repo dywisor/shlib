@@ -77,10 +77,15 @@ initramfs_switch_root() {
 #  Copies a file verbosely using rsync or cp. rsync is preferred.
 #
 initramfs_copy_file() {
-	if qwhich rsync; then
-		${LOGGER} -0 --level=DEBUG "Copying ${1} -> ${2} using rsync"
+	if [ -x /usr/bin/rsync ]; then
+		${LOGGER} -0 --level=DEBUG "Copying ${1} -> ${2} using /usr/bin/rsync"
 
-		rsync -L -W --progress -- "${1}" "${2}"
+		/usr/bin/rsync -L -W --progress -- "${1}" "${2}"
+
+#	elif qwhich rsync; then
+#		${LOGGER} -0 --level=DEBUG "Copying ${1} -> ${2} using rsync"
+#
+#		rsync -L -W --progress -- "${1}" "${2}"
 
 	else
 		${LOGGER} -0 --level=INFO "Copying ${1} -> ${2} using cp"
