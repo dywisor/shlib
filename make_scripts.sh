@@ -6,42 +6,36 @@ set -u
    loader_load core strutil/yesno fs/dodir_minimal || exit
 
 readonly GEN_SCRIPT="${SCRIPT_DIR}/generate_script.sh"
+: ${SCRIPT_OUTFILE_REMOVE=y}
 
 : ${MAKESCRIPT_STANDALONE=y}
 
-__gen_script_call() {
+call_genscript() {
    EXITCODE_HELP=64 ${GEN_SCRIPT} ${GEN_SCRIPT_ARGS-} "$@"
 }
 
-# __gen_script_create ( src, dest )
-__gen_script_create() {
-   if __gen_script_call "${1}" > "${2}" && chmod 0755 "${2}"; then
-		[ -s "${2}" ] || ewarn "${2} is empty!"
-		return 0
-	else
-		rm -f "${2}"
-		return 1
-	fi
-}
+# void gargs ( *args, **GEN_SCRIPT_ARGS )
+#
+#  Adds args to GEN_SCRIPT_ARGS.
+#
+gargs() { GEN_SCRIPT_ARGS="${GEN_SCRIPT_ARGS-}${GEN_SCRIPT_ARGS:+ }$*"; }
 
-list_scripts() {
-   __gen_script_call --list
-}
+list_scripts() { call_genscript --list; }
 
 gen_script() {
-   autodie dodir_clean "${2%/*}" && \
-   autodie __gen_script_create "${1}" "${2}"
+   autodie call_genscript --chmod 0775 --verify "${1}" -O "${2}"
 }
 
 : ${MAKESCRIPT_SHLIB=/sh/lib/shlib.sh}
 
 if yesno "${MAKESCRIPT_BASH=n}"; then
-   GEN_SCRIPT_ARGS="${GEN_SCRIPT_ARGS-} --bash"
+   gargs --bash
 fi
+
 if yesno "${MAKESCRIPT_STANDALONE=y}"; then
-   GEN_SCRIPT_ARGS="${GEN_SCRIPT_ARGS-} --standalone"
+   gargs --standalone
 else
-   GEN_SCRIPT_ARGS="${GEN_SCRIPT_ARGS-} --shlib ${MAKESCRIPT_SHLIB}"
+   gargs --shlib "${MAKESCRIPT_SHLIB}"
 fi
 
 : ${MAKESCRIPT_DEST:=${SCRIPT_DIR}/build/scripts}
