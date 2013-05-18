@@ -10,7 +10,7 @@ dodir_minimal() {
    [ -d "${1:?}" ] || mkdir -p -- "${1}" || return 1
 
    [ "${KEEPDIR:-n}" != "y" ] || \
-      [ -e "${1}/.keep" || touch "${1}/.keep" || true
+      [ -e "${1}/.keep" ] || touch "${1}/.keep" || true
 }
 
 # int dodir_clean ( *dir, **KEEPDIR=n )
