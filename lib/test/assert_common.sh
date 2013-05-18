@@ -24,6 +24,17 @@ assert_list_has_not() {
    fi
 }
 
+# @assert void assert_function_defined ( *func )
+#
+assert_function_defined() {
+   local f
+   while [ $# -gt 0 ]; do
+      f="${1%%(*}"; f="${f%% *}"
+      function_defined "${f}" || assert_die "function '${1}' is not defined."
+      shift
+   done
+}
+
 # @assert void assert_retcode ( retcode, *argv )
 #
 #  Runs *argv and dies if the return code is unexpected, i.e. not retcode.
@@ -46,18 +57,26 @@ assert_retcode() {
 #  <int> == <command...>
 #
 assert() {
-   if [ "x${2-}"  = "xin" ]; then
+
+   if [ "x${1-}" = "xfunction_defined" ]; then
+      shift || die
+      assert_function_defined "$@"
+
+   elif [ "x${2-}" = "xin" ]; then
       local word="${1}"
       shift 2 || die
       assert_list_has "${word}" "$@"
+
    elif [ "x${2-}" = "xnot" ] && [ "x${3-}" = "xin" ]; then
       local word="${1}"
       shift 3 || die
       assert_list_has_not "${word}" "$@"
+
    elif [ "x${2-}" = "x==" ]; then
       local want_rc="${1}"
       shift 2 || die
       assert_retcode "${want_rc}" "$@"
+
    else
       die "unknown assert() statement: '$*'"
    fi
