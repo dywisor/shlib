@@ -14,7 +14,13 @@
 #  consume zero or more of the remaining args.
 #
 
-# void __argparse_print_help ( **<see function body> ), raises exit()
+# void argparse_die ( message, code=**EX_USAGE=64 )
+#
+#  die() wrapper function.
+#
+argparse_die() { die "argparse: ${1-}" "${2:-${EX_USAGE:-64}}"; }
+
+# @private void __argparse_print_help ( **<see function body> ), raises exit()
 #
 #  Prints a help message.
 #
@@ -88,7 +94,7 @@ argparse_need_arg() {
    if [ -n "${1-}" ]; then
       doshift=1
    else
-      die "one non-empty arg required after '${arg}'"
+      argparse_die "one non-empty arg required after '${arg}'"
    fi
 }
 
@@ -101,12 +107,12 @@ argparse_need_args() {
    local nargs="${1:?}"
    shift
    if [ $# -lt ${nargs} ]; then
-      die "${nargs} non-empty args required after '${arg}'."
+      argparse_die "${nargs} non-empty args required after '${arg}'."
    else
       local i=0
       while [ ${i} -lt ${nargs} ]; do
          if [ -z "${1-}" ]; then
-            die "${nargs} non-empty args required after '${arg}', but only ${i} found."
+            argparse_die "${nargs} non-empty args required after '${arg}', but only ${i} found."
          fi
          i=$(( ${i} + 1 ))
          shift
@@ -148,7 +154,7 @@ __argparse_handle_shortopt() {
 #
 argparse_unknown() {
    if [ -z "${ARGPARSE_LOG_UNKNOWN-}" ]; then
-      die "cannot handle arg '${real_arg}'"
+      argparse_die "cannot handle arg '${real_arg}'"
    else
       ewarn "argparse: unknown arg '${real_arg}'." || true
    fi
