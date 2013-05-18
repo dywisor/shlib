@@ -704,7 +704,7 @@ kcomp_main() {
       ;;
       'git')
          autodie kcomp_init_git \
-            "${KENREL_SRC}" "${KERNEL_GIT_REF-}" "${KERNEL_BUILD}" \
+            "${KERNEL_SRC}" "${KERNEL_GIT_REF-}" "${KERNEL_BUILD}" \
             "${KERNEL_DEFAULT_CONFIG}" "${KERNEL_OVERWRITE_CONFIG}"
       ;;
       *)
