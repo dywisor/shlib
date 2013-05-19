@@ -62,6 +62,9 @@ assert() {
       shift || die
       assert_function_defined "$@"
 
+   elif [ -n "${1-}" ] && [ "x${1#-}" != "x${1}" ]; then
+      test "$@" || assert_die "test $*"
+
    elif [ "x${2-}" = "xin" ]; then
       local word="${1}"
       shift 2 || die
