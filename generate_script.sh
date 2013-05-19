@@ -301,7 +301,7 @@ shverify_file() {
 				ewarn "'dash' is not available."
 			fi
 
-			if qwhich busybox && busybox --list 2>/dev/null | greq -qx ash; then
+			if qwhich busybox && busybox --list 2>/dev/null | grep -qx ash; then
 				autodie busybox ash -n "${1}" && any_test=ash
 			else
 				ewarn "'busybox ash' is not available."
