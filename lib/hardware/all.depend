@@ -2,5 +2,7 @@ function/export
 
 hardware/dreamplug/all
 
-hardware/leds
+hardware/disk_status
 hardware/hacks
+hardware/leds
+hardware/policy

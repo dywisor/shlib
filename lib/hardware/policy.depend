@@ -1,0 +1,17 @@
+die
+message
+runcmd
+itertools
+
+fs/dofile
+fs/foreach
+
+function/defined
+
+hardware/hacks
+hardware/disk_status
+
+misc/depcheck
+misc/pragma
+
+strutil/yesno
