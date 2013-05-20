@@ -1,0 +1,9 @@
+autodie
+die
+defsym
+message
+
+fs/pack
+fs/tmpdir
+
+test/assert
