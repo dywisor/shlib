@@ -20,10 +20,12 @@ defsym
 die_extended
 die
 itertools
+integer
 list_has
 logging
 message
 readconfig
+runcmd
 scriptinfo
 sudofy
 varcheck

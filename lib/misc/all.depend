@@ -1,6 +1,7 @@
 function/export
 
 misc/busybox
+misc/depcheck
 misc/pragma
 misc/qwhich
 misc/repeat

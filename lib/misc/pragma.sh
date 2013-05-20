@@ -35,3 +35,12 @@ __quiet__() {
 __interactive__() {
    [ "${INTERACTIVE:-n}" = "y" ]
 }
+
+# @pragma faking
+#
+#  Returns true if (certain/all) commands should only be printed and not
+#  executed, else false.
+#
+__faking__() {
+   [ "${FAKE_MODE:-n}" = "y" ]
+}

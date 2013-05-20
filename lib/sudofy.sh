@@ -1,7 +1,7 @@
 # int sudofy (
 #    *cmdv,
 #    **USER, **SUDOFY_NOPASS=y, **SUDOFY_REEXEC=n,
-#    **SUDOFY_USER=root, **SUDOFY_ONLY_OTHERS=n
+#    **SUDOFY_USER=root, **SUDOFY_ONLY_OTHERS=n, **SUDO=sudo
 # )
 #
 #  Runs cmdv as SUDOFY_USER (:= root) and passes the return value.
@@ -23,9 +23,9 @@ sudofy() {
          return 0
       fi
    elif [ "${SUDOFY_NOPASS:-y}" = "y" ]; then
-      ${CMD_PREFIX} sudo -n -u "${SUDOFY_USER:-root}" -- "$@"
+      ${CMD_PREFIX} ${SUDO:-sudo} -n -u "${SUDOFY_USER:-root}" -- "$@"
    else
-      ${CMD_PREFIX} sudo -u "${SUDOFY_USER:-root}" -- "$@"
+      ${CMD_PREFIX} ${SUDO:-sudo} -u "${SUDOFY_USER:-root}" -- "$@"
    fi
 }
 
