@@ -7,8 +7,9 @@
 #  vdr/distribution combinations as well.
 #
 #
-RECORDMUX=/sh/lib/vdr-recordmux.sh
+## !! do not use 'set -u' here (remove it if generate_script.sh added it)
+RECORDMUX=/sh/lib/vdr-recordmux-hook.sh
 
 if [ -x "${RECORDMUX}" ]; then
-	${RECORDMUX} "$@" || true
+   ${RECORDMUX} "$@" || true
 fi
