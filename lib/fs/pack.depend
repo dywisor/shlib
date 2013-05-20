@@ -1,0 +1,8 @@
+defsym
+message
+
+function/die
+
+fs/uncompress
+fs/doprefix
+fs/dodir

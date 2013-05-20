@@ -17,6 +17,7 @@ fs/foreach
 fs/level
 fs/lockfile
 fs/md_each
+fs/pack
 fs/symlink_replace
 fs/tmpdir
 fs/uncompress
