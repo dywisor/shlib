@@ -1,0 +1,19 @@
+# **SHLIB_CALL_APPLETS should be set before running this recipe
+#
+__INHERITED__ || INTO /shlib-call
+HAVELIB_SHLIB || MAKELIB_SHLIB
+
+# shlib-call-minimal needs to be executable
+DOLIB_CHMOD 0755
+
+# install shlib-call-minimal that simply runs functions provided by shlib
+DOLIB shlib-call-minimal
+
+# link applets, if any
+if [ -n "${SHLIB_CALL_APPLETS-}" ]; then
+   SYMSTORM lib/shlib-call-minimal.sh ${SHLIB_CALL_APPLETS}
+fi
+
+# install "big" shlib-call script (user-targeted shlib-call script)
+#
+use minimal || LINK_SHARED shlib-call

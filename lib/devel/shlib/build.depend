@@ -1,0 +1,11 @@
+autodie
+die_extended
+varcheck
+
+function/functrace
+
+use/extra
+
+devel/message
+devel/shlib/base
+devel/shlib/genscript/all

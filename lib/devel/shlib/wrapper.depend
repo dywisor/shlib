@@ -1,0 +1,7 @@
+autodie
+defsym
+die
+
+devel/message
+
+fs/dodir_minimal

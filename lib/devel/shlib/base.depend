@@ -1,0 +1,11 @@
+autodie
+die
+
+# colored die()
+message
+
+devel/message
+
+devel/shlib/defsym
+devel/shlib/scriptvars
+devel/shlib/wrapper

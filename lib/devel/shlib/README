@@ -1,0 +1,3 @@
+do *not* include this directory in the all lib for the following reasons:
+* namespace violations (!)
+* may be incompatible with dash/ash
