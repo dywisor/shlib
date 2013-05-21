@@ -22,6 +22,10 @@ check_dir() {
 	local rel="${1#${S}}"
 	rel="${rel#/}"
 
+#	# can only be true if the top level has block_CC (which is not expected
+#	if [ -e "${1}/block_CC" ] && [ "${SKIP_BLOCKED:-y}" = "y" ]; then
+#		true
+#	elif [ ! -e "${1}/all.sh" ]; then
 	if [ ! -e "${1}/all.sh" ]; then
 		echo "A ${rel}"
 	else
@@ -37,7 +41,9 @@ check_dir() {
 		done
 		local d
 		for d in "${1}"/*; do
-			if [ -d "${d}" ]; then
+			if [ -e "${d}/block_CC" ] && [ "${SPIP_BLOCKED:-y}" = "y" ]; then
+				true
+			elif [ -d "${d}" ]; then
 				n="${d##*/}"
 				n="${rel}/${n}"
 				n="${n#/}"
