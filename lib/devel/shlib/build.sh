@@ -19,7 +19,7 @@ SET_BASH() {
    else
       SCRIPT_USE_BASH=n
       # FIXME: /bin/busybox ash, anyone?
-      SCRIPT_INTERPRETER=/bin/sh
+      SCRIPT_INTERPRETER="${2:-${DEFAULT_SCRIPT_INTERPRETER:-/bin/sh}}"
    fi
    print_setvar SCRIPT_USE_BASH
    print_setvar SCRIPT_INTERPRETER
@@ -42,7 +42,11 @@ SET_OVERWRITE() {
    if [ "${1:-y}" = "y" ]; then
       local PRINTCMD_COLOR_CMD="1;33m"
       SCRIPT_OVERWRITE=y
-      print_command "OVERWRITE" "enabled -- fix your build script!"
+      if [ "${2:-N}" = "--force" ]; then
+         print_command "OVERWRITE" "enabled"
+      else
+         print_command "OVERWRITE" "enabled -- fix your build script!"
+      fi
    elif [ "${SCRIPT_OVERWRITE:-x}" != "n" ]; then
       SCRIPT_OVERWRITE=n
       print_command "OVERWRITE" "disabled"

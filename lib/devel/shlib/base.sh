@@ -22,6 +22,9 @@ set_build_dir() {
       //*)
          BUILD_DIR="${1#/}"
       ;;
+      /)
+         BUILD_DIR="${BUILD_ROOT:?}"
+      ;;
       *)
          BUILD_DIR="${BUILD_ROOT:?}/${1#/}"
       ;;
