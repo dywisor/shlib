@@ -36,7 +36,7 @@ remove_destfile() {
    if [ ! -e "${dest:?}" ]; then
       [ ! -h "${dest:?}" ] || autodie rm -- "${dest}"
       return 0
-   elif [ -f "${dest:?}" ]; then
+   elif [ -f "${dest:?}" ] || [ -h "${dest:?}" ]; then
       if [ "${SCRIPT_OVERWRITE:-n}" = "y" ]; then
          print_command "+ OVERWRITE" "${dest}"
          autodie rm -- "${dest}"
