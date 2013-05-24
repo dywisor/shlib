@@ -1,5 +1,6 @@
 autodie
 die_extended
+list_has
 varcheck
 
 function/functrace
