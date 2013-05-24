@@ -51,4 +51,4 @@ revcut() { rev | cut "$@" | rev; }
 str_upper() { tr [:lower:] [:upper:] "$@"; }
 
 # @function_alias str_lower() renames tr()
-str_upper() { tr [:upper:] [:lower:] "$@"; }
+str_lower() { tr [:upper:] [:lower:] "$@"; }
