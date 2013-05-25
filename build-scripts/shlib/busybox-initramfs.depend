@@ -1,0 +1,10 @@
+core
+
+fs/dodir_minimal
+fs/uncompress
+
+misc/pragma
+misc/depcheck
+
+net-misc/fetch_list
+test/assert
