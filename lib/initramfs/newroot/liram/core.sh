@@ -41,6 +41,13 @@
 #  e.g. TARBALL_SCAN_DIR and SLOT.
 #
 
+## functions from initramfs/newroot/liram/extra
+
+# @extern int liram_write_env()
+#
+#  Creates the default env file.
+#
+
 
 ## functions from initramfs/newroot/liram/setup
 

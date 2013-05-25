@@ -3,6 +3,7 @@ fs/filesize
 initramfs/newroot/base
 
 initramfs/newroot/liram/base
+initramfs/newroot/liram/extra
 initramfs/newroot/liram/setup
 initramfs/newroot/liram/subtree
 initramfs/newroot/liram/util
