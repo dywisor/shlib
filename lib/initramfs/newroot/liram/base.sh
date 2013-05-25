@@ -122,8 +122,8 @@ liram_getslot() {
 #  !!! Never call a liram_populate_layout_<LAYOUT>() function directly.
 #
 liram_populate__inherit() {
-   local LIRAM_LAYOUT="${1:?}"
-   local LIRAM_POPULATE_FUNCTION=liram_populate_layout_${LIRAM_LAYOUT}
+   local LIRAM_LAYOUT_ACTIVE="${1:?}"
+   local LIRAM_POPULATE_FUNCTION=liram_populate_layout_${LIRAM_LAYOUT_ACTIVE}
 
    if function_defined "${LIRAM_POPULATE_FUNCTION}"; then
       local FILESIZE v0
@@ -151,17 +151,17 @@ liram_populate__inherit() {
 #
 liram_populate_inherit() { irun liram_populate__inherit "$@"; }
 
-# int liram_populate_helper ( helper_name, *argv, **LIRAM_LAYOUT )
+# int liram_populate_helper ( helper_name, *argv, **LIRAM_LAYOUT_ACTIVE )
 #
 #  Calls a helper function.
 #  Should only be called by populate_layout functions.
 #
 liram_populate_helper() {
    if [ $# -eq 1 ]; then
-      irun liram_layout_${LIRAM_LAYOUT:?}__${1:?}
+      irun liram_layout_${LIRAM_LAYOUT_ACTIVE:?}__${1:?}
    else
       local HELPER_NAME="${1:?}"; shift
-      irun liram_layout_${LIRAM_LAYOUT:?}__${HELPER_NAME} "$@"
+      irun liram_layout_${LIRAM_LAYOUT_ACTIVE:?}__${HELPER_NAME} "$@"
    fi
 }
 
@@ -172,7 +172,7 @@ liram_populate_helper() {
 #
 liram_populate() {
    : ${LIRAM_LAYOUT:=default}
-   local LIRAM_POPULATE_FUNCTION=liram_populate_layout_${LIRAM_LAYOUT:=default}
+   local LIRAM_POPULATE_FUNCTION=liram_populate_layout_${LIRAM_LAYOUT}
 
    # initialize variables
    local \
