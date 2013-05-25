@@ -22,3 +22,5 @@ die__minimal() {
 die() {
    ${__F_DIE:-die__minimal} "${1-}" "${2:-2}"
 }
+
+: ${HAVE_DIE:=y}
