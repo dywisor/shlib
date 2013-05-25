@@ -13,6 +13,7 @@
 #   simply extracts the tarball into /etc/.
 #
 # !!! Make sure to set LIRAM_ETC_INCREMENTAL=y if /etc is a subtree (tmpfs).
+#     liram_setup_subtrees() will do this automatically.
 #
 # /var (optional)
 # * Extracts the 'var' tarball into /var
@@ -36,6 +37,7 @@
 #
 # Calls liram_setup_subtrees() after unpacking the rootfs and
 # newroot_setup_all() after populating newroot.
+# Also exports boot-time variables such as LIRAM_DISK to NEWROOT as file.
 #
 # Note: "optional" means that it is okay if the tarball does not exist,
 #       it doesn't mean that it's optional whether it can be extracted
@@ -58,13 +60,17 @@ liram_populate_layout_default() {
 
    local usr_sfs="" home_sfs="" etc_sfs="" scripts_sfs=""
 
+   # scan files
    irun liram_scan_files
 
+   # unpack the rootfs tarball
    liram_log_tarball_unpacking "rootfs"
    irun liram_unpack_default rootfs
 
+   # early setup (liram subtrees)
    inonfatal liram_setup_subtrees
 
+   # unpack etc tarball or else import etc sfs (optional)
    if liram_unpack_etc; then
       true
    elif liram_sfs_container_import etc; then
@@ -74,18 +80,21 @@ liram_populate_layout_default() {
       liram_log_nothing_found "etc"
    fi
 
+   # unpack var taball (optional)
    if liram_unpack_optional var; then
       liram_log_tarball_unpacked "var"
    else
       liram_log_nothing_found "var"
    fi
 
+   # unpack log tarball (optional)
    if liram_unpack_optional log; then
       liram_log_tarball_unpacked "log"
    else
       liram_log_nothing_found "log"
    fi
 
+   # unpack usr tarball or else import usr sfs (optional)
    if liram_get_tarball usr; then
       liram_log_tarball_unpacking "usr"
       liram_unpack_default usr "${v0:?}"
@@ -96,9 +105,11 @@ liram_populate_layout_default() {
       liram_log_nothing_found "usr"
    fi
 
+   # set NEWROOT_HOME_DIR
    newroot_detect_home_dir
    liram_log DEBUG "home directory is ${NEWROOT_HOME_DIR}"
 
+   # unpack home tarball or else import home sfs (optional)
    if liram_get_tarball home; then
       liram_log_tarball_unpacking "home"
       liram_unpack_default home "${v0:?}"
@@ -109,6 +120,7 @@ liram_populate_layout_default() {
       liram_log_nothing_found "home"
    fi
 
+   # unpack scripts tarball or else import scripts sfs (optional)
    if liram_get_tarball scripts; then
       liram_log_tarball_unpacking "scripts"
       liram_unpack_default scripts "${v0:?}"
@@ -124,12 +136,16 @@ liram_populate_layout_default() {
       liram_info \
          "mounting squashfs files:${usr_sfs:+ usr}${home_sfs:+ home}${etc_sfs:+ etc}${scripts_sfs:+ scripts}"
 
+      # finalize sfs container (mount readonly, ...)
       irun newroot_sfs_container_finalize
 
+      # mount usr sfs if imported
       [ -z "${usr_sfs-}" ] || irun newroot_sfs_container_mount usr /usr
 
+      # mount home sfs if imported
       if [ -n "${home_sfs-}" ]; then
          if [ -n "${LIRAM_HOME_TMPFS_SIZE-}" ]; then
+            # as union<tmpfs,sfs>
             irun newroot_sfs_container_mount_writable \
                home "${NEWROOT_HOME_DIR?}" "${LIRAM_HOME_TMPFS_SIZE}"
          else
@@ -138,8 +154,10 @@ liram_populate_layout_default() {
          fi
       fi
 
+      # mount etc sfs if imported
       if [ -n "${etc_sfs-}" ]; then
          if [ -n "${LIRAM_ETC_TMPFS_SIZE-}" ]; then
+            # as union<tmpfs,sfs>
             irun newroot_sfs_container_mount_writable \
                etc /etc "${LIRAM_ETC_TMPFS_SIZE}"
          else
@@ -148,9 +166,17 @@ liram_populate_layout_default() {
          fi
       fi
 
+      # mount scripts sfs if imported
       [ -z "${scripts_sfs-}" ] || \
          irun newroot_sfs_container_mount scripts /scripts
    fi
 
+   # final setup (dirs and mounts)
    inonfatal newroot_setup_all
+
+   # write liram env
+   inonfatal liram_write_env
+
+   # don't pass the last inonfatal return value
+   return 0
 }

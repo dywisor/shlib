@@ -31,8 +31,9 @@
 # /sh (mandatory)
 # * Extracts the 'scripts' tarball into /sh
 #
-# Calls liram_setup_subtrees() after unpacking the rootfs and
-# newroot_setup_all() after populating newroot.
+# Calls liram_setup_subtrees() after unpacking the rootfs and some
+# newroot_setup*() functions after populating newroot.
+# Also exports boot-time variables such as LIRAM_DISK to NEWROOT as file.
 #
 # Notes:
 # * /home should be a symlink to /var/users
@@ -104,4 +105,8 @@ liram_populate_layout_tv() {
    for name in ${NEWROOT_SETUP_TARGETS?}; do
       irun newroot_setup_${name}
    done
+
+   # export some vars to %NEWROOT/LIRAM_ENV so that userspace scripts know
+   # the disk used for populating newroot
+   irun liram_write_env
 }
