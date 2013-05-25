@@ -14,7 +14,8 @@ As for the dependency file, simply symlink "<layout name>.depend" to
 The "<layout name>.sh" file should contain at least one function,
 int liram_populate_layout_<layout name>(), which somehow populates
 ${NEWROOT}. The actual implementation is up to you, see the existing
-layouts for working examples, especially the "default" layout.
+layouts for working examples, namely "tv" and "default". I recommend you to
+look at the "tv" layout first as it is the more straightforward one.
 
 The code file may also implement helper functions.
 Their naming convention is
@@ -51,3 +52,5 @@ Some random notes:
 * You should mark a new layout as experimental so that it gets exempted from
   the "do not modify" rules above.
   Just add a comment stating "EXPERIMENTAL" to the top of the code file.
+* irun() and inonfatal() are command wrappers that provide logging.
+  Moreover, irun() raises liram_die() on error.
