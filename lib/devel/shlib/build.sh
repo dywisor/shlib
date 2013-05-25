@@ -3,6 +3,28 @@
 # TODO: support {SRC,DEST}_PREFIX
 #
 
+# void BUILD_API ( build_api )
+#
+#  Sets the build API.
+#
+#  no-op. Reserved for future usage.
+#
+BUILD_API() {
+   print_setvar BUILD_API "$*"
+}
+
+# int __FUTURE__ ( func_spec )
+#
+#  Loads a function from future build APIs.
+#  Returns 0 on success, else non-zero (1).
+#
+#  func_spec ::= <function name>[:<api_spec>{,<api_spec>}]
+#  api_spec  ::= ## to be figured out ##
+#
+#  Not Implemented. Reserved for future usage.
+#
+__FUTURE__() { return 1; }
+
 SET_NOUNSET() {
    if [ "${1:-y}" = "y" ]; then
       SCRIPT_SET_U=y
@@ -15,15 +37,24 @@ SET_NOUNSET() {
 SET_BASH() {
    if [ "${1:-y}" = "y" ]; then
       SCRIPT_USE_BASH=y
-      SCRIPT_INTERPRETER=/bin/bash
+      print_setvar SCRIPT_USE_BASH
+      SET_SCRIPT_INTERPRETER /bin/bash
    else
       SCRIPT_USE_BASH=n
-      # FIXME: /bin/busybox ash, anyone?
-      SCRIPT_INTERPRETER="${2:-${DEFAULT_SCRIPT_INTERPRETER:-/bin/sh}}"
+      print_setvar SCRIPT_USE_BASH
+      SET_SCRIPT_INTERPRETER "${2-}"
    fi
-   print_setvar SCRIPT_USE_BASH
+}
+
+SET_BUSYBOX_ASH() { SET_BASH n "/bin/busybox ash"; }
+SET_DASH()        { SET_BASH n "/bin/dash"; }
+
+SET_SCRIPT_INTERPRETER() {
+   SCRIPT_INTERPRETER="${1:-${DEFAULT_SCRIPT_INTERPRETER:-/bin/sh}}"
    print_setvar SCRIPT_INTERPRETER
 }
+SET_INTERPRETER() { SET_SCRIPT_INTERPRETER "$@"; }
+
 
 BASH_ONCE() {
    print_command BASH_ONCE "$*"
@@ -44,6 +75,8 @@ SET_OVERWRITE() {
       SCRIPT_OVERWRITE=y
       if [ "${2:-N}" = "--force" ]; then
          print_command "OVERWRITE" "enabled"
+      elif [ -n "${2-}" ]; then
+         print_command "OVERWRITE" "enabled (${2})"
       else
          print_command "OVERWRITE" "enabled -- fix your build script!"
       fi
@@ -51,6 +84,37 @@ SET_OVERWRITE() {
       SCRIPT_OVERWRITE=n
       print_command "OVERWRITE" "disabled"
    fi
+}
+
+ENABLE_OVERWRITE_IF() {
+   local f
+   for f; do
+      if HAVE_FILE "${f}"; then
+         SET_OVERWRITE y "'${f}' exists"
+         break
+      fi
+   done
+   return 0
+}
+
+TARGET_ROOT() {
+   TARGET_SHLIB_ROOT="${1:-/sh}"
+   print_setvar TARGET_SHLIB_ROOT
+}
+TARGET_SHLIB() {
+   TARGET_SHLIB_NAME="${1:-shlib.sh}"
+   print_setvar TARGET_SHLIB_NAME
+}
+
+
+SET_DEFAULTS() {
+   SCRIPT_AUTO_CHMOD=y
+   print_setvar SCRIPT_AUTO_CHMOD
+   #SCRIPT_AUTO_CHOWN
+   SCRIPT_AUTO_VERIFY=y
+   print_setvar SCRIPT_AUTO_VERIFY
+
+   DOLIB_CHMOD 0755
 }
 
 __LOCATE() {
@@ -66,10 +130,11 @@ LOCATE_SCRIPT()   { __LOCATE script  "$@"; }
 LOCATE_SPLITLIB() { __LOCATE spltlib "$@"; }
 LOCATE()          { __LOCATE script  "$@"; }
 
-DOLIB_CHMOD() { DOLIB_CHMOD="${1-0644}"; }
+DOLIB_CHMOD() { DOLIB_CHMOD="${1-0644}"; print_setvar DOLIB_CHMOD; }
 
 
-INTO() { autodie set_build_dir "$@"; }
+INTO()      { autodie set_build_dir "$@"; }
+INTO_ROOT() { INTO "${TARGET_SHLIB_ROOT}"; }
 
 CHDIR() {
    local into
@@ -165,18 +230,56 @@ SYMSTORM() {
 }
 
 CP() {
-   local SCRIPT_AUTO_VERIFY=n
-   get_scriptvars "$@" || shift ${?} || OUT_OF_BOUNDS
+   local s="${__SRC_PREFIX-}${1-}"
+   local d
+
+   if [ -n "${2-}" ]; then
+      d="${__DEST_PREFIX-}${2}"
+      shift 2 || OUT_OF_BOUNDS
+   else
+      d="${__DEST_PREFIX-}${1-}"
+      shift || OUT_OF_BOUNDS
+   fi
+
+   get_scriptvars "${s}" "${d}" "$@" || true
+   #shift $(( ${?} - 2 )) || OUT_OF_BOUNDS
+
    print_command COPY_SCRIPT "${script}, ${dest_name}"
    printcmd_indent
 
    remove_destfile
    autodie cp -T -- "${script}" "${dest}"
 
+   if [ "${SCRIPT_AUTO_VERIFY:-n}" = "y" ]; then
+      local h=$( head -n 1 "${dest}" | sed -e 's,^\#\![[:blank:]]*,,' )
+
+      case "${h#/bin/}" in
+         "sh"|"ash"|"busybox ash"|"dash")
+            VERIFY "${dest}"
+         ;;
+         "bash")
+            BASH_ONCE VERIFY "${dest}"
+         ;;
+         *)
+            print_command SKIP_VERIFY "${dest}"
+         ;;
+      esac
+   fi
+
+   local SCRIPT_AUTO_VERIFY=n
    destfile_done
    printcmd_outdent
 }
-COPY_SCRIPT() { CP "$@"; }
+COPY_SCRIPT() { scriptvars_noleak CP "$@"; }
+
+COPY_SCRIPTS() {
+   print_command COPY_SCRIPTS
+   printcmd_indent
+   local s
+   for s; do COPY_SCRIPT "${s}" "${s}"; done
+   printcmd_outdent
+}
+
 
 HAVE_FILE() {
    local f
@@ -207,30 +310,6 @@ DEST_PREFIX() {
    "$@"
 }
 
-COPY_SCRIPTS() {
-   print_command COPY_SCRIPTS
-   printcmd_indent
-   local s
-   for s; do
-      CP "${__SRC_PREFIX-}${s}" "${__DEST_PREFIX-}${s}"
-
-      if [ "${SCRIPT_AUTO_VERIFY:-n}" != "y" ]; then
-         true
-      elif head -n 1 "${dest}" | \
-         grep -q -- ^'#![[:blank:]]*/bin/sh' "${script}"
-      then
-         VERIFY "${dest}"
-      elif head -n 1 "${dest}" | \
-         grep -q -- ^'#![[:blank:]]*/bin/bash' "${script}"
-      then
-         BASH_ONCE VERIFY "${dest}"
-      else
-         print_command SKIP_VERIFY "${dest}"
-      fi
-   done
-   printcmd_outdent
-}
-
 DOLIB() {
    print_command DOLIB
    printcmd_indent
@@ -253,7 +332,56 @@ PRINT() {
    print_message "${2-}" "${1-}" "${3:-1;033}" "${4:-1;035}"
 }
 
-__INHERITED__() { [ -n "${__INHERITED__-}" ]; }
+LOADVAR() {
+   eval "v0=\"\${${1}-}\""
+   if [ -n "${v0}" ]; then
+      return 0
+   else
+      local x
+      eval "x=\"\${${1}+SET}\""
+      if [ -n "${x}" ]; then
+         return 0
+      elif [ "${LOADVAR_DIE:-y}" = "y" ]; then
+         die "${1} is not set."
+      else
+         return 1
+      fi
+   fi
+}
+
+PRINTVAR() {
+   local v0
+   local LOADVAR_DIE="${2:-${PRINTVAR_DIE:-y}}"
+   LOADVAR "${1}" && PRINT "${v0}" "${1}"
+}
+
+__INHERITED__()     { [ -n "${__INHERITED__-}" ]; }
+__NOT_INHERITED__() { [ -z "${__INHERITED__-}" ]; }
+DENY_INHERIT() {
+   __NOT_INHERITED__ || die "This recipe must not be inherited."
+}
+
+SHLIBCC_ARGS() { SHLIBCC_ARGS="$*"; print_setvar SHLIBCC_ARGS; }
+SHLIBCC_ARGS_APPEND() {
+   if [ -n "${SHLIBCC_ARGS-}" ]; then
+      local arg;
+      for arg; do
+         list_has "${arg}" ${SHLIBCC_ARGS} || \
+            SHLIBCC_ARGS="${SHLIBCC_ARGS} ${arg}"
+      done
+   else
+      SHLIBCC_ARGS="$*"
+   fi
+   print_setvar SHLIBCC_ARGS
+}
+
+
+BUILD_NEEDS_BASH() {
+   [ -n "${BASH_VERSION-}" ] || \
+      die "This recipe needs to be run with bash as command interpreter."
+}
+BUILD_NEED_BASH() { BUILD_NEEDS_BASH "$@"; }
+
 
 DIE() { die "$@"; }
 END() {

@@ -1,6 +1,7 @@
 autodie
 die_extended
 list_has
+list_redux
 varcheck
 
 function/functrace
