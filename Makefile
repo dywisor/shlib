@@ -66,5 +66,8 @@ scripts-standalone: clean-scripts $(MAKE_SCRIPTS)
 
 scripts: scripts-linked
 
+initramfs: ./build-scripts/buildvars.sh
+	QUIET=y ./build-scripts/buildvars.sh $(CURDIR) $(CURDIR)/build/work busybox-initramfs $(CURDIR)/build/initramfs.cpio
+
 .PHONY: shlib install uninstall clean clean-scripts verify default reinstall \
-	scripts-linked scripts-standalone scripts
+	scripts-linked scripts-standalone scripts initramfs
