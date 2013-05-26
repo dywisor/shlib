@@ -57,7 +57,10 @@
 #
 ## END HEADER
 
-# void setup ( [root_dir=**PWD], [compression_format="gzip"], [fake="n"] )
+# void setup (
+#    [root_dir=**PWD], [compression_format="gzip"], [fake="n"],
+#    [image_dir=**root_dir/images]
+# )
 #
 #  Initial setup.
 #  Sets the system root directory, the tarball compression format,
@@ -70,7 +73,7 @@ setup() {
    : ${DOTAR_TAROPTS_APPEND=--one-file-system}
 
    ${PACK_AUTODIE-} dotar_set_root "${1:-${PWD}}"
-   ${PACK_AUTODIE-} dotar_set_image_dir "${DOTAR_ROOT_DIR}/images"
+   ${PACK_AUTODIE-} dotar_set_image_dir "${4:-${DOTAR_ROOT_DIR}/images}"
 
    ${PACK_AUTODIE-} dotar_set_compression "${2:-gzip}"
 
