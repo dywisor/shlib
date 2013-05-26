@@ -65,7 +65,7 @@ message_bind_functions() {
 #
 veinfo() {
    if __verbose__ || __debug__; then
-      einfo "${1-}"
+      einfo "$@"
    fi
    return 0
 }

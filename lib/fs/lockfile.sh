@@ -14,6 +14,9 @@
 # yesno LOCKFILE_AUTO_DELETE     (=n) -- must set before/when retrieving a lock
 #
 
+# not supported by busybox ln
+: ${LOCKFILE_LN_OPTS=-T}
+
 # @private void lockfile__atexit_release ( lock )
 #
 #  Releases a lock. Does nothing if the pid check fails for it.
@@ -104,11 +107,19 @@ __lockfile_release() {
 #  Automatically registers the acquired lock for deletion at exit if
 #  LOCKFILE_AUTO_DELETE is set to 'y'.
 #
+if [ "${LOCKFILE_DEBUG_ACQUIRE:-n}" != "y" ]; then
 __lockfile_acquire_now() {
-   ln -s -T -- "${2:?}" "${1:?}" 2>/dev/null || return
+   ln -s ${LOCKFILE_LN_OPTS-} -- "${2:?}" "${1:?}" 2>/dev/null || return
    [ "${LOCKFILE_AUTO_DELETE:-n}" != "y" ] || \
       lockfile__atexit_register "${1}"
 }
+else
+__lockfile_acquire_now() {
+   ln -s ${LOCKFILE_LN_OPTS-} -- "${2:?}" "${1:?}" || return
+   [ "${LOCKFILE_AUTO_DELETE:-n}" != "y" ] || \
+      lockfile__atexit_register "${1}"
+}
+fi
 
 # int lockfile_acquire_now ( lock, **LOCKFILE_AUTO_DELETE=n )
 #

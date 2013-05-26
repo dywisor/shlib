@@ -9,4 +9,7 @@ readonly IFS_DEFAULT="${IFS}"
 readonly IFS_NEWLINE='
 '
 
+readonly EX_OK=0
+readonly EX_USAGE=64
+
 fi
