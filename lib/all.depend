@@ -22,6 +22,7 @@ die
 itertools
 integer
 list_has
+list_redux
 logging
 message
 readconfig
