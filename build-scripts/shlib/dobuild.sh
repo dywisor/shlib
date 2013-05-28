@@ -69,28 +69,46 @@ run_recipe() {
    fi
 }
 
+# @private int find_recipe__file ( recipe_path, **recipe )
+#
+find_recipe__file() {
+   if [ -f "${1}" ]; then
+      recipe="${1}"
+      return 0
+   elif [ -f "${1}.recipe" ]; then
+      recipe="${1}.recipe"
+      return 0
+   else
+      return 1
+   fi
+}
+
 # int find_recipe ( name )
 #
 find_recipe() {
    recipe=
 
-   if [ "${1:?}" = "${1#/}" ]; then
-      if [ -n "${RECIPE-}" ]; then
-         recipe="${RECIPE%/*}/${1}"
-      else
-         recipe="${RECIPE_ROOT}/${1}"
-      fi
-   else
-      recipe="${1}"
-   fi
-
-   if [ -f "${recipe}" ]; then
-      true
-   elif [ -f "${recipe}.recipe" ]; then
-      recipe="${recipe}.recipe"
-   else
-      return 1
-   fi
+   case "${1:?}" in
+      /*)
+         find_recipe__file "${1}" || return 1
+         return 0
+      ;;
+      *)
+         local d
+         if \
+            [ -n "${RECIPE-}" ] && find_recipe__file "${RECIPE%/*}/${1#./}"
+         then
+            return 0
+         else
+            for d in "${RECIPE_ROOT?}" "${PRJROOT_RECIPE?}"; do
+               if find_recipe__file "${d}/${1#./}"; then
+                  return 0
+               fi
+            done
+            return 1
+         fi
+      ;;
+   esac
 }
 
 # void find_and_run_recipe ( name ), raises die()

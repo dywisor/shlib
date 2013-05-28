@@ -18,6 +18,7 @@ dobuild_writevars() {
       LC_ALL=C
 
       RECIPE_ROOT=$( readlink -f "${PWD}" )
+      PRJROOT_RECIPE="${PRJROOT}/files/recipe"
 
       USE="${USE-}${USE:+ }\${USE-}"
       : ${USE_REDUX:=y}
