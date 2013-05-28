@@ -86,6 +86,12 @@ main__atexit() {
          rm -r -v -- "${LIRAM_DEST_SLOT}/work" || :
       fi
 
+      # it's a bit confusing if the script says "removing %LIRAM_DEST_SLOT"
+      # after creating this slot successfully (even if rmdir does nothing
+      # in that case).
+      # Setting LIRAM_DEST_SLOT_SUCCESS=y will prevent that.
+      #
+      [ "${LIRAM_DEST_SLOT_SUCCESS:-n}" = "y" ] || \
       rmdir -v --ignore-fail-on-non-empty -- "${LIRAM_DEST_SLOT-}" || :
    fi
 
@@ -430,7 +436,6 @@ umount_liram_bootdisk() {
 #
 NOT_OVERRIDING liram_disk_init
 liram_disk_init() {
-   die lalala
    mount_liram_disk
    autodie dodir_clean "${LIRAM_IMAGE_ROOT}"
    LIRAM_BOOT_SLOT_NAME="${LIRAM_BOOT_SLOT##*/}"
@@ -555,17 +560,21 @@ main__do_pack() {
    [ ${UID} -eq 0 ] || die
 
    # mount disk + initial fixup
+   einfo "Mounting liram disk ... "
    liram_disk_init
 
    # get dest and work slot
+   einfo "Trying to get a slot ... "
    liram_get_slot
 
    # pack %PACK_TARGETS
-   main__call_pack ${PACK_TARGET:=update}
+   #einfo "Packing your system ... "
+   main__call_pack ${PACK_TARGETS:=update}
 
    # transfer files from work slot to dest slot
    #  assumption: work slot has files
    #
+   einfo "Moving image files into slot '${LIRAM_DEST_SLOT##*/}' ... "
    if __quiet__; then
       autodie mv -t "${LIRAM_DEST_SLOT}" "${LIRAM_WORK_SLOT}"/?*
    else
@@ -573,18 +582,21 @@ main__do_pack() {
    fi
 
    # another assumption: work slot is empty after moving files
+   einfo "Removing work dir ... "
    autodie rmdir "${LIRAM_WORK_SLOT}"
 
    # import LIRAM_CORE_IMAGE_DIR (if set)
    if [ -z "${LIRAM_CORE_IMAGE_DIR-}" ]; then
-      true
+      veinfo "No core image dir configured."
    elif [ -d "${LIRAM_CORE_IMAGE_DIR-}" ]; then
-      if [ -d "${LIRAM_SLOT}/${LIRAM_CORE_IMAGE_RELPATH}/" ]; then
+      if [ -d "${LIRAM_DEST_SLOT}/${LIRAM_CORE_IMAGE_RELPATH}/" ]; then
          # ^unsafe: existence of these dirs does not imply
          #   LIRAM_CORE_IMAGE_DIR == LIRAM_CORE_IMAGE_RELPATH
          #
          # Add further checks if required.
          #
+
+         einfo "Adding links to core images ... "
 
          # globbing is essential here
          set +f
@@ -593,22 +605,22 @@ main__do_pack() {
          for cimage in ${LIRAM_CORE_IMAGE_DIR}/*.*; do
             if [ -f "${cimage}" ]; then
                cfile="${cimage##*/}"; cname="${cfile%.*}"
-               set -- "${LIRAM_SLOT}/${cname}".*
+               set -- "${LIRAM_DEST_SLOT}/${cname}".*
 
                # [ -n "$1" ] should always be true here
                if \
-                  [ -n "${1-}" ] && [ "${1}" = "${LIRAM_SLOT}/${cname}.*" ]
+                  [ -n "${1-}" ] && [ "${1}" = "${LIRAM_DEST_SLOT}/${cname}.*" ]
                then
                   # add link
                   einfo "Adding core image ${cfile}"
                   autodie ln -s -T -- \
-                     "${LIRAM_CORE_IMAGE_RELPATH}/${cfile}" "${LIRAM_SLOT}/${cfile}"
+                     "${LIRAM_CORE_IMAGE_RELPATH}/${cfile}" "${LIRAM_DEST_SLOT}/${cfile}"
 
                   if __double_tap__; then
-                     [ -h "${LIRAM_SLOT}/${cfile}" ] || \
-                        die "${LIRAM_SLOT}/${cfile} is not a symlink."
-                     [ -e "${LIRAM_SLOT}/${cfile}" ] || \
-                        die "${LIRAM_SLOT}/${cfile} is a broken symlink."
+                     [ -h "${LIRAM_DEST_SLOT}/${cfile}" ] || \
+                        die "${LIRAM_DEST_SLOT}/${cfile} is not a symlink."
+                     [ -e "${LIRAM_DEST_SLOT}/${cfile}" ] || \
+                        die "${LIRAM_DEST_SLOT}/${cfile} is a broken symlink."
                   fi
                fi
             fi
@@ -623,10 +635,15 @@ main__do_pack() {
    fi
 
    # update boot slot
+   einfo "Updating the boot slot ... "
    liram_update_boot_slot "${LIRAM_DEST_SLOT##*/}"
 
    # successfully done!
    unset -v LIRAM_FALLBACK_SLOT
+
+   LIRAM_DEST_SLOT_SUCCESS=y
+   einfo "Successfully created new slot '${LIRAM_DEST_SLOT##*/}'."
+   #veinfo "Successfully created new slot '${LIRAM_DEST_SLOT##*/}'."
 }
 
 main__exit_with_help() {
@@ -705,4 +722,6 @@ main() {
 
 # @implicit int main (...)
 #
-main "$@"
+if [ "${LIRAM_MANAGE_AS_LIB:-n}" != "y" ]; then
+   main "$@"
+fi
