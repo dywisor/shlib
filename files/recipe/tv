@@ -26,21 +26,21 @@ readconfig
 varcheck
 "
 
-# all linked libs should be executable
-DOLIB_CHMOD 0755
-
-#SCRIPT_AUTO_VERIFY=y
-SCRIPT_AUTO_CHMOD=y
-SCRIPT_AUTO_CHOWN=n
-
-SET_NOUNSET
-SET_BASH n
+SET_DEFAULTS
+SET_BASH n /bin/bash
 
 INTO /tv
+
+ENABLE_OVERWRITE_IF lib/shlib.sh
 
 MAKELIB_SHLIB
 
 INHERIT shlib-call
+
+# liram-manage
+#  currently, all of its dependencies are covered by the "shlib"/"all" lib
+LINK_SHARED liram-manage root/liram-manage
+DEST_PREFIX root SYMSTORM liram-manage liram-pack liram-fixup liram-kernup
 
 # standalone scripts
 #
