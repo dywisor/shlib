@@ -16,6 +16,10 @@ _SHLIB_FILE = ./build/shlib_$(shell date +%F).sh
 
 DESTDIR ?=
 DEST    ?= $(DESTDIR)/sh/lib/shlib.sh
+USE     ?=
+ifeq ($(LOCAL),1)
+USE := local $(USE)
+endif
 
 default: shlib verify
 
@@ -69,5 +73,16 @@ scripts: scripts-linked
 initramfs: ./build-scripts/buildvars.sh
 	QUIET=y ./build-scripts/buildvars.sh $(CURDIR) $(CURDIR)/build/work busybox-initramfs $(CURDIR)/build/initramfs.cpio
 
+tv-scripts: ./build-scripts/buildvars.sh
+	USE=$(USE) ./build-scripts/buildvars.sh $(CURDIR) $(CURDIR)/build/work -x dobuild-ng $(CURDIR)/files/recipe/tv
+	( cd $(CURDIR)/build/work/tv && tar c ./ -f $(CURDIR)/build/tv-scripts.txz --xz --owner=root --group=root; )
+
+tv-scripts-host: ./build-scripts/buildvars.sh
+	USE=$(USE) ./build-scripts/buildvars.sh $(CURDIR) $(CURDIR)/build/work -x dobuild-ng $(CURDIR)/files/recipe/tv-host
+
+# @lazy
+tv-all: tv-scripts-host tv-scripts initramfs
+
 .PHONY: shlib install uninstall clean clean-scripts verify default reinstall \
-	scripts-linked scripts-standalone scripts initramfs
+	scripts-linked scripts-standalone scripts initramfs \
+	tv-scripts tv-scripts-host tv-all
