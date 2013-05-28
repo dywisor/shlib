@@ -117,7 +117,7 @@ newroot_tmpdir_avail() { [ -n "${NEWROOT_TMPDIR-}" ]; }
 newroot_tmpdir_users() {
    local v0 tmpdir_owner_id tmpdir_user fail=0
 
-   if newroot_tmpdir_avail; then
+   if ! newroot_tmpdir_avail; then
       return 2
    elif [ "${NEWROOT_TMPDIR_USER_ONLY:-n}" != "y" ]; then
       inonfatal newroot_tmpdir_dodir /users \
