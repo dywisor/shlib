@@ -31,6 +31,12 @@
 # /sh (mandatory)
 # * Extracts the 'scripts' tarball into /sh
 #
+# Extra directories if LIRAM_LAYOUT_TV_WITH_VDR is set to 'y' (default):
+#
+# /etc/vdr      (mandatory)
+# /etc/vdradmin (mandatory)
+#
+#
 # Calls liram_setup_subtrees() after unpacking the rootfs and some
 # newroot_setup*() functions after populating newroot.
 # Also exports boot-time variables such as LIRAM_DISK to NEWROOT as file.
@@ -41,8 +47,13 @@
 # ----------------------------------------------------------------------------
 #
 liram_populate_layout_tv() {
+   : ${LIRAM_LAYOUT_TV_WITH_VDR:=y}
+
    # the names of all tarballs used by this layout except "rootfs"
    local ADDITIONAL_TARBALL_NAMES="etc var log scripts"
+   if [ "${LIRAM_LAYOUT_TV_WITH_VDR}" = "y" ]; then
+      ADDITIONAL_TARBALL_NAMES="${ADDITIONAL_TARBALL_NAMES} etc-vdr etc-vdradmin"
+   fi
 
    # setup targets that will be run after populating newroot
    local NEWROOT_SETUP_TARGETS="dirs mountpoints premount tmpdir"
