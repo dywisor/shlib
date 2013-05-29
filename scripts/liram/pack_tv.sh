@@ -39,6 +39,12 @@
 #  Not implemented yet.
 : ${NOT_GENTOO:=n}
 
+# in case you want to keep "everything" (build-time files/dirs will be
+# removed, though)
+KEEP_EVERYTHING=n
+
+WITH_VDR_TARBALLS=y
+
 # man page directories to remove:
 MAN_PURGE="cs de es fi fr hu id it ja ko pl pt_BR ru sv tr zh_CN zh_TW"
 
@@ -79,7 +85,7 @@ PYTHON_INSTALLED_VERSIONS="2.7 3.2"
 #
 # Note: only partially implemented
 #
-KEEP_DEV_FILES=n
+KEEP_DEV_FILES=y
 
 # keep development tools?
 #
@@ -91,7 +97,7 @@ KEEP_DEV_FILES=n
 #
 # Note: only partially implemented
 #
-KEEP_DEV_TOOLS=n
+KEEP_DEV_TOOLS=y
 
 # app-portage/portage-utils q applets
 Q_APPLETS="qatom qcache qcheck qdepends qfile qgrep qlist qlop \
@@ -125,6 +131,9 @@ man_x_purge() {
    done
 }
 
+keep_everything()      { [ "${KEEP_EVERYTHING:-n}" = "y" ]; }
+dont_keep_everything() { ! keep_everything; }
+
 # =========
 #  targets
 # =========
@@ -136,7 +145,7 @@ man_x_purge() {
 ## rootfs
 pack_target_rootfs() {
    next / rootfs
-   ex   /LIRAM_ENV /pack.sh
+   ex   /LIRAM_ENV /pack.sh /pack_tv.sh
    ex   /stagemounts /CHROOT /BUILD /portage
    exd  /proc /sys /dev /run /etc /var /usr /sh /tmp
    pack
@@ -149,49 +158,65 @@ pack_target_etc() {
    ex /VENDOR /machine-id
    ex /group- /gshadow- /passwd- /shadow-
 
-   local f
-   local s
-   for f in ${INITD_PURGE?}; do
-      # lazy implementation
-      if [ -n "$( \
-         find "${PACK_SRC}/runlevels" -xdev -type l -name "${f}" | head -n 1 \
-      )" ]; then
-         s="${s-}${s:+ }${f}"
-      fi
-   done
-   if [ -n "${s-}" ]; then
-      eerror "The following services are enabled but marked for removal"
-      for f in ${s}; do eerror "  ${f}"; done
-
-      if [ "${INITD_PURGE_DIE_IF_ENABLED:?}" = "y" ]; then
-         die "Please fix INITD_PURGE."
-      else
-         ewarn "Continuing due to INITD_PURGE_DIE_IF_ENABLED=n."
-      fi
+   if [ "${WITH_VDR_TARBALLS:?}" = "y" ]; then
+      ex /vdr /vdradmin
    fi
 
-   ex_prefix_foreach /conf.d ${CONFD_PURGE?}
-   ex_prefix_foreach /init.d ${INITD_PURGE?}
+   if dont_keep_everything; then
+      local f
+      local s
+      for f in ${INITD_PURGE?}; do
+         # lazy implementation
+         if [ -n "$( \
+            find "${PACK_SRC}/runlevels" -xdev -type l -name "${f}" | head -n 1 \
+         )" ]; then
+            s="${s-}${s:+ }${f}"
+         fi
+      done
+      if [ -n "${s-}" ]; then
+         eerror "The following services are enabled but marked for removal"
+         for f in ${s}; do eerror "  ${f}"; done
 
-   if [ "${KEEP_DEV_TOOLS:?}" != "y" ]; then
-      ex \
-         /eixrc /eclean /revdep-rebuild /env.d/99gentoolkit-env \
-         /portage/bin/post_sync /portage/postsync.d/q-reinitialize \
-         /etc-update.conf /dispatch-conf.conf \
-         /logrotate.d/elog-save-summary
+         if [ "${INITD_PURGE_DIE_IF_ENABLED:?}" = "y" ]; then
+            die "Please fix INITD_PURGE."
+         else
+            ewarn "Continuing due to INITD_PURGE_DIE_IF_ENABLED=n."
+         fi
+      fi
 
-      # why keep env.d if /usr/sbin/env-update is to be removed?
-      exd /env.d
+      ex_prefix_foreach /conf.d ${CONFD_PURGE?}
+      ex_prefix_foreach /init.d ${INITD_PURGE?}
+
+      if [ "${KEEP_DEV_TOOLS:?}" != "y" ]; then
+         ex \
+            /eixrc /eclean /revdep-rebuild /env.d/99gentoolkit-env \
+            /portage/bin/post_sync /portage/postsync.d/q-reinitialize \
+            /etc-update.conf /dispatch-conf.conf \
+            /logrotate.d/elog-save-summary
+
+         # why keep env.d if /usr/sbin/env-update is to be removed?
+         exd /env.d
+      fi
    fi
 
    pack
 }
 add_target etc
 
+## etc-vdr
+pack_target_etc_vdr() { oneshot /etc/vdr etc-vdr; }
+[ "${WITH_VDR_TARBALLS:?}" != "y" ] || add_target etc_vdr
+
+## etc-vdradmin
+pack_target_etc_vdradmin() { oneshot /etc/vdradmin etc-vdradmin; }
+[ "${WITH_VDR_TARBALLS:?}" != "y" ] || add_target etc_vdradmin
+
 ## var
 pack_target_var() {
    next /var
-   ex   /portage /db /cache/eix /cache/db
+   if dont_keep_everything; then
+      ex /portage /db /cache/eix /cache/db
+   fi
    exd  /log /tmp /run /lock
    pack
 }
@@ -205,67 +230,70 @@ add_target log
 pack_target_usr() {
    next /usr as squashfs
 
-   ex  /portage /share/info /share/doc /share/gtk-doc
+   ex  /portage
    exd /tmp
 
-   ex_prefix_foreach /share/keymaps ${KEYMAP_PURGE?}
-   ex_prefix_foreach /share/man     ${MAN_PURGE?}
-   ex_prefix_foreach /share/locale  ${LOCALE_PURGE?}
+   if dont_keep_everything; then
+      ex /share/info /share/doc /share/gtk-doc
+      ex_prefix_foreach /share/keymaps ${KEYMAP_PURGE?}
+      ex_prefix_foreach /share/man     ${MAN_PURGE?}
+      ex_prefix_foreach /share/locale  ${LOCALE_PURGE?}
 
-   if [ "${KEEP_DEV_FILES:?}" != "y" ]; then
-      exd /include
-   fi
+      if [ "${KEEP_DEV_FILES:?}" != "y" ]; then
+         exd /include
+      fi
 
-   if [ "${KEEP_DEV_TOOLS:?}" != "y" ]; then
-      # eix
-      ex_prefix_foreach /bin \
-         eix eix-diff eix-drop-permissions eix-functions.sh eix-installed \
-         eix-installed-after eix-layman eix-remote eix-sync \
-         eix-test-obsolete eix-update versionsort
+      if [ "${KEEP_DEV_TOOLS:?}" != "y" ]; then
+         # eix
+         ex_prefix_foreach /bin \
+            eix eix-diff eix-drop-permissions eix-functions.sh eix-installed \
+            eix-installed-after eix-layman eix-remote eix-sync \
+            eix-test-obsolete eix-update versionsort
 
-      # euses
-      ex /bin/euses
-      ex /share/man/man1/euses.1.bz2
+         # euses
+         ex /bin/euses
+         ex /share/man/man1/euses.1.bz2
 
-      # gentoolkit
-      ex_prefix_foreach /bin \
-         eclean eclean-dist eclean-pkg enalyze \
-         epkginfo equery eread eshowkw euse glsa-check \
-         revdep-rebuild revdep-rebuild.py revdep-rebuild.sh
+         # gentoolkit
+         ex_prefix_foreach /bin \
+            eclean eclean-dist eclean-pkg enalyze \
+            epkginfo equery eread eshowkw euse glsa-check \
+            revdep-rebuild revdep-rebuild.py revdep-rebuild.sh
 
-      python_purge_site_packages gentoolkit
+         python_purge_site_packages gentoolkit
 
-      man_x_purge 1 \
-         equery glsa-check eread euse eshowkw \
-         revdep-rebuild enalyze epkginfo eclean
+         man_x_purge 1 \
+            equery glsa-check eread euse eshowkw \
+            revdep-rebuild enalyze epkginfo eclean
 
 
-      # portage-utils
+         # portage-utils
 
-      ex_prefix_foreach /bin ${Q_APPLETS?}
-      man_x_purge 1 ${Q_APPLETS?}
+         ex_prefix_foreach /bin ${Q_APPLETS?}
+         man_x_purge 1 ${Q_APPLETS?}
 
-      # portage (!)
+         # portage (!)
 
-      ex_prefix_foreach /bin \
-         ebuild egencache emerge emerge-webrsync emirrordist \
-         portageq quickpkg repoman
+         ex_prefix_foreach /bin \
+            ebuild egencache emerge emerge-webrsync emirrordist \
+            portageq quickpkg repoman
 
-      ex_prefix_foreach /sbin \
-         archive-conf dispatch-conf emaint env-update etc-update \
-         fixpackages regenworld update-env update-etc
+         ex_prefix_foreach /sbin \
+            archive-conf dispatch-conf emaint env-update etc-update \
+            fixpackages regenworld update-env update-etc
 
-      # lazy-exclude (using lib instead of $LIBDIR is correct here)
-      ex /lib/portage
+         # lazy-exclude (using lib instead of $LIBDIR is correct here)
+         ex /lib/portage
 
-      python_purge_site_packages _emerge portage repoman
+         python_purge_site_packages _emerge portage repoman
 
-      ex /share/portage
-      man_x_purge 1 \
-         repoman quickpkg fixpackages etc-update env-update emirrordist \
-         emerge emaint egencache ebuild dispatch-conf
-      man_x_purge 5 xpak portage make.conf ebuild color.map
+         ex /share/portage
+         man_x_purge 1 \
+            repoman quickpkg fixpackages etc-update env-update emirrordist \
+            emerge emaint egencache ebuild dispatch-conf
+         man_x_purge 5 xpak portage make.conf ebuild color.map
 
+      fi
    fi
 
    pack
@@ -294,8 +322,23 @@ pack_target_update() {
       local DOTAR_OVERWRITE=y
    fi
    ${virtual} etc var log # scripts
+
+   if [ "${WITH_VDR_TARBALLS:?}" = "y" ]; then
+      ${virtual} etc_vdr etc_vdradmin
+   fi
 }
 add_virtual_target update
+
+# vdr update - virtual target that packs vdr dirs in /etc
+#
+pack_target_vdr_update() {
+   if [ -z "${DOTAR_OVERWRITE-}" ]; then
+      einfo "setting DOTAR_OVERWRITE=y"
+      local DOTAR_OVERWRITE=y
+   fi
+   ${virtual} etc_vdr etc_vdradmin
+}
+add_virtual_target vdr_update
 
 
 # ======
