@@ -129,6 +129,12 @@ liram_unpack_default() {
       'log')
          dest="/var/log"
       ;;
+      *-*)
+         dest="/${1%%-*}/${1#*-}"
+      ;;
+      *_*)
+         dest="/1{%%_*}/${1#*_}"
+      ;;
       *)
          initramfs_die "unknown dest dir for tarball name ${1}"
       ;;

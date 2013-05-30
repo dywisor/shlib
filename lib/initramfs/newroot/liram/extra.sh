@@ -41,7 +41,7 @@ liram_write_env() {
    liram_zap_env_file && \
    liram_write_env_var "LIRAM_DISK" "${LIRAM_DISK-}" && \
    liram_write_env_var "LIRAM_DISK_FSTYPE" "${LIRAM_DISK_FSTYPE:-auto}" && \
-   liram_write_env_var "LIRAM_SLOT" "${LIRAM_SLOT-}" && \
+   liram_write_env_var "LIRAM_BOOTED_SLOT" "${LIRAM_SLOT-}" && \
    liram_write_env_var "LIRAM_LAYOUT" "${LIRAM_LAYOUT-}" && \
    liram_write_env_var "NEWROOT_HOME_DIR" "${NEWROOT_HOME_DIR-}"
 }
