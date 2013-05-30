@@ -60,6 +60,13 @@
 #    starts with a single "/", and absolute if it starts with more than one
 #    "/" char. Note that the latter variant is not supported.
 #
+# * LIRAM_HARDLINK_CORE (optional)
+#
+#    Use hardlinks to add files from LIRAM_CORE_IMAGE_DIR (if set to y),
+#    else use symlinks. Defaults to "y". Using hardlinks allows to set
+#    LIRAM_CORE_IMAGE_DIR = %LIRAM_BOOT_SLOT, but it'll be harder to track
+#    which image files have been created specifically for a given slot.
+#
 #
 # --- USAGE ---
 #
@@ -227,6 +234,10 @@ main__init() {
    #  dest dir for newly created images
    #
    : ${LIRAM_SLOT:=${DATE_NOW}}
+
+   # LIRAM_HARDLINK_CORE
+   #
+   : ${LIRAM_HARDLINK_CORE:=y}
 
    # LIRAM_CORE_IMAGE_DIR
    #  Overlay directory whose content will be symlinked into the new slot
@@ -612,15 +623,22 @@ main__do_pack() {
                   [ -n "${1-}" ] && [ "${1}" = "${LIRAM_DEST_SLOT}/${cname}.*" ]
                then
                   # add link
-                  einfo "Adding core image ${cfile}"
-                  autodie ln -s -T -- \
-                     "${LIRAM_CORE_IMAGE_RELPATH}/${cfile}" "${LIRAM_DEST_SLOT}/${cfile}"
+                  if [ "${LIRAM_HARDLINK_CORE:?}" = "y" ]; then
+                     einfo "Adding core image ${cfile} (as hardlink)"
+                     autodie ln -T -- \
+                        "${LIRAM_CORE_IMAGE_DIR}/${cfile}" "${LIRAM_DEST_SLOT}/${cfile}"
 
-                  if __double_tap__; then
-                     [ -h "${LIRAM_DEST_SLOT}/${cfile}" ] || \
-                        die "${LIRAM_DEST_SLOT}/${cfile} is not a symlink."
-                     [ -e "${LIRAM_DEST_SLOT}/${cfile}" ] || \
-                        die "${LIRAM_DEST_SLOT}/${cfile} is a broken symlink."
+                  else
+                     einfo "Adding core image ${cfile} (as symlink)"
+                     autodie ln -s -T -- \
+                        "${LIRAM_CORE_IMAGE_RELPATH}/${cfile}" "${LIRAM_DEST_SLOT}/${cfile}"
+
+                     if __double_tap__; then
+                        [ -h "${LIRAM_DEST_SLOT}/${cfile}" ] || \
+                           die "${LIRAM_DEST_SLOT}/${cfile} is not a symlink."
+                        [ -f "${LIRAM_DEST_SLOT}/${cfile}" ] || \
+                           die "${LIRAM_DEST_SLOT}/${cfile} is a broken symlink."
+                     fi
                   fi
                fi
             fi
