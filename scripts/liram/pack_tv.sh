@@ -223,7 +223,11 @@ pack_target_var() {
 add_target var
 
 ## log
-pack_target_log() { oneshot /var/log as tarball; }
+pack_target_log() {
+   next /var/log as tarball
+   ex /portage /emerge.log /emerge-fetch.log
+   pack
+}
 add_target log
 
 ## usr
@@ -339,6 +343,17 @@ pack_target_vdr_update() {
    ${virtual} etc_vdr etc_vdradmin
 }
 add_virtual_target vdr_update
+
+# etc update - all etc tarballs
+#
+pack_target_etc_update() {
+   if [ -z "${DOTAR_OVERWRITE-}" ]; then
+      einfo "setting DOTAR_OVERWRITE=y"
+      local DOTAR_OVERWRITE=y
+   fi
+   ${virtual} etc etc_vdr etc_vdradmin
+}
+add_virtual_target etc_update
 
 
 # ======
