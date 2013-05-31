@@ -144,7 +144,7 @@ newroot_tmpdir_users() {
                tmpdir_owner_id="${v0}"
             ;;
             *:)
-               tmpdir_owener_id="${v0}${v0%:}"
+               tmpdir_owner_id="${v0}${v0%:}"
             ;;
             *)
                tmpdir_owner_id="${v0}:${NEWROOT_TMPDIR_USER_GID:-0}"
