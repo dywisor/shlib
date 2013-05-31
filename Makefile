@@ -71,14 +71,14 @@ scripts-standalone: clean-scripts $(MAKE_SCRIPTS)
 scripts: scripts-linked
 
 initramfs: ./build-scripts/buildvars.sh
-	QUIET=y ./build-scripts/buildvars.sh $(CURDIR) $(CURDIR)/build/work busybox-initramfs $(CURDIR)/build/initramfs.cpio
+	QUIET=y ./build-scripts/buildvars.sh --force $(CURDIR) $(CURDIR)/build/work busybox-initramfs $(CURDIR)/build/initramfs.cpio
 
 tv-scripts: ./build-scripts/buildvars.sh
-	USE=$(USE) ./build-scripts/buildvars.sh $(CURDIR) $(CURDIR)/build/work -x dobuild-ng $(CURDIR)/files/recipe/tv
+	USE=$(USE) ./build-scripts/buildvars.sh --force $(CURDIR) $(CURDIR)/build/work -x dobuild-ng $(CURDIR)/files/recipe/tv
 	( cd $(CURDIR)/build/work/tv && tar c ./ -f $(CURDIR)/build/tv-scripts.txz --xz --owner=root --group=root; )
 
 tv-scripts-host: ./build-scripts/buildvars.sh
-	USE=$(USE) ./build-scripts/buildvars.sh $(CURDIR) $(CURDIR)/build/work -x dobuild-ng $(CURDIR)/files/recipe/tv-host
+	USE=$(USE) ./build-scripts/buildvars.sh --force $(CURDIR) $(CURDIR)/build/work -x dobuild-ng $(CURDIR)/files/recipe/tv-host
 
 # @lazy
 tv-all: tv-scripts-host tv-scripts initramfs
