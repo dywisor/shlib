@@ -43,7 +43,19 @@
 # removed, though)
 KEEP_EVERYTHING=n
 
-WITH_VDR_TARBALLS=y
+# pack /etc/vdr and /etc/vdradmin separately?
+#: ${WITH_VDR_TARBALLS:=y}
+# else autodetect here:
+if [ -z "${WITH_VDR_TARBALLS-}" ]; then
+   if \
+      [ -e "${PACK_ROOT%/}/etc/vdr" ] || [ -e "${PACK_ROOT%/}/etc/vdradmin" ]
+   then
+      WITH_VDR_TARBALLS=y
+   else
+      WITH_VDR_TARBALLS=n
+   fi
+fi
+
 
 # man page directories to remove:
 MAN_PURGE="cs de es fi fr hu id it ja ko pl pt_BR ru sv tr zh_CN zh_TW"
@@ -235,7 +247,7 @@ pack_target_usr() {
    next /usr as squashfs
 
    ex  /portage
-   exd /tmp
+   exd /tmp /src
 
    if dont_keep_everything; then
       ex /share/info /share/doc /share/gtk-doc
