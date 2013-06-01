@@ -34,6 +34,9 @@ __cmdline_parser_liram_opts() {
       'experimental')
          LIRAM_EXPERIMENTAL=y
       ;;
+      'novdr')
+         LIRAM_LAYOUT_TV_WITH_VDR=n
+      ;;
       *)
          ${LOGGER} --level=WARN --facility=cmdline.liram "unknown option '${1}'"
       ;;

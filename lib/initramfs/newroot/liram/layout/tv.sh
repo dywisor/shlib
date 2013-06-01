@@ -56,7 +56,7 @@ liram_populate_layout_tv() {
    fi
 
    # setup targets that will be run after populating newroot
-   local NEWROOT_SETUP_TARGETS="dirs mountpoints premount tmpdir"
+   local NEWROOT_SETUP_TARGETS="premount dirs mountpoints tmpdir"
 
    local name usr_sfs
 

@@ -113,7 +113,7 @@ newroot_setup_tmpdir() {
 
    local failcount=0
    F_ITER_ON_ERROR=newroot_setup__failcount \
-   file_list_iterator newroot_tmpdir_users
+   file_list_iterator newroot_tmpdir_users "${1}"
    return ${failcount}
 }
 
