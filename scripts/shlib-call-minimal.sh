@@ -22,5 +22,5 @@ shlib_call_wrap_v0() {
 if function_defined "${SCRIPT_NAME}"; then
    shlib_call_wrap_v0 ${SCRIPT_NAME} "$@"
 else
-   die "no such function: '${1}'"
+   die "no such function: '${SCRIPT_NAME}'"
 fi
