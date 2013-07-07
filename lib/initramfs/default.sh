@@ -36,6 +36,7 @@ initramfs_default_start() {
          disk)
             # rootfs, /etc, premount(s)
             irun newroot_mount_all
+            [ "${NEWROOT_SETUP:=y}" != "y" ] || irun newroot_setup_all
          ;;
          disk-hybrid)
             # rootfs
