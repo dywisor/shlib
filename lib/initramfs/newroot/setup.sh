@@ -123,8 +123,8 @@ newroot_setup_tmpdir() {
 #  thus triggering their "default" behavior).
 #
 newroot_setup_all() {
-   irun newroot_setup_dirs
-   irun newroot_setup_mountpoints
    irun newroot_setup_premount
+   irun newroot_setup_mountpoints
+   irun newroot_setup_dirs
    irun newroot_setup_tmpdir
 }
