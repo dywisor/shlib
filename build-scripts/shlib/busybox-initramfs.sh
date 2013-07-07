@@ -3,6 +3,8 @@ set -u
 # load build env and build functions
 with_stdfunc || die
 
+readonly DEFAULT_BUSYBOX_VERSION="1.21.1"
+
 depcheck mknod fakeroot cpio
 
 readonly D="${BUILD_ROOT}/initramfs"
@@ -21,7 +23,7 @@ case "${1-}" in
       shift
    ;;
    *)
-      BUSYBOX_PV="1.21.0"
+      BUSYBOX_PV="${DEFAULT_BUSYBOX_VERSION}"
    ;;
 esac
 
