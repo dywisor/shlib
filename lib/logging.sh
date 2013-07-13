@@ -170,6 +170,17 @@ dolog_critical()  { dolog "$@" --level=CRITICAL; }
 dolog_timestamp() { dolog "$@" --time --level=TIMESTAMP; }
 dolog_var()       { F_PRINTVAR=dolog_info printvar "$@"; }
 
+# @logger DEBUG dolog_debug_function_call ( funcname, *args )
+#
+dolog_debug_function_call() {
+   local func_name="${1:?}"; shift
+   if [ -n "${*}" ]; then
+      dolog "${func_name} ( ${*} )" --level=DEBUG +FCALL -0
+   else
+      dolog "${func_name}()" --level=DEBUG +FCALL -0
+   fi
+}
+
 # void get_logger ( name, [facility...] )
 #
 #  Creates a logger function with the given name whose root facility (fixed
