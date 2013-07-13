@@ -10,6 +10,8 @@ basemounts_mount() {
    devfs_seed
    irun dodir_clean /proc /sys
    imount -t proc  -o ${PROCFS_OPTS:?} proc  /proc
+   # set up /etc/mtab
+   inonfatal ln -sf /proc/self/mounts /etc/mtab
    imount -t sysfs -o ${SYSFS_OPTS:?}  sysfs /sys
    devfs_mount
 }
@@ -99,6 +101,12 @@ initramfs_baselayout() {
    irun dodir_clean /bin /sbin "${NEWROOT:=/newroot}"
    inonfatal dodir_clean /etc /var/log /var/run /run /mnt
    inonfatal touch /etc/fstab
+
+   # default mount command fails if /etc/mtab is a broken symlink
+   # (latest version from buildroot#master, 2013-07-13)
+   # -> remove it
+   [ ! -L /etc/mtab ] || inonfatal rm -f /etc/mtab
+
    basemounts_mount
 }
 

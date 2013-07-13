@@ -1,7 +1,4 @@
-defsym
 message
 logging
 autodie
 die
-
-initramfs/shell

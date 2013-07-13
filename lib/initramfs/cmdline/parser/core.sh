@@ -25,6 +25,9 @@ cmdline_parser_core() {
       debuglog)
          DEBUG=y
       ;;
+      doshell)
+         CMDLINE_WANT_SHELL=y
+      ;;
       *)
          return 1
       ;;

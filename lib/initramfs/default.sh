@@ -29,23 +29,29 @@ initramfs_default_start() {
       inonfatal initramfs_suppress_printk
    fi
    irun cmdline_parse
-   irun initramfs_rootdelay
 
-   if [ "x${INIT_NEWROOT=y}" = "xy" ]; then
-      case "${NEWROOT_TYPE=disk}" in
-         disk)
-            # rootfs, /etc, premount(s)
-            irun newroot_mount_all
-            [ "${NEWROOT_SETUP:=y}" != "y" ] || irun newroot_setup_all
-         ;;
-         disk-hybrid)
-            # rootfs
-            irun newroot_mount_rootfs
-         ;;
-         liram)
-            irun liram_init
-         ;;
-      esac
+   if [ "${CMDLINE_WANT_SHELL:-n}" = "y" ]; then
+      initramfs_launch_user_shell
+
+   else
+      irun initramfs_rootdelay
+
+      if [ "x${INIT_NEWROOT=y}" = "xy" ]; then
+         case "${NEWROOT_TYPE=disk}" in
+            disk)
+               # rootfs, /etc, premount(s)
+               irun newroot_mount_all
+               [ "${NEWROOT_SETUP:=y}" != "y" ] || irun newroot_setup_all
+            ;;
+            disk-hybrid)
+               # rootfs
+               irun newroot_mount_rootfs
+            ;;
+            liram)
+               irun liram_init
+            ;;
+         esac
+      fi
    fi
 }
 

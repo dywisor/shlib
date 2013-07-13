@@ -47,6 +47,7 @@ newroot_setup_dirs() {
       [ -f "${1}" ] || return 0
    fi
 
+   dolog_debug_function_call "newroot_setup_dirs" "$@"
    local fail=0
    F_ITER_ON_ERROR=return \
    file_list_iterator newroot_setup__dodir "$@" && return ${fail}
@@ -65,6 +66,7 @@ newroot_setup_mountpoints() {
       [ -f "${1}" ] || return 0
    fi
 
+   dolog_debug_function_call "newroot_setup_mountpoints" "$@"
    local fail=0
    F_FSTAB_ITER=newroot_setup__make_mountpoint \
    fstab_iterator "${1}" && return ${fail}
@@ -88,6 +90,7 @@ newroot_setup_premount() {
       [ -f "${1}" ] || return 0
    fi
 
+   dolog_debug_function_call "newroot_setup_premount" "$@"
    F_ITER_ON_ERROR=return \
    file_list_iterator newroot_premount_essential "${1}"
 }
@@ -109,6 +112,8 @@ newroot_setup_tmpdir() {
       [ -f "${1}" ] || return 0
    fi
 
+   dolog_debug_function_call "newroot_setup_tmpdir" "$@"
+
    newroot_tmpdir_init && newroot_tmpdir_users || return
 
    local failcount=0
@@ -123,6 +128,7 @@ newroot_setup_tmpdir() {
 #  thus triggering their "default" behavior).
 #
 newroot_setup_all() {
+   dolog_debug_function_call "newroot_setup_all" "$@"
    irun newroot_setup_premount
    irun newroot_setup_mountpoints
    irun newroot_setup_dirs

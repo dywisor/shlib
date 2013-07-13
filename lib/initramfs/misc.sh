@@ -3,8 +3,8 @@
 #  Sleeps for the specified amount of time.
 #
 initramfs_sleep() {
-	${LOGGER} --level=DEBUG "(initramfs) sleeping for $*"
-	sleep "$@"
+   ${LOGGER} --level=DEBUG "(initramfs) sleeping for $*"
+   sleep "$@"
 }
 
 # int initramfs_debug_sleep ( *time, **INITRAMFS_DEBUG_SLEEP=y )
@@ -13,12 +13,12 @@ initramfs_sleep() {
 #  is set to y.
 #
 initramfs_debug_sleep() {
-	if [ "${INITRAMFS_DEBUG_SLEEP:-y}" = "y" ]; then
-		${LOGGER} --level=INFO "(initramfs debug) sleeping for $*"
-		sleep "$@"
-	else
-		return 0
-	fi
+   if [ "${INITRAMFS_DEBUG_SLEEP:-y}" = "y" ]; then
+      ${LOGGER} --level=INFO "(initramfs debug) sleeping for $*"
+      sleep "$@"
+   else
+      return 0
+   fi
 }
 
 # int initramfs_rootdelay ( **CMDLINE_ROOTDELAY= )
@@ -26,12 +26,12 @@ initramfs_debug_sleep() {
 #  rootdelay sleeping.
 #
 initramfs_rootdelay() {
-	if [ -n "${CMDLINE_ROOTDELAY-}" ]; then
-		dolog_info "rootdelay: sleeping for ${CMDLINE_ROOTDELAY} seconds"
-		sleep "${CMDLINE_ROOTDELAY}"
-	else
-		return 0
-	fi
+   if [ -n "${CMDLINE_ROOTDELAY-}" ]; then
+      dolog_info "rootdelay: sleeping for ${CMDLINE_ROOTDELAY} seconds"
+      sleep "${CMDLINE_ROOTDELAY}"
+   else
+      return 0
+   fi
 }
 
 # int initramfs_kmsg_redirect ( **CONSOLE )
@@ -39,7 +39,7 @@ initramfs_rootdelay() {
 #  Sets up stderr/stdout redirection to /dev/kmsg.
 #
 initramfs_kmsg_redirect() {
-	exec >/dev/kmsg 2>&1 <${CONSOLE:?}
+   exec >/dev/kmsg 2>&1 <${CONSOLE:?}
 }
 
 # void initramfs_suppress_printk()
@@ -47,7 +47,7 @@ initramfs_kmsg_redirect() {
 #  Stops kernel messages from "polluting" the console.
 #
 initramfs_suppress_printk() {
-	echo 0 > /proc/sys/kernel/printk
+   echo 0 > /proc/sys/kernel/printk
 }
 
 # void initramfs_switch_root ( *argv ), raises initramfs_die()
@@ -55,21 +55,21 @@ initramfs_suppress_printk() {
 #  Switches to NEWROOT.
 #
 initramfs_switch_root() {
-	: ${CMDLINE_INIT:=/sbin/init}
+   : ${CMDLINE_INIT:=/sbin/init}
 
-	[ -x "${NEWROOT}/${CMDLINE_INIT#/}" ] || \
-		initramfs_die "cannot locate ${CMDLINE_INIT} in ${NEWROOT}"
+   [ -x "${NEWROOT}/${CMDLINE_INIT#/}" ] || \
+      initramfs_die "cannot locate ${CMDLINE_INIT} in ${NEWROOT}"
 
-	if [ $# -eq 0 ] && [ -n "${INIT_ARGV+y}" ]; then
-		# this does not handle whitespace in INIT_ARGV
-		set -- ${INIT_ARGV}
-	fi
+   if [ $# -eq 0 ] && [ -n "${INIT_ARGV+y}" ]; then
+      # this does not handle whitespace in INIT_ARGV
+      set -- ${INIT_ARGV}
+   fi
 
-	local opts=""
-	[ -z "${CONSOLE-}" ] || opts="${opts} -c ${CONSOLE}"
+   local opts=""
+   [ -z "${CONSOLE-}" ] || opts="${opts} -c ${CONSOLE}"
 
-	exec switch_root ${opts} "${NEWROOT}" ${CMDLINE_INIT} "$@"
-	initramfs_die "switch_root failed"
+   exec switch_root ${opts} "${NEWROOT}" ${CMDLINE_INIT} "$@"
+   initramfs_die "switch_root failed"
 }
 
 # int initramfs_copy_file ( src, dest )
@@ -77,20 +77,20 @@ initramfs_switch_root() {
 #  Copies a file verbosely using rsync or cp. rsync is preferred.
 #
 initramfs_copy_file() {
-	if [ -x /usr/bin/rsync ]; then
-		${LOGGER} -0 --level=DEBUG "Copying ${1} -> ${2} using /usr/bin/rsync"
-
-		/usr/bin/rsync -L -W --progress -- "${1}" "${2}"
-
-#	elif qwhich rsync; then
-#		${LOGGER} -0 --level=DEBUG "Copying ${1} -> ${2} using rsync"
+#   if [ -x /usr/bin/rsync ]; then
+#      ${LOGGER} -0 --level=DEBUG "Copying ${1} -> ${2} using /usr/bin/rsync"
 #
-#		rsync -L -W --progress -- "${1}" "${2}"
+#      /usr/bin/rsync -L -W --progress -- "${1}" "${2}"
 
-	else
-		${LOGGER} -0 --level=INFO "Copying ${1} -> ${2} using cp"
+   if qwhich rsync; then
+      ${LOGGER} -0 --level=DEBUG "Copying ${1} -> ${2} using rsync"
 
-		cp -v -L  -- "${1}" "${2}"
+      rsync -L -W --progress -- "${1}" "${2}"
 
-	fi
+   else
+      ${LOGGER} -0 --level=INFO "Copying ${1} -> ${2} using cp"
+
+      cp -v -L  -- "${1}" "${2}"
+
+   fi
 }

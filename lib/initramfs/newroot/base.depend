@@ -2,4 +2,7 @@ fs/dodir
 fs/doprefix
 fs/dofile
 
+# explicit dependency on logging (also covered by initramfs/misc->...)
+logging
+
 initramfs/misc

@@ -10,10 +10,19 @@
 #  Checks the filesystem before mounting it if NEWROOT_PREMOUNT_FSCK is
 #  set to y.
 #
-#  Always returns 0, failure is catched by irun().
+#  Always returns 0, mount failure is catched by irun() (in this function).
 #
 __newroot_premount_fstab() {
    [ "x${mp}" = "x${want_mp}" ] || return 0
+
+   if __debug__; then
+      # log *args, **kwargs
+      dolog_debug_function_call "__newroot_premount_fstab" "$@" \
+      "fs='${fs-}'" "mp='${mp-}'" "fstype='${fstype-}'" "opts='${opts-}'" \
+      "want_mp='${want_mp-}'" "mounted='${mounted-}'" \
+      "NEWROOT_PREMOUNT_FSCK='${NEWROOT_PREMOUNT_FSCK-}'"
+   fi
+
 
    local v0 newroot_mp
    newroot_doprefix "${mp}"
@@ -109,6 +118,7 @@ __newroot_premount_fstab() {
 #  Returns 0 on success, else 1.
 #
 newroot_premount() {
+   dolog_debug_function_call "newroot_premount" "$@"
    local v0 want_mp="${1:?}" mounted=0
    # %want_mp should always be an absolute path
    want_mp="/${want_mp#/}"

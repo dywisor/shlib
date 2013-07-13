@@ -1,62 +1,18 @@
-# @noreturn initramfs_die ( [message], [code] )
+# @noreturn initramfs_die (
+#    [message], [code], **F_INITRAMFS_DIE=, **INITRAMFS_SHELL_ON_DIE=y
+# )
 #
-#  initramfs die() function. May start a rescue shell (in future).
+#  initramfs die() function.
 #
 initramfs_die() {
    if [ -n "${F_INITRAMFS_DIE-}" ]; then
-
       ${F_INITRAMFS_DIE} "$@"
 
    elif [ "${INITRAMFS_SHELL_ON_DIE:-y}" = "y" ]; then
-      if [ -n "${1-}" ]; then
-         eerror "${1}" "[CRITICAL]"
-      fi
+      initramfs_launch_rescue_shell "$@"
 
-      ewarn "Starting a rescue shell"
-      einfo ""
-      einfo "If you're sure that you've fixed whatever caused the problem,"
-      einfo "touch /RESUME_BOOT and exit the shell."
-      einfo "${0} will then continue where it failed."
-      einfo ""
-      einfo "The /RESUME_BOOT file can also be used to inject variables,"
-      einfo "which may be required to continue booting."
-
-      if [ -c "${CONSOLE-}" ]; then
-         case "${CONSOLE-}" in
-            /dev/ttyS?*)
-               sh --login
-            ;;
-            /dev/tty?*)
-               setsid sh -c "exec sh --login <${CONSOLE} >${CONSOLE} 2>${CONSOLE}"
-            ;;
-            *)
-               sh --login
-            ;;
-         esac
-      else
-         sh --login
-      fi
-      if [ ! -e /RESUME_BOOT ]; then
-
-         [ ! -x /telinit ] || /telinit --
-         die "$@"
-         return 150
-
-      elif [ -f /RESUME_BOOT ] && [ -s /RESUME_BOOT ]; then
-
-         # read the file twice to ensure that it's actually parseable
-         if ( . /RESUME_BOOT --; ) && . /RESUME_BOOT --; then
-            mv -f /RESUME_BOOT /RESUME_BOOT.last
-         else
-            initramfs_die "errors occured while reading /RESUME_BOOT"
-         fi
-         return 0
-      else
-         mv -f /RESUME_BOOT /RESUME_BOOT.last
-         return 0
-      fi
    else
-      [ ! -x /telinit ] || /telinit --
+      initramfs_telinit
       die "$@"
    fi
    return 150

@@ -1,4 +1,5 @@
 initramfs/core
+initramfs/shell
 
 initramfs/cmdline/parse
 initramfs/cmdline/parser
