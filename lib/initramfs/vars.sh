@@ -4,7 +4,15 @@
 #
 initramfs_vars() {
    # default path
-   export PATH="/sbin:/usr/sbin:/bin/usr/bin:/busybox"
+   export PATH="/sbin:/usr/sbin:/bin:/usr/bin:/busybox"
+
+   if [ -z "${SHELL-}" ] || [ ! -x "${SHELL}" ]; then
+      if [ -x /bin/sh ]; then
+         SHELL="/bin/sh"
+      else
+         SHELL="/bin/busybox ash"
+      fi
+   fi
 
    if [ -z "${DEBUG-}" ]; then
       [ -e /DEBUG ] && DEBUG=y || DEBUG=n
