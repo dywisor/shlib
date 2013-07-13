@@ -2,10 +2,12 @@
 
 # void bash_compat()
 #
-#  Sets the EUID, UID and USER variables if unset.
+#  Sets the SHELL, EUID, UID and USER variables if unset.
 #  Any output will be redirected to /dev/null.
 #
 bash_compat() {
+   : ${SHELL:=/bin/sh}
+
    if [ -z "${EUID-}" ]; then
       EUID=`id -u 2>/dev/null`
       [ -n "${EUID}" ] || EUID=65534
