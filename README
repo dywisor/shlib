@@ -1,5 +1,15 @@
 shlib - shell module library
 
+
+shlib, the *shell module library*, is a project that aims to provide reusable
+shell code in modular form, thus allowing to create small scripts as well as
+big library files.
+
+Its features range from basic functions like *die()* known from Perl,
+generic iterators, file system manipulation and colored messages to more
+complex functionality such as squashfs containers and initramfs code, including
+*liram*, a distribution-agnostic approach to load a (Linux) system into tmpfs.
+
 See doc/shlib.rst for documentation.
 
 
