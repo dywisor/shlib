@@ -3,8 +3,7 @@
 #  Returns true if the given directory is empty, else false.
 #
 dir_empty() {
-   local tmp=`ls -A -1 -- "$@"`
-   [ -z "${tmp}" ]
+   ! dir_not_empty "$@"
 }
 
 # int dir_not_empty ( dir )
@@ -12,5 +11,5 @@ dir_empty() {
 #  Returns true if the given directory is not empty, else false.
 #
 dir_not_empty() {
-   ! dir_empty "$@"
+   ls -A -1 -- "$@" | grep -q .
 }
