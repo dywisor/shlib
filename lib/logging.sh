@@ -9,7 +9,7 @@ LOGGER=dolog
 __logging_accept_level() {
    case "${1?}" in
       'DEBUG')
-         [ "${DEBUG:-n}" = "y" ] || return 1
+         __debug__ || return 1
       ;;
    esac
    return 0
