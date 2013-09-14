@@ -105,7 +105,7 @@ initramfs_baselayout() {
    # default mount command fails if /etc/mtab is a broken symlink
    # (latest version from buildroot#master, 2013-07-13)
    # -> remove it
-   [ ! -L /etc/mtab ] || inonfatal rm -f /etc/mtab
+   [ ! -h /etc/mtab ] || inonfatal rm -f /etc/mtab
 
    basemounts_mount
 }
