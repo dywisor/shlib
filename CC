@@ -1,5 +1,5 @@
 #!/bin/sh -eu
-readonly SCRIPT_DIR="$(cd $(dirname "${0}"); pwd)"
+readonly SCRIPT_DIR="$(cd "$(dirname "${0}")"; pwd)"
 readonly REAL_SCRIPT_DIR="$(readlink -f "${SCRIPT_DIR}")"
 
 if \
