@@ -117,6 +117,9 @@ The actual content of the *shlib* repo is organized in four subdirectories:
    +-----------+-------------------------------------------------------------+
    | /scripts  | Script *templates*. Most of them need modules from lib/.    |
    +-----------+-------------------------------------------------------------+
+   | /build\   | Scripts for building *shlib recipes*, e.g. the initramfs    |
+   | -scripts  |                                                             |
+   +-----------+-------------------------------------------------------------+
 
 
 ---------------------
