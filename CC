@@ -1,11 +1,21 @@
-#!/bin/sh
-if [ "${SYSTEM_SHLIBCC:-y}" = "y" ] && which shlibcc 1>/dev/null 2>/dev/null; then
-	CC=shlibcc
-elif [ -x ../shlibcc/shlibcc.py ]; then
-	CC=../shlibcc/shlibcc.py
+#!/bin/sh -eu
+readonly SCRIPT_DIR="$(cd $(dirname "${0}"); pwd)"
+readonly REAL_SCRIPT_DIR="$(readlink -f "${SCRIPT_DIR}")"
+
+if \
+   [ "${SYSTEM_SHLIBCC:-y}" = "y" ] && which shlibcc 1>/dev/null 2>/dev/null
+then
+   CC=shlibcc
 else
-	echo "cannot locate shlibcc" 1>&2
-	exit 2
+   SHLIBCC_ROOT="$(dirname ${REAL_SCRIPT_DIR})/shlibcc"
+
+   if [ -x "${SHLIBCC_ROOT}/shlibcc.py" ]; then
+      CC="${SHLIBCC_ROOT}/shlibcc.py"
+      export PYTHONPATH="${SHLIBCC_ROOT}/shlibcclib${PYTHONPATH:+:}${PYTHONPATH}"
+   else
+      echo "cannot locate shlibcc" 1>&2
+      exit 2
+   fi
 fi
 
-"${CC}" -S ${0%/*}/lib "$@"
+"${CC}" -S "${SCRIPT_DIR}/lib" "$@"
