@@ -138,7 +138,7 @@ shift 2 || OUT_OF_BOUNDS
 
 # BUILD_WORKDIR
 # BUILDSCRIPTS
-readonly BUILD_WORKDIR="${BUILD_ROOT}/work"
+readonly BUILD_WORKDIR="${BUILD_ROOT}/shlib_work"
 readonly BUILDSCRIPTS="${BUILD_WORKDIR}/scripts"
 dodir "${BUILDSCRIPTS}"
 
