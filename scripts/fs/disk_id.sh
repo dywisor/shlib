@@ -11,7 +11,7 @@ process_id_path() {
          true
       ;;
       ata-?*)
-         local dev=`readlink -f "${1}"`
+         local dev=$(readlink -f "${1}")
          print_dev_and_id "${id}" "${dev}"
       ;;
    esac

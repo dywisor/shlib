@@ -13,7 +13,7 @@ atomic_file_counter__add() {
    local old_val new_val min_val="${3:-0}"
 
    if [ -e "${1?}" ]; then
-      old_val=`cat "${1}" 2>/dev/null`
+      old_val=$(cat "${1}" 2>/dev/null)
 
       [ -n "${old_val-}" ] && \
          [ "${old_val}" -ge ${min_val} 2>/dev/null ] || old_val="${min_val}"
@@ -34,7 +34,7 @@ atomic_file_counter__add() {
 #  Returns 0 if the value was not empty and greater or equal min_val.
 #
 atomic_file_counter__read() {
-   v0=`cat "${1?}"`
+   v0=$(cat "${1?}")
    [ -n "${v0}" ] && [ "${v0}" -ge "${2:-0}" 2>/dev/null ]
 }
 

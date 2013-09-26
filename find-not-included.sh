@@ -11,7 +11,7 @@
 # F <dir> -- module file not included
 #
 
-S=`readlink -f "${0%/*}/lib"`
+S=$(readlink -f "${0%/*}/lib")
 
 if [ ! -d "${S}" ]; then
 	echo "'${S}' does not exist." 1>&2

@@ -30,7 +30,7 @@ vdr_get_record_vars() {
    VDR_RECORD_STATE=
    VDR_RECORD_NEW_DIR=
 
-   VDR_RECORD_DIR=`readlink -f "${1}"`
+   VDR_RECORD_DIR=$(readlink -f "${1}")
 
    # @ASSERT fs_level ( VDR_RECORD_DIR ) > 1
 
@@ -114,7 +114,7 @@ vdr_script_get_record_vars() {
 
    VDR_RECORD_STATE="${1-}"
    if [ -n "${3-}" ]; then
-      VDR_RECORD_NEW_DIR=`readlink -f "${3}"`
+      VDR_RECORD_NEW_DIR=$(readlink -f "${3}")
    else
       VDR_RECORD_NEW_DIR=
    fi
@@ -153,7 +153,7 @@ vdr_get_record_files() {
    : ${VDR_RECORD_DIR?} ${VDR_RECORD_EXT?}
    v0=
    v1=
-   set -- `vdr__print_record_file_names`
+   set -- $(vdr__print_record_file_names)
    local f i=0
    for f; do
       [ -f "${VDR_RECORD_DIR}/${f}" ] || return 1

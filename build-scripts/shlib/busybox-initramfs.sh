@@ -140,7 +140,7 @@ addnod tty     -m 666 c 5 0
 addnod console -m 666 c 5 1
 addnod null    -m 666 c 1 3
 addnod kmsg    -m 666 c 1 11
-#for i in `seq 0 2`; do
+#for i in $(seq 0 2); do
 #   addnod tty${i}  -m 666 c 4  ${i}
 #   #addnod ttyS${i} -m 666 c 4 6$(( 4 + ${i} ))
 #done

@@ -8,7 +8,7 @@
 #
 symlink_replace() {
    local symlink="${1:?}" ltarget_new="${2:?}" symlink_tmp
-   symlink_tmp=`mktemp -u "${symlink}.XXXXXXXXXXX"`
+   symlink_tmp=$(mktemp -u "${symlink}.XXXXXXXXXXX")
 
    [ -n "${symlink_tmp}" ] && \
       ln -s -T -- "${ltarget_new}" "${symlink_tmp}" || return

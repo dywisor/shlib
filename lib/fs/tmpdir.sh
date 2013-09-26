@@ -17,7 +17,7 @@ tmpdir_cleanup() {
 # is set to 'y'.
 #
 get_tmpdir() {
-   T=`mktemp -d "${TMPDIR:-/tmp}/${1:-shlib}.XXXXXXXXXX"`
+   T=$(mktemp -d "${TMPDIR:-/tmp}/${1:-shlib}.XXXXXXXXXX")
    if [ -n "${T}" ]; then
       atexit_register tmpdir_cleanup "${T}"
       [ "${GET_TMPDIR_QUIET:-y}" = "y" ] || echo "${T}"

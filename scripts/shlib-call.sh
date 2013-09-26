@@ -98,9 +98,9 @@ elif [ "${1}" = "--install" ] || [ "${1}" = "-i" ]; then
       die "nothing to install"
 
    else
-      DESTDIR=`readlink -f "${2}"`
-      SCRIPT_DIR_ABSOLUTE=`readlink -f "${SCRIPT_DIR}"`
-      SCRIPT_FILE=`readlink -f "${0}"`
+      DESTDIR=$(readlink -f "${2}")
+      SCRIPT_DIR_ABSOLUTE=$(readlink -f "${SCRIPT_DIR}")
+      SCRIPT_FILE=$(readlink -f "${0}")
 
       if [ "${DESTDIR}" = "${SCRIPT_DIR_ABSOLUTE}" ]; then
          LINK_TARGET="${SCRIPT_FILENAME}"
@@ -118,7 +118,7 @@ elif [ "${1}" = "--install" ] || [ "${1}" = "-i" ]; then
       symlink_self() {
          local link="${DESTDIR}/${1}"
          if [ -e "${link}" ]; then
-            local dest=`readlink -f "${link}"`
+            local dest=$(readlink -f "${link}")
             if [ "${dest}" = "${SCRIPT_FILE}" ]; then
                einfo "Skipping ${link} - already installed"
             else

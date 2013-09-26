@@ -7,7 +7,7 @@
 get_filesize() {
    FILESIZE="-1"
    if [ -n "${1-}" ] && [ -e "${1-}" ]; then
-      local size=`du -xms "${1}" | sed -r -e 's=\s.*$=='`
+      local size=$(du -xms "${1}" | sed -r -e 's=\s.*$==')
 
       if [ -n "${size}" ]; then
          # busybox' du returns 0 for small files

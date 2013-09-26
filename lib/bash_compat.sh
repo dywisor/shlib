@@ -9,15 +9,15 @@ bash_compat() {
    : ${SHELL:=/bin/sh}
 
    if [ -z "${EUID-}" ]; then
-      EUID=`id -u 2>/dev/null`
+      EUID=$(id -u 2>/dev/null)
       [ -n "${EUID}" ] || EUID=65534
    fi
    if [ -z "${UID-}" ]; then
-      UID=`id -r -u 2>/dev/null`
+      UID=$(id -r -u 2>/dev/null)
       [ -n "${UID}" ] || UID=65534
    fi
    if [ -z "${USER-}" ]; then
-      USER=`id -r -u -n 2>/dev/null`
+      USER=$(id -r -u -n 2>/dev/null)
       [ -n "${USER}" ] || USER=nobody
    fi
 }

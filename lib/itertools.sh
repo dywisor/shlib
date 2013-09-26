@@ -202,7 +202,7 @@ dir_iterator() {
    while [ $# -gt 0 ]; do
       if [ -n "${1}" ]; then
          if [ "${ITER_ABSPATH:-y}" = "y" ]; then
-            d=`readlink -f "${1}"`
+            d=$(readlink -f "${1}")
          else
             d="${1}"
          fi

@@ -63,7 +63,7 @@ liram_filescan_get() {
       return 5
 
    elif [ -e "${SYNC_DIR}${1:?}" ]; then
-      v0=`readlink -f "${SYNC_DIR}${1}"`
+      v0=$(readlink -f "${SYNC_DIR}${1}")
       if [ -f "${v0}" ]; then
          return 0
       else

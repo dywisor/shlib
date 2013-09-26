@@ -47,7 +47,7 @@ fi
 
 if [ -z "$*" ]; then
    einfo "Building all scripts"
-   set -- `list_scripts`
+   set -- $(list_scripts)
    [ -n "$*" ] || die "nothing to build"
 fi
 

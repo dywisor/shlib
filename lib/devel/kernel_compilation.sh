@@ -74,7 +74,7 @@ kcomp_prepare_build_dir() {
    local kbuild="${1:-${__KCOMP_KSRC:?}}" initial_config="${2-/proc/config.gz}"
 
    if dodir "${kbuild}" && touch "${kbuild}"; then
-      __KCOMP_KBUILD=`readlink -f "${kbuild}"`
+      __KCOMP_KBUILD=$(readlink -f "${kbuild}")
       __KCOMP_CONFIG="${__KCOMP_KBUILD}/.config"
 
 #      if [ "${__KCOMP_KBUILD}" = "${__KCOMP_KSRC}" ]; then
@@ -121,9 +121,9 @@ kcomp_prepare_build_dir() {
 kcomp_init_default() {
    BUILDENV_UNSET_VARS="KSRC KBUILD"
 
-   __KCOMP_KSRC=`readlink -f "${1:?}"`
+   __KCOMP_KSRC=$(readlink -f "${1:?}")
    : ${KERNEL_TARGET:=bzImage}
-   [ -n "${ARCH-}" ] || ARCH=`arch`
+   [ -n "${ARCH-}" ] || ARCH=$(arch)
 
    if shift && kcomp_prepare_build_dir "$@"; then
       KSRC="${__KCOMP_KSRC}"
@@ -226,8 +226,8 @@ kcomp_make_clean() {
 #
 kcomp_get_version() {
    KVER=
-   KERNEL_RELEASE=`kcomp__make_quiet kernelrelease 2>/dev/null`
-   KERNEL_VERSION=`kcomp__make_quiet kernelversion 2>/dev/null`
+   KERNEL_RELEASE=$(kcomp__make_quiet kernelrelease 2>/dev/null)
+   KERNEL_VERSION=$(kcomp__make_quiet kernelversion 2>/dev/null)
    [ -z "${KERNEL_RELEASE}" ] || \
       [ -z "${KERNEL_VERSION}" ] || KVER="${KERNEL_VERSION%+}"
 }
@@ -238,7 +238,7 @@ kcomp_get_version() {
 #
 kcomp_get_kver() {
    if [ -z "${KVER-}" ]; then
-      local KERNEL_VERSION=`kcomp__make_quiet kernelversion 2>/dev/null`
+      local KERNEL_VERSION=$(kcomp__make_quiet kernelversion 2>/dev/null)
       KVER="${KERNEL_VERSION%+}"
       [ -n "${KVER}" ]
    else

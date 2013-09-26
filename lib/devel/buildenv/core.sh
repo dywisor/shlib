@@ -136,9 +136,9 @@ buildenv_prepare_do() {
 #  Returns 0 if the correct cpu count has been determined, else 1.
 #
 buildenv_get_cpucount() {
-   CPUCOUNT=`grep -c -x -- \
+   CPUCOUNT=$(grep -c -x -- \
       processor[[:blank:]][[:blank:]]*[:][[:blank:]]*[0-9][0-9]* \
-      /proc/cpuinfo`
+      /proc/cpuinfo)
    if [ "${CPUCOUNT}" -gt 0 2>/dev/null ]; then
       return 0
    else

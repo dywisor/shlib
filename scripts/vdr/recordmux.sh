@@ -6,11 +6,11 @@
 #
 readconfig /etc/vdr/recordhook.conf
 
-VDR_ROOT=`readlink -f "${VDR_ROOT}"`
+VDR_ROOT=$(readlink -f "${VDR_ROOT}")
 varcheck VDR_ROOT VDR_RECORD_HOOK_DIR
 
 if [ -n "${VDR_ROOT_DONE-}" ]; then
-   VDR_ROOT_DONE=`readlink -f "${VDR_ROOT_DONE}"`
+   VDR_ROOT_DONE=$(readlink -f "${VDR_ROOT_DONE}")
    varcheck VDR_ROOT_DONE
 fi
 

@@ -48,7 +48,7 @@ get_external_ip() {
    if [ -z "${1-}" ]; then
       get_external_ip "1" || get_external_ip "2"
    else
-      v0=`print_external_ip "$@"`
+      v0=$(print_external_ip "$@")
       [ -n "${v0-}" ]
    fi
 }

@@ -98,7 +98,7 @@ newroot_detect_home_dir() {
    [ "${1:-n}" = "y" ] || [ -z "${NEWROOT_HOME_DIR-}" ] || return 0
 
    if [ -h "${NEWROOT}/home" ]; then
-      v0=`readlink -f "${NEWROOT}/home"`
+      v0=$(readlink -f "${NEWROOT}/home")
       if [ -n "${v0}" ]; then
          newroot_doprefix "${v0}"
          NEWROOT_HOME_DIR="${v0}"

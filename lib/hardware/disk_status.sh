@@ -13,7 +13,7 @@ print_disk_status() {
 #  nor "unknown".
 #
 get_disk_status() {
-   v0=`print_disk_status "${1}"`
+   v0=$(print_disk_status "${1}")
    [ -n "${v0}" ] && [ "${v0}" != "unknown" ]
 }
 

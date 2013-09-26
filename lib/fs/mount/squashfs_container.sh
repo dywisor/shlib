@@ -198,7 +198,7 @@ sfs_container_import() {
 
    elif \
       sfs_container__isdir && \
-      [ x`stat -c '%D' "${SFS_CONTAINER}/"` = x`stat -c '%D' "${1}"` ]
+      [ x$(stat -c '%D' "${SFS_CONTAINER}/") = x$(stat -c '%D' "${1}") ]
    then
       # device of $1 is device containing $SFS_CONTAINER
       #  try to hardlink and fall back to copy

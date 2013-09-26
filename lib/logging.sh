@@ -101,7 +101,7 @@ msg="${1# }"
          level=DEBUG
       ;;
       *)
-         level=`echo "${level}" | tr [:lower:] [:upper:]`
+         level=$(echo "${level}" | tr [:lower:] [:upper:])
       ;;
    esac
 

@@ -25,7 +25,7 @@ is_busybox_command() {
       ;;
       /*)
          if [ -h "${1}" ]; then
-            local link_target=`readlink -f "${1}"`
+            local link_target=$(readlink -f "${1}")
             [ "${link_target}" = "${BUSYBOX}" ] || return 1
 
          elif [ "${1}" != "${BUSYBOX}" ]; then

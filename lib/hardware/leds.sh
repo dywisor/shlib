@@ -5,7 +5,7 @@
 #  else a non-zero value is returned.
 #
 led__get_brightness() {
-   v0=`cat "${led_file:?}" 2>/dev/null`
+   v0=$(cat "${led_file:?}" 2>/dev/null)
    [ -n "${v0}" ] && [ "${v0}" -ge 0 2>/dev/null ]
 }
 

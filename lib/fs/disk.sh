@@ -19,7 +19,7 @@ get_disk() {
          dev="${1}"
       ;;
       LABEL=*|UUID=*)
-         dev=`${SUDO-} findfs ${1} 2>/dev/null`
+         dev=$(${SUDO-} findfs ${1} 2>/dev/null)
       ;;
       *)
          return 2

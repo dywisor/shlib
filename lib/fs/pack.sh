@@ -34,7 +34,7 @@ dotar__doprefix_if() {
    else
       v0="${1?}"
    fi
-   v0=`readlink -${3:-f} "${v0}"`
+   v0=$(readlink -${3:-f} "${v0}")
 }
 
 # void dotar_from ( src_dir, **DOTAR_ROOT_DIR, **DOTAR__SRC_DIR! )
@@ -55,7 +55,7 @@ dotar_set_root() {
    if [ -z "${1?}" ]; then
       DOTAR_ROOT_DIR=
    else
-      DOTAR_ROOT_DIR=`readlink -f "${1:?}"`
+      DOTAR_ROOT_DIR=$(readlink -f "${1:?}")
    fi
 }
 
@@ -67,7 +67,7 @@ dotar_set_image_dir() {
    if [ -z "${1?}" ]; then
       DOTAR_IMAGE_DIR=
    else
-      DOTAR_IMAGE_DIR=`readlink -f "${1:?}"`
+      DOTAR_IMAGE_DIR=$(readlink -f "${1:?}")
    fi
 }
 
@@ -130,7 +130,7 @@ dotar_exclude_abs_dir() {
    local reldir
    while [ $# -gt 0 ]; do
       if [ -n "${1}" ]; then
-         reldir=`readlink -f "${1}"`
+         reldir=$(readlink -f "${1}")
          reldir="${reldir#${DOTAR__SRC_DIR-}}"
 
          [ "${reldir}" = "${1}" ] || dotar__exclude_append "${reldir}/*"

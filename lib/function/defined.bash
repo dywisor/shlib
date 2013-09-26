@@ -7,7 +7,7 @@
 #
 function_defined() {
    while [[ $# -gt 0 ]]; do
-      [[ -z "${1-}" ]] || [[ `type -t "${1}"` = "function" ]] || return 1
+      [[ -z "${1-}" ]] || [[ $(type -t "${1}") = "function" ]] || return 1
       shift
    done
    return 0
