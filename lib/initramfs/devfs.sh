@@ -101,6 +101,7 @@ devfs_mount() {
       imount -t devpts -o ${DEVPTS_OPTS:?} devpts /dev/pts
    fi
    inonfatal dodir_clean /dev/shm
+   inonfatal call_if_defined eval_scriptinfo
    return 0
 }
 
