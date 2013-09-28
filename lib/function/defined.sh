@@ -20,3 +20,15 @@ function_defined() {
    done
    return 0
 }
+
+# ~int call_if_defined ( func, *args )
+#
+#  Calls func( *args ) and passes its return value if %func is defined,
+#  else returns 0.
+#
+#  %func must not be empty.
+#
+call_if_defined() {
+   function_defined "${1:?}" || return 0
+   "$@"
+}
