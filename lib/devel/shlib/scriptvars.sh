@@ -73,8 +73,24 @@ get_lib_dest() {
    [ -n "${v0}" ]
 }
 
+get_target_lib_dest() {
+   if [ -z "${1-}" ]; then
+      v0=
+      return 1
+   elif [ -n "${TARGET_SHLIB_LIBDIR-}" ]; then
+      v0="${TARGET_SHLIB_LIBDIR%/}/${1#/}"
+      return 0
+   else
+      get_lib_dest "$@"
+   fi
+}
+
 get_splitlib_dest() {
    get_lib_dest "$@" && v0="${v0%.sh}.sh"
+}
+
+get_target_splitlib_dest() {
+   get_target_lib_dest "$@" && v0="${v0%.sh}.sh"
 }
 
 # @private void get_scriptvars__script (

@@ -10,7 +10,8 @@
 #  no-op. Reserved for future usage.
 #
 BUILD_API() {
-   print_setvar BUILD_API "$*"
+   BUILD_API="${1}"
+   print_setvar BUILD_API
 }
 
 # int __FUTURE__ ( func_spec )

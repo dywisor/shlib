@@ -31,7 +31,7 @@ genscript_linked_splitlib() {
    get_scriptvars "$@" || shift ${?} || OUT_OF_BOUNDS
 
    local v0
-   autodie get_splitlib_dest "${dest_name}" "${TARGET_SHLIB_ROOT:?}"
+   autodie get_target_splitlib_dest "${dest_name}"
 
    genscript_linked_create "$@" "${v0:?}"
 

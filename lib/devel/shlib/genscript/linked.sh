@@ -85,7 +85,7 @@ genscript_linked__create() {
 
    local any_lib v0 lib_name
    for lib_name; do
-      if get_lib_dest "${lib_name}" "${TARGET_SHLIB_ROOT:?}"; then
+      if get_target_lib_dest "${lib_name}"; then
          echo ". \"${v0}\" -- || exit"
          any_lib="${v0}"
       fi
@@ -103,7 +103,7 @@ genscript_linked__append() {
 
    local any_lib v0 lib_name
    for lib_name; do
-      if get_lib_dest "${lib_name}" "${TARGET_SHLIB_ROOT:?}"; then
+      if get_target_lib_dest "${lib_name}"; then
          echo ". \"${v0}\" -- || exit"
          any_lib="${v0}"
       fi

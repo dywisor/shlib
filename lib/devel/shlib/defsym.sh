@@ -59,6 +59,7 @@ readonly SHLIBCC
 # TARGET_*
 : ${TARGET_SHLIB_NAME:=shlib.sh}
 : ${TARGET_SHLIB_ROOT=/sh}
+: ${TARGET_SHLIB_LIBDIR=}
 
 # misc SCRIPT_* vars for script generation
 : ${SCRIPT_INTERPRETER=/bin/sh}
