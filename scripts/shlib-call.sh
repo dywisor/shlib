@@ -25,6 +25,14 @@ shlib_call_wrap_v0() {
    return ${rc}
 }
 
+subshell_exec_self() {
+   if [ -n "${CHAINLOAD_SCRIPT-}" ]; then
+      ( exec -c /bin/bash --noprofile --norc "${0}" "${SCRIPT_NAME?}" "$@"; )
+   else
+      ( exec -c /bin/bash --noprofile --norc "${0}" "$@"; )
+   fi
+}
+
 if function_defined "${SCRIPT_NAME}"; then
 
    shlib_call_wrap_v0 ${SCRIPT_NAME} "$@"
@@ -50,15 +58,11 @@ elif function_defined "${1}"; then
 
 elif [ "${1}" = "list-functions" ] || [ "${1}" = "lf" ]; then
 
-   (
-      exec -c /bin/bash --noprofile --norc "${0}" autodie declare -F
-   ) | cut -b 12-
+   subshell_exec_self autodie declare -F | cut -b 12-
 
 elif [ "${1}" = "list-variables" ] || [ "${1}" = "lv" ]; then
 
-   (
-      exec -c /bin/bash --noprofile --norc "${0}" autodie declare -p
-   ) | sed -e 's,^declare .. ,,'
+   subshell_exec_self autodie declare -p | sed -e 's,^declare .. ,,'
 
 elif [ "${1}" = "--exports" ] || [ "${1}" = "-e" ]; then
 
