@@ -1,0 +1,6 @@
+message
+defsym
+die
+scriptinfo
+
+shlib/chainload
