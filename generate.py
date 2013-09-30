@@ -317,8 +317,7 @@ class BuildRecipe ( object ):
    def splitlib ( self, script, destname=None, *modules_exclude ):
       # standalone lib
       self.add_command (
-         "SPLITLIB", script, ( script if destname is None else destname ),
-         *modules_exclude
+         "SPLITLIB", script, ( destname or script ), *modules_exclude
       )
    # --- end of splitlib (...) ---
 
@@ -328,8 +327,7 @@ class BuildRecipe ( object ):
    ):
       self.splitlib ( script, lib_destname, *modules_exclude )
       self.link_shared (
-         script, script_destname,
-         ( script if lib_destname is None else lib_destname ), *lib_targets
+         script, script_destname, ( lib_destname or script ), *lib_targets
       )
    # --- end of splitlib_script (...) ---
 
@@ -360,7 +358,7 @@ class BuildRecipe ( object ):
 
    def add_spec ( self, spec ):
       assert spec
-      cmd_str, *args = spec.split ( ',' )
+      cmd_str, *args = [ ( k if k else None ) for k in spec.split ( ',' ) ]
 
       try:
          cmd_func = self.instruction_map [cmd_str.lower()]
