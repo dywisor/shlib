@@ -325,7 +325,8 @@ class BuildRecipe ( object ):
    def splitlib ( self, script, destname=None, *modules_exclude ):
       # standalone lib
       self.add_command (
-         "SPLITLIB", script, ( destname or script ), *modules_exclude
+         "SPLITLIB", script, ( destname or os.path.basename ( script ) ),
+         *modules_exclude
       )
    # --- end of splitlib (...) ---
 
@@ -335,7 +336,8 @@ class BuildRecipe ( object ):
    ):
       self.splitlib ( script, lib_destname, *modules_exclude )
       self.link_shared (
-         script, script_destname, ( lib_destname or script ), *lib_targets
+         script, script_destname,
+         ( lib_destname or os.path.basename ( script ) ), *lib_targets
       )
    # --- end of splitlib_script (...) ---
 
