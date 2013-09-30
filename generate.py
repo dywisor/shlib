@@ -15,6 +15,12 @@ import subprocess
 import sys
 import time
 
+from os.path import basename
+
+def basename_fallback ( word, fallback, fallback_suffix='' ):
+   return word if word else ( basename ( fallback ) + fallback_suffix )
+# --- end of basename_fallback (...) ---
+
 def quote_str ( s ):
    return "\"" + str ( s ) + "\""
 # --- end of quote_str (...) ---
@@ -294,8 +300,9 @@ class BuildRecipe ( object ):
 
    def add_command ( self, *argv ):
       self.add (
-         ' '.join ( quote_str ( arg ) for arg in argv if arg is not None )
+         ' '.join ( quote_str ( arg )  for arg in argv if arg is not None )
       )
+      print ( argv, self.lines[-1] )
    # --- end of add_command (...) ---
 
    def depend_on_shlib ( self ):
@@ -307,15 +314,23 @@ class BuildRecipe ( object ):
    # --- end of inherit_recipe (...) ---
 
    def standalone ( self, script, destname=None ):
-      self.add_command ( "STANDALONE", script, destname )
+      self.add_command (
+         "STANDALONE", script, basename_fallback ( destname, script )
+      )
    # --- end of standalone (...) ---
 
    def link_shared ( self, script, destname=None, *lib_targets ):
-      self.add_command ( "LINK_SHARED", script, destname, *lib_targets )
+      self.add_command (
+         "LINK_SHARED", script, basename_fallback ( destname, script ),
+         *lib_targets
+      )
    # --- end of link_shared (...) ---
 
    def link_shared_lib ( self, script, destname=None, *lib_targets ):
-      self.add_command ( "LINK_SHARED_LIB", script, destname, *lib_targets )
+      self.add_command (
+         "LINK_SHARED_LIB", script, basename_fallback ( destname, script ),
+         *lib_targets
+      )
    # --- end of link_shared (...) ---
 
    def dolib ( self, *libname ):
@@ -325,7 +340,7 @@ class BuildRecipe ( object ):
    def splitlib ( self, script, destname=None, *modules_exclude ):
       # standalone lib
       self.add_command (
-         "SPLITLIB", script, ( destname or os.path.basename ( script ) ),
+         "SPLITLIB", script, basename_fallback ( destname, script ),
          *modules_exclude
       )
    # --- end of splitlib (...) ---
@@ -337,7 +352,7 @@ class BuildRecipe ( object ):
       self.splitlib ( script, lib_destname, *modules_exclude )
       self.link_shared (
          script, script_destname,
-         ( lib_destname or os.path.basename ( script ) ), *lib_targets
+         basename_fallback ( lib_destname, script, '.sh' ), *lib_targets
       )
    # --- end of splitlib_script (...) ---
 
@@ -353,7 +368,8 @@ class BuildRecipe ( object ):
    # --- end of splitlib_script_with_stdlib (...) ---
 
    def symstorm ( self, script, *link_names ):
-      self.add_command ( "SYMSTORM", script, *link_names )
+      if link_names:
+         self.add_command ( "SYMSTORM", script, *link_names )
    # --- end of symstorm (...) ---
 
    def gen_lines ( self ):
