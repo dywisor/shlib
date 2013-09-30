@@ -46,9 +46,20 @@ http_fetch() {
 		wget -O "${2}" "${1}"
 	fi
 }
+http_nofetch() {
+   if [ -e "${2}" ]; then
+      einfo "${2#**/} exists"
+   else
+      die "${2} is missing."
+   fi
+}
 
-F_FETCH_PRE=prefetch_info
-F_FETCH_ITEM=http_fetch
+if [ "${NOFETCH:-n}" = "y" ]; then
+   F_FETCH_ITEM=http_nofetch
+else
+   einfo "Disabling download of source files (NOFETCH=y)."
+   F_FETCH_ITEM=http_fetch
+fi
 
 
 autodie fetch_list_from_file "${BUSYBOX_SRC_LIST}"
