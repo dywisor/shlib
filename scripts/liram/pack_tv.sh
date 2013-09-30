@@ -30,6 +30,19 @@
 #
 : ${IMAGE_DIR=}
 
+# config file
+#  will be loaded after setting up the default config / just before packing
+#
+# default config file (doesn't have to exist)
+: ${PACK_DEFAULT_CONFFILE:=/etc/pack_system.conf}
+
+# user config file
+#  The default config file won't be loaded if this variable is set.
+#
+#  Additionally, PACK_CONFFILE has to be empty or the file has to exist.
+#
+#PACK_CONFFILE=
+
 
 # =======================
 #  target-related config
@@ -71,14 +84,44 @@ pt_BR pt_PT ro ru sv vi zh_CN zh_TW"
 LOCALE_PURGE="${LOCALE_PURGE-} en_GB"
 
 # lib64 or lib?
-LIBDIR=lib64
+#  checking $(arch), $(uname -m) is not accurate when "cross-packing".
+#
+if [ -z "${LIBDIR-}" ]; then
+   if [ -d "${PACK_ROOT%/}/usr/lib64" ]; then
+      LIBDIR=lib64
+   else
+      LIBDIR=lib
+   fi
+fi
+
+# list of python versions whose site-packages directory will be cleaned up
+#
+if [ -n "${PYTHON_INSTALLED_VERSIONS+SET}" ]; then
+   _py=
+   v0=
+   for _py in "${PACK_ROOT%/}/usr/bin/python"?.?; do
+      if [ -x "${_py}" ]; then
+         v0="${v0} ${_py##*/python}"
+      fi
+   done
+   unset -v _py
+   PYTHON_INSTALLED_VERSIONS="${v0# }"
+   unset -v v0
+   : ${PYTHON_INSTALLED_VERSIONS:="2.7 3.2"}
+fi
 
 # useless files in /etc/conf.d, /etc/init.d
 # * useless ^= target has no use for these files
 #
 INITD_PURGE="crypto-loop dhcrelay dhcrelay6 fancontrol git-daemon hdparm \
-iptables lm_sensors mdadm mdraid nullmailer pciparm pydoc-2.7 pydoc-3.2 \
-smartd swap swapfiles sysstat wpa_supplicant"
+iptables lm_sensors mdadm mdraid nullmailer pciparm smartd swap swapfiles \
+sysstat wpa_supplicant"
+
+_pyver=
+for _pyver in ${PYTHON_INSTALLED_VERSIONS}; do
+   INITD_PURGE="${INITD_PURGE} python-${_pyver}"
+done
+unset -v _pyver
 
 # should this script die if a service in INITD_PURGE is found in
 # /etc/runlevels/*? That's generally a good idea.
@@ -87,9 +130,7 @@ smartd swap swapfiles sysstat wpa_supplicant"
 #
 INITD_PURGE_DIE_IF_ENABLED=y
 
-CONFD_PURGE="${INITD_PURGE-}"
-
-PYTHON_INSTALLED_VERSIONS="2.7 3.2"
+CONFD_PURGE="${INITD_PURGE?}"
 
 # keep development files?
 #
@@ -179,9 +220,10 @@ pack_target_etc() {
       local s
       for f in ${INITD_PURGE?}; do
          # lazy implementation
-         if [ -n "$( \
-            find "${PACK_SRC}/runlevels" -xdev -type l -name "${f}" | head -n 1 \
-         )" ]; then
+         if \
+            find "${PACK_SRC}/runlevels" -xdev -type l -name "${f}" | \
+            grep -q .
+         then
             s="${s-}${s:+ }${f}"
          fi
       done
@@ -371,6 +413,23 @@ add_virtual_target etc_update
 # ======
 #  main
 # ======
+
+# load user config
+if [ -n "${PACK_CONFFILE+SET}" ]; then
+
+   if [ -z "${PACK_CONFFILE-}" ]; then
+      true
+   elif [ -f "${PACK_CONFFILE}" ]; then
+      . "${PACK_CONFFILE}" || \
+         die "errors occured while loading user config file '${PACK_CONFFILE}'."
+   else
+      die "config file is missing: ${PACK_CONFFILE}"
+   fi
+
+elif [ -f "${PACK_DEFAULT_CONFFILE?}" ]; then
+   . "${PACK_DEFAULT_CONFFILE}" || \
+      die "errors occured while loading default config file '${PACK_DEFAULT_CONFFILE}'."
+fi
 
 if [ "${PACK_TV_AS_LIB:-n}" != "y" ]; then
    pack_autodie
