@@ -302,7 +302,6 @@ class BuildRecipe ( object ):
       self.add (
          ' '.join ( quote_str ( arg )  for arg in argv if arg is not None )
       )
-      print ( argv, self.lines[-1] )
    # --- end of add_command (...) ---
 
    def depend_on_shlib ( self ):
