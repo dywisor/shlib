@@ -34,7 +34,7 @@
 #  will be loaded after setting up the default config / just before packing
 #
 # default config file (doesn't have to exist)
-: ${PACK_DEFAULT_CONFFILE:=/etc/pack_system.conf}
+: ${PACK_DEFAULT_CONFFILE:=/etc/liram/pack_system.conf}
 
 # user config file
 #  The default config file won't be loaded if this variable is set.
