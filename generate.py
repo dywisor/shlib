@@ -502,8 +502,8 @@ class ScriptGenerationRuntime ( object ):
          recipe     = BuildRecipe.from_spec ( self.dest_dir, self.posargs )
          recipe_str = recipe.get_str()
 
+         dodir_for_file ( self.recipe_file )
          with open ( self.recipe_file, 'wt' ) as FH:
-            dodir_for_file ( self.recipe_file )
             FH.write ( recipe_str )
 
          self.build_recipe ( self.recipe_file )
