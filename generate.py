@@ -26,6 +26,14 @@ def die ( message=None, code=None ):
    sys.exit ( ( 1 ^ os.EX_OK ) if code is None else code )
 # --- end of die (...) ---
 
+def dodir ( dirpath ):
+   os.makedirs ( dirpath, exist_ok=True )
+# --- end of dodir (...) ---
+
+def dodir_for_file ( filepath ):
+   dodir ( os.path.dirname ( filepath ) )
+# --- end of dodir_for_file (...) ---
+
 def run_command_v (
    cmdv, *,
    env=None, env_extend=None, return_success=True, stdout=None, stderr=None
@@ -486,6 +494,7 @@ class ScriptGenerationRuntime ( object ):
          if self.recipe_stdout:
             sys.stdout.write ( recipe_str )
          else:
+            dodir_for_file ( self.recipe_file )
             with open ( self.recipe_file, 'wt' ) as FH:
                FH.write ( recipe_str )
 
@@ -494,6 +503,7 @@ class ScriptGenerationRuntime ( object ):
          recipe_str = recipe.get_str()
 
          with open ( self.recipe_file, 'wt' ) as FH:
+            dodir_for_file ( self.recipe_file )
             FH.write ( recipe_str )
 
          self.build_recipe ( self.recipe_file )
