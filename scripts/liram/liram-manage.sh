@@ -73,8 +73,8 @@
 # Just call this script with "--help" to get a full list of command-line
 # options. Note that the help message is created *after* reading and verifying
 # the config file(s), so you won't get any help message if your configuration
-# is incomplete.
-# As mentioned before, most variables cannot be set this way.
+# is incomplete. Some variables can be passed as environment vars,
+# but, as mentioned before, most variables cannot be set this way.
 # Currently, it is possible to set the script's mode (which has no real effect)
 # and the slot's name (else the current date is used).
 #
