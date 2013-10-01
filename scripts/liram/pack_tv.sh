@@ -3,32 +3,9 @@
 ## This script has to be appended to pack_system (or linked against it)
 ##
 
-# fix up $TMPDIR
-[ -n "${TMPDIR-}" ] && [ -d "${TMPDIR}" ] || TMPDIR=/tmp
-
 # ========
 #  config
 # ========
-
-# compression format
-#  common choices are gzip and xz, depending on whether you want to spend
-#  more time on reading (gzip) or unpacking (xz) tarballs
-#
-#  The target machine has a rather slow connection to its sysdisk (USB).
-#
-: ${PACK_COMPRESS_FORMAT:=xz}
-
-# root directory
-#  all targets are relative to this dir
-#
-: ${PACK_ROOT:=/}
-
-# image dir
-#  where tarballs / squashfs files will be written to
-#
-#  Leaving this empty results in auto-configuration by setup().
-#
-: ${IMAGE_DIR=}
 
 # config file
 #  will be loaded after setting up the default config / just before packing
@@ -43,6 +20,29 @@
 #
 #PACK_CONFFILE=
 
+# compression format
+#  common choices are gzip and xz, depending on whether you want to spend
+#  more time on reading (gzip) or unpacking (xz) tarballs
+#
+#  The target machine has a rather slow connection to its sysdisk (USB).
+#
+ENV__PACK_COMPRESS_FORMAT="${PACK_COMPRESS_FORMAT-}"
+: ${PACK_COMPRESS_FORMAT:=xz}
+
+# root directory
+#  all targets are relative to this dir
+#
+ENV__PACK_ROOT="${PACK_ROOT-}"
+: ${PACK_ROOT:=/}
+
+# image dir
+#  where tarballs / squashfs files will be written to
+#
+#  Leaving this empty results in auto-configuration by setup().
+#
+ENV__IMAGE_DIR="${IMAGE_DIR-}"
+: ${IMAGE_DIR=}
+
 
 # =======================
 #  target-related config
@@ -54,7 +54,7 @@
 
 # in case you want to keep "everything" (build-time files/dirs will be
 # removed, though)
-KEEP_EVERYTHING=n
+: ${KEEP_EVERYTHING:=n}
 
 # pack /etc/vdr and /etc/vdradmin separately?
 #: ${WITH_VDR_TARBALLS:=y}
@@ -71,17 +71,21 @@ fi
 
 
 # man page directories to remove:
+[ -n "${MAN_PURGE+SET}" ] || \
 MAN_PURGE="cs de es fi fr hu id it ja ko pl pt_BR ru sv tr zh_CN zh_TW"
 
 # keymap dirs to remove:
+[ -n "${KEYMAP_PURGE+SET}" ] || \
 KEYMAP_PURGE="amiga atari mac ppc sun \
 i386/azerty i386/colemak i386/dvorak i386/fgGIod i386/olpc"
 
-LOCALE_PURGE="cs da es fi fr hu id is it ja nl pl \
-pt_BR pt_PT ro ru sv vi zh_CN zh_TW"
+if [ -z "${LOCALE_PURGE+SET}" ]; then
+   LOCALE_PURGE="cs da es fi fr hu id is it ja nl pl \
+   pt_BR pt_PT ro ru sv vi zh_CN zh_TW"
 
-#LOCALE_PURGE="${LOCALE_PURGE-} de de_DE"
-LOCALE_PURGE="${LOCALE_PURGE-} en_GB"
+   #LOCALE_PURGE="${LOCALE_PURGE-} de de_DE"
+   LOCALE_PURGE="${LOCALE_PURGE-} en_GB"
+fi
 
 # lib64 or lib?
 #  checking $(arch), $(uname -m) is not accurate when "cross-packing".
@@ -113,24 +117,24 @@ fi
 # useless files in /etc/conf.d, /etc/init.d
 # * useless ^= target has no use for these files
 #
-INITD_PURGE="crypto-loop dhcrelay dhcrelay6 fancontrol git-daemon hdparm \
-iptables lm_sensors mdadm mdraid nullmailer pciparm smartd swap swapfiles \
-sysstat wpa_supplicant"
+if [ -z "${INITD_PURGE+SET}" ]; then
+   INITD_PURGE="crypto-loop dhcrelay dhcrelay6 fancontrol git-daemon hdparm \
+   iptables lm_sensors mdadm mdraid nullmailer pciparm smartd swap swapfiles \
+   sysstat wpa_supplicant"
 
-_pyver=
-for _pyver in ${PYTHON_INSTALLED_VERSIONS}; do
-   INITD_PURGE="${INITD_PURGE} python-${_pyver}"
-done
-unset -v _pyver
+   _pyver=
+   for _pyver in ${PYTHON_INSTALLED_VERSIONS}; do
+      INITD_PURGE="${INITD_PURGE} python-${_pyver}"
+   done
+   unset -v _pyver
+fi
 
 # should this script die if a service in INITD_PURGE is found in
 # /etc/runlevels/*? That's generally a good idea.
 #
 # Setting this to 'n' results in printing an error message only.
 #
-INITD_PURGE_DIE_IF_ENABLED=y
-
-CONFD_PURGE="${INITD_PURGE?}"
+: ${INITD_PURGE_DIE_IF_ENABLED:=y}
 
 # keep development files?
 #
@@ -138,7 +142,7 @@ CONFD_PURGE="${INITD_PURGE?}"
 #
 # Note: only partially implemented
 #
-KEEP_DEV_FILES=y
+${KEEP_DEV_FILES:=y}
 
 # keep development tools?
 #
@@ -150,9 +154,10 @@ KEEP_DEV_FILES=y
 #
 # Note: only partially implemented
 #
-KEEP_DEV_TOOLS=y
+${KEEP_DEV_TOOLS:=y}
 
 # app-portage/portage-utils q applets
+[ -n "${Q_APPLETS+SET}" ] || \
 Q_APPLETS="qatom qcache qcheck qdepends qfile qgrep qlist qlop \
 qmerge qpkg qsearch qsize qtbz2 quse qxpak q"
 
@@ -414,7 +419,7 @@ add_virtual_target etc_update
 #  main
 # ======
 
-# load user config
+# load config file
 if [ -n "${PACK_CONFFILE+SET}" ]; then
 
    if [ -z "${PACK_CONFFILE-}" ]; then
@@ -430,6 +435,16 @@ elif [ -f "${PACK_DEFAULT_CONFFILE?}" ]; then
    . "${PACK_DEFAULT_CONFFILE}" || \
       die "errors occured while loading default config file '${PACK_DEFAULT_CONFFILE}'."
 fi
+
+[ -n "${CONFD_PURGE+SET}" ] || CONFD_PURGE="${INITD_PURGE}"
+
+[ -z "${ENV__IMAGE_DIR?}" ] || IMAGE_DIR="${ENV__IMAGE_DIR}"
+[ -z "${ENV__PACK_ROOT?}" ] || PACK_ROOT="${ENV__PACK_ROOT}"
+[ -z "${ENV__PACK_COMPRESS_FORMAT?}" ] || \
+   PACK_COMPRESS_FORMAT="${ENV__PACK_COMPRESS_FORMAT}"
+
+# fix up $TMPDIR
+[ -n "${TMPDIR-}" ] && [ -d "${TMPDIR}" ] || TMPDIR=/tmp
 
 if [ "${PACK_TV_AS_LIB:-n}" != "y" ]; then
    pack_autodie
