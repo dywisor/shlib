@@ -1,0 +1,89 @@
+# Path to the script that will actually pack your system.
+# This can also be a name if the pack script is in PATH.
+PACK_SCRIPT="/usr/bin/liram-packscript"
+
+# Name of the boot slot. The boot slot has to be a symlink, if it exists.
+#
+# Defaults to "current".
+#
+#LIRAM_BOOT_SLOT=""
+
+# Slot (name) that will be used to fix up the boot slot link.
+# Optional.
+#LIRAM_FALLBACK_SLOT=""
+
+# Directory that contains all slots. The path should be relative to
+# the mountpoint of the liram disk.
+LIRAM_IMAGE_ROOT="images"
+
+# Directory that contains "core" images (typically host-generated files).
+# The path is interpreted as relative to LIRAM_IMAGE_ROOT if it does not
+# start with a "/", relative to the mountpoint of the liram disk if it
+# starts with a single "/", and absolute if it starts with more than one
+# "/" char. Note that the "//*" variant is not supported.
+LIRAM_CORE_IMAGE_DIR="core/default"
+
+# Use hardlinks to add files from LIRAM_CORE_IMAGE_DIR (if set to y),
+# else use symlinks. Defaults to "y". Using hardlinks allows to set
+# LIRAM_CORE_IMAGE_DIR = %LIRAM_BOOT_SLOT, but it'll be harder to track
+# which image files have been created specifically for a given slot.
+#
+# Defaults to "y".
+#
+LIRAM_HARDLINK_CORE="y"
+
+# identifier of the disk that is used to store the images.
+# Should be any of
+# * UUID=<uuid>
+# * LABEL=<label>
+# * /dev/sd?, ...
+#
+# Note that this option is *ignored* on systems that booted with liram,
+# as /LIRAM_ENV contains LIRAM_DISK and is read after this file.
+#
+#LIRAM_DISK=""
+
+# mountpoint for LIRAM_DISK
+#
+# Defaults to "/mnt/liram/sysdisk".
+#
+#LIRAM_DISK_MP=""
+
+# disk that contains kernel images, initramfs, etc.
+#
+# *** not used so far / reserved for future usage ***
+#
+#LIRAM_BOOTDISK=""
+
+# mountpoint for LIRAM_BOOTDISK
+#
+# Defaults to "/mnt/liram/boot".
+#
+#LIRAM_BOOTDISK_MP=""
+
+# ----------------------------------------------------------------------------
+# Options better left unchanged:
+#
+
+# image slot that will be used for packing
+#
+# Do *not* change this if unsure.
+#
+# Defaults to $DATE_NOW (which is $(date +%F)).
+#
+#LIRAM_SLOT=""
+
+# directory for filesystem locks
+#
+# Defaults to "/run/lock/liram".
+#
+#PACK_LOCKDIR=""
+
+# fine-tuning for filesystem locks
+#LOCKFILE_ACQUIRE_RETRY="10"
+#LOCKFILE_ACQUIRE_WAIT_INTVL="0.5"
+
+# increase randomness
+# Hint: affects on-error behavior.
+#unset -v RANDOM
+#RANDOM=2
