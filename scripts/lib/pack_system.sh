@@ -172,7 +172,7 @@ next() {
    ${PACK_AUTODIE-} dotar_from "${1?}"
    PACK_SRC="${DOTAR__SRC_DIR:?}"
 
-   if [ -z "${2-}" ] || [ "${2}" = "as" ]; then
+   if [ -z "${2-}" ] || [ "${2}" = "as" ] || [ "${2}" = "@" ]; then
       PACK_NAME="${PACK_SRC##*/}"
    else
       PACK_NAME="${2#@}"
