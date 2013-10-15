@@ -2,7 +2,7 @@ if [ -z "${__HAVE_SHLIB_DIE__:-}" ]; then
 readonly __HAVE_SHLIB_DIE__=y
 
 # @private @noreturn die__extended (
-#    message=, code=2, **DIE=exit, **F_ON_DIE=, **PRINT_FUNCTRACE=y
+#    message=, code=2, **DIE=exit, **F_ON_DIE=, **PRINT_FUNCTRACE=n
 # )
 #
 #  if %F_ON_DIE has is not defined / has a null value:
