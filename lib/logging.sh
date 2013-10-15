@@ -37,6 +37,8 @@ dolog() {
 
    # parse args
    local level="${LOG_LEVEL-}" facility= time=0 msg= prefix= suffix=
+   local no_newline=0
+
    while [ $# -gt 0 ]; do
       case "${1}" in
          --level=*)
@@ -62,6 +64,9 @@ dolog() {
          ;;
          -0)
             rc=0
+         ;;
+         -n)
+            no_newline=1
          ;;
          '')
             true
@@ -134,6 +139,7 @@ msg="${1# }"
             print_func=einfo
          ;;
       esac
+      [ ${no_newline} -eq 0 ] || print_func="${print_func}n"
    fi
 
    # finally log the message(s)
@@ -144,7 +150,13 @@ msg="${1# }"
    while [ $# -gt 0 ]; do
       ${print_func} "${log_head}${prefix}${1}${suffix}" # "${log_head_level}"
       if [ -n "${LOGFILE-}" ]; then
-         echo "${log_head_level} ${log_head}${prefix}${1}${suffix}" >> "${LOGFILE}"
+         local logfile_message="${log_head_level} ${log_head}${prefix}${1}${suffix}"
+         if [ ${no_newline} -eq 0 ]; then
+            echo "${logfile_message}" >> "${LOGFILE}"
+         else
+            # or printf()
+            echo -n "${logfile_message}" >> "${LOGFILE}"
+         fi
       fi
       shift
    done
