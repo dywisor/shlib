@@ -1,0 +1,6 @@
+defsym
+die_extended
+misc/pragma
+message
+autodie
+scriptinfo
