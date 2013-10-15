@@ -12,3 +12,5 @@ print_functrace() {
    ftrace="${ftrace# }"
    ${1:-${F_FUNCTRACE_MSG:-ewarn}} "${ftrace% }" "[FUNCTRACE]"
 }
+
+readonly FUNCTRACE_AVAILABLE=y

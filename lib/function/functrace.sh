@@ -5,3 +5,5 @@
 print_functrace() {
    ${1:-${F_FUNCTRACE_MSG:-eerror}} "not available" "[FUNCTRACE]"
 }
+
+readonly FUNCTRACE_AVAILABLE=n
