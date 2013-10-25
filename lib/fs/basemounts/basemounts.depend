@@ -1,0 +1,6 @@
+fs/dodir_minimal
+
+fs/basemounts/defsym
+fs/basemounts/devfs
+
+fs/mount/domount

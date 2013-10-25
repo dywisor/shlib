@@ -1,0 +1,10 @@
+function/defined
+function/die
+
+fs/dodir_minimal
+fs/dofile
+fs/dosym
+fs/basemounts/defsym
+
+fs/mount/domount
+fs/mount/info

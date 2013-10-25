@@ -1,6 +1,8 @@
 fs/dodir
 fs/dofile
 
+fs/basemounts/basemounts
+
 fs/mount/domount
 fs/mount/util
 

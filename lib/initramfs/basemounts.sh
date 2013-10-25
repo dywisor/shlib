@@ -1,20 +1,4 @@
-: ${PROCFS_OPTS:=rw,nosuid,nodev,noexec,relatime}
-: ${SYSFS_OPTS:=rw,nosuid,nodev,noexec,relatime}
-
-# void basemounts_mount ( **DEVFS_TYPE=devtmpfs, **PROCFS_OPTS, **SYSFS_OPTS )
-#
-#  Creates a minimal static /dev and mounts all basemounts afterwards,
-#  namely /proc, /sys, /dev and /dev/pts (in that order).
-#
-basemounts_mount() {
-   devfs_seed
-   irun dodir_clean /proc /sys
-   imount -t proc  -o ${PROCFS_OPTS:?} proc  /proc
-   # set up /etc/mtab
-   inonfatal ln -sf /proc/self/mounts /etc/mtab
-   imount -t sysfs -o ${SYSFS_OPTS:?}  sysfs /sys
-   devfs_mount
-}
+# @extern int basemounts_mount()
 
 # @private void basemounts__default_umount()
 #
