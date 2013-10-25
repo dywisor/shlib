@@ -10,13 +10,19 @@ die__autodie() {
    fi
 }
 
-# void autodie ( *argv, **AUTODIE=die__autodie )
+# void autodie ( *argv, **F_AUTODIE=die__autodie )
 #
-#  Runs AUTODIE ( *argv ) which is supposed to let the script die on
+#  Runs %F_AUTODIE ( *argv ) which is supposed to let the script die on
 #  non-zero return code.
 #
-autodie() { ${AUTODIE:-die__autodie} "$@"; }
+autodie() { ${F_AUTODIE:-die__autodie} "$@"; }
 
 # @function_alias run() copies autodie()
 #
-run() { ${AUTODIE:-die__autodie} "$@"; }
+run() { ${F_AUTODIE:-die__autodie} "$@"; }
+
+
+# modules/scripts may want to use/set %AUTODIE, %AUTODIE_NONFATAL
+# if autodie behavior is optional
+: ${AUTODIE=}
+: ${AUTODIE_NONFATAL=}

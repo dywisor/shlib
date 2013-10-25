@@ -33,10 +33,10 @@ initramfs_assert() {
    fi
 }
 
-# @extern void autodie ( *argv, **AUTODIE )
-# @extern void run     ( *argv, **AUTODIE )
+# @extern void autodie ( *argv, **F_AUTODIE )
+# @extern void run     ( *argv, **F_AUTODIE )
 #
-#  Overridden via AUTODIE=irun.
+#  Overridden via F_AUTODIE=irun.
 #
 
 # void irun ( *cmdv ), raises die()
@@ -79,6 +79,10 @@ inonfatal() {
 
 # @implicit void main()
 #
-#  Sets the AUTODIE variable.
+#  Sets the F_AUTODIE, AUTODIE and AUTODIE_NONFATAL variables.
 #
+#  Note: Usually, initramfs modules should use irun()/inonfatal() directly.
+#
+F_AUTODIE=irun
 AUTODIE=irun
+AUTODIE_NONFATAL=inonfatal
