@@ -56,3 +56,20 @@ fstype_supported() {
    done
    return 0
 }
+
+# int mountpoint_in_fstab ( mp, **FSTAB_FILE=/etc/fstab )
+#
+#  Returns 0 if the given mountpoint appears in %FSTAB_FILE, else 1.
+#  Returns 2 if %mp was empty.
+#
+mountpoint_in_fstab() {
+   if [ -z "${1-}" ]; then
+      return 2
+   elif \
+      grep -q -E -- ^"\S+\s+${1}[/]*\s+" "${FSTAB_FILE:-/etc/fstab}"
+   then
+      return 0
+   else
+      return 1
+   fi
+}
