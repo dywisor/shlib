@@ -287,6 +287,7 @@ class BuildRecipe ( object ):
          'inherit'                     : self.inherit_recipe,
          'use'                         : self.inherit_recipe,
          'stdlib'                      : self.depend_on_shlib,
+         'makelib'                     : self.makelib,
          'splitlib'                    : self.splitlib,
          'splitlib_script'             : self.splitlib_script,
          'splitlib_x'                  : self.splitlib_script,
@@ -317,6 +318,10 @@ class BuildRecipe ( object ):
          "STANDALONE", script, basename_fallback ( destname, script )
       )
    # --- end of standalone (...) ---
+
+   def makelib ( self, destname, *modules ):
+      self.add_command ( "MAKELIB", destname, *modules )
+   # --- end of makelib (...) ---
 
    def link_shared ( self, script, destname=None, *lib_targets ):
       self.add_command (
