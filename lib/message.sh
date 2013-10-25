@@ -53,6 +53,7 @@ eerrorn_color() { __messagen_colored "${2:-*}" '1;31m' "${1-}"; }
 #
 message_bind_functions() {
    HAVE_MESSAGE_FUNCTIONS=n
+   HAVE_COLORED_MESSAGE_FUNCTIONS=n
    __HAVE_MESSAGE_FUNCTIONS=n
    unset -f einfo ewarn eerror edebug message
 
@@ -68,6 +69,7 @@ message_bind_functions() {
       eerrorn()  { eerrorn_color "$@" 1>&2; }
       messagen() { __messagen_colored "$*" '1;29m'; }
 
+      HAVE_COLORED_MESSAGE_FUNCTIONS=y
    else
 
       einfo()    { einfo_nocolor  "$@"; }
@@ -81,6 +83,7 @@ message_bind_functions() {
       messagen() { printf -- "${*}"; }
 
    fi
+
    __HAVE_MESSAGE_FUNCTIONS=y
    HAVE_MESSAGE_FUNCTIONS=y
 }
@@ -97,6 +100,13 @@ veinfo() {
    return 0
 }
 
+# void veinfo_stderr ( message, header, **DEBUG=n )
+#
+#  Identical to veinfo(), buts prints the message to stderr
+#  (instead of stdout).
+#
+veinfo_stderr() { veinfo "$@" 1>&2; }
+
 # void veinfon ( message, header, **DEBUG= )
 #
 #  Like veinfo(), but doesn't append a trailing newline.
@@ -107,6 +117,13 @@ veinfon() {
    fi
    return 0
 }
+
+# void veinfon_stderr ( message, header, **DEBUG=n )
+#
+#  Identical to veinfon(), buts prints the message to stderr
+#  (instead of stdout).
+#
+veinfo_stderr() { veinfon "$@" 1>&2; }
 
 # void printvar ( *varname, **F_PRINTVAR=einfo, **PRINTVAR_SKIP_EMPTY=n )
 #
@@ -125,4 +142,48 @@ printvar() {
    done
 }
 
+# void message_autoset_nocolor ( force_rebind=n, **NO_COLOR! )
+#
+#  Sets NO_COLOR to 'y' if any of the following conditions are met:
+#  * /NO_COLOR exists (can also be a broken symlink)
+#  * stdout or stderr are not connected to a tty
+#  * stdin is connected to a special terminal, e.g. serial console (ttyS*)
+#
+#  Automatically rebinds the message functions if necessary or
+#  if %force_rebind is set to 'y'.
+#
+#  Note that this function never sets NO_COLOR=n.
+#
+message_autoset_nocolor() {
+   if [ "${NO_COLOR:-n}" != "y" ]; then
+      if \
+         [ -e /NO_COLOR ] || [ -h /NO_COLOR ] || \
+         [ ! -t 1 ] || [ ! -t 2 ]
+      then
+         NO_COLOR=y
+      else
+         case "$(tty 2>/dev/null)" in
+            ttyS*|/*/ttyS*)
+               # stdin from serial console, disable color
+               NO_COLOR=y
+            ;;
+         esac
+      fi
+   fi
+
+   # assert ${HAVE_COLORED_MESSAGE_FUNCTIONS:-y} in y n
+   # * NO_COLOR <=> (not HAVE_COLORED_MESSAGE_FUNCTIONS)
+   #
+   if \
+      [ "${1:-n}" = "y" ] || \
+      [ "${NO_COLOR:-n}" = "${HAVE_COLORED_MESSAGE_FUNCTIONS:-y}" ]
+   then
+      message_bind_functions
+   fi
+}
+
+# @implicit void main ( **MESSAGE_BIND_FUNCTIONS=y )
+#
+#  Binds the message functions if %MESSAGE_BIND_FUNCTIONS is set to 'y'.
+#
 [ "${MESSAGE_BIND_FUNCTIONS:-y}" != "y" ] || message_bind_functions
