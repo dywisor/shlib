@@ -1,6 +1,7 @@
 defsym
 die_extended
 misc/pragma
+misc/qwhich
 message
 autodie
 scriptinfo

@@ -52,8 +52,7 @@ configure_which_nonfatal() {
       configure_die "configure_which: bad usage."
 
    configure_check_message_begin "${1} exists"
-   v0=$(which "${1}" 2>>${DEVNULL})
-   if [ -n "${v0}" ]; then
+   if qwhich_single "${1}"; then
       configure_check_message_end "${v0}"
    else
       configure_check_message_end "no"
