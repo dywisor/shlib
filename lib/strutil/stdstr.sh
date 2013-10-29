@@ -52,3 +52,30 @@ str_upper() { tr [:lower:] [:upper:] "$@"; }
 
 # @function_alias str_lower() renames tr()
 str_lower() { tr [:upper:] [:lower:] "$@"; }
+
+
+# void str_remove_trailing_chars ( str, chars, **v0! )
+#
+str_remove_trailing_chars() {
+   : ${2:?}
+   v0="${1?}"
+   local a="${v0%[${2}]}"
+
+   while [ "${a}" != "${v0}" ]; do
+      v0="${a%[${2}]}"
+      a="${v0%[${2}]}"
+   done
+}
+
+# void str_remove_leading_chars ( str, chars, **v0! )
+#
+str_remove_leading_chars() {
+   : ${2:?}
+   v0="${1?}"
+   local a="${v0#[${2}]}"
+
+   while [ "${a}" != "${v0}" ]; do
+      v0="${a#[${2}]}"
+      a="${v0#[${2}]}"
+   done
+}
