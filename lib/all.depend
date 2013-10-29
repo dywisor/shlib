@@ -19,10 +19,12 @@ core
 defsym
 die_extended
 die
+eval_var
 itertools
 integer
 list_has
 list_redux
+list_sort
 logging
 message
 readconfig

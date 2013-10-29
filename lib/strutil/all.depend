@@ -1,5 +1,6 @@
 function/export
 
 strutil/charwise
+strutil/fnmatch
 strutil/stdstr
 strutil/yesno
