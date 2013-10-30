@@ -1,0 +1,5 @@
+#function/export
+
+fs/basemounts/basemounts
+fs/basemounts/defsym
+fs/basemounts/devfs
