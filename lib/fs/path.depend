@@ -1,3 +1,3 @@
-die
+function/die
 misc/qwhich
 strutil/stdstr

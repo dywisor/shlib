@@ -146,7 +146,7 @@ realpath__realpath_safe() {
 
 # void fspath_bind_implementation (
 #    impl, **HAVE_FSPATH_FUNCTIONS!
-# ), raises die()
+# ), raises function_die()
 #
 #  Binds the print_abspath, print_realpath, print_realpath_safe,
 #  get_abspath, get_realpath and get_realpath_safe functions according
@@ -167,24 +167,37 @@ fspath_bind_implementation() {
          print_realpath()      { realpath__realpath "$@"; }
          print_realpath_safe() { realpath__realpath_safe "$@"; }
 
-         get_abspath()         { v0=$(realpath__abspath "$@"); }
-         get_realpath()        { v0=$(realpath__realpath "$@"); }
-         get_realpath_safe()   { v0=$(realpath__realpath_safe "$@"); }
+         get_abspath()         { v0="$(realpath__abspath "$@")"; }
+         get_realpath()        { v0="$(realpath__realpath "$@")"; }
+         get_realpath_safe()   { v0="$(realpath__realpath_safe "$@")"; }
       ;;
       readlink)
          print_abspath()       { readlink__abspath "$@"; }
          print_realpath()      { readlink__realpath "$@"; }
          print_realpath_safe() { readlink__realpath_safe "$@"; }
 
-         get_abspath()         { v0=$(readlink__abspath "$@"); }
-         get_realpath()        { v0=$(readlink__realpath "$@"); }
-         get_realpath_safe()   { v0=$(readlink__realpath_safe "$@"); }
+         get_abspath()         { v0="$(readlink__abspath "$@")"; }
+         get_realpath()        { v0="$(readlink__realpath "$@")"; }
+         get_realpath_safe()   { v0="$(readlink__realpath_safe "$@")"; }
       ;;
       *)
-         die "unknown fspath implementation '${1}'"
+         function_die "unknown fspath implementation '${1}'" \
+            fspath_bind_implementation
       ;;
    esac
    HAVE_FSPATH_FUNCTIONS=y
+}
+
+# void get_fspath ( fspath, **v0! )
+#
+#  Stores the realpath of %fspath in %v0 if it is non-empty,
+#  and the abspath otherwise.
+#
+get_fspath() {
+   v0=
+   get_realpath "${1?}"
+   [ -n "${v0}" ] || get_abspath "${1?}"
+   return 0
 }
 
 # void fspath_bind_functions ( **HAVE_FSPATH_FUNCTIONS! )
@@ -204,6 +217,12 @@ fspath_bind_functions() {
    else
       fspath_bind_implementation readlink
    fi
+}
+
+# void fspath_bind_functions_if_required ( **HAVE_FSPATH_FUNCTIONS! )
+#
+fspath_bind_functions_if_required() {
+   [ "${HAVE_FSPATH_FUNCTIONS:-n}" = "y" ] || fspath_bind_functions
 }
 
 
