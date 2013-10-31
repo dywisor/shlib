@@ -88,6 +88,22 @@ def autodie_command ( *cmdv, env=None, env_extend=None ):
       )
 # --- end of autodie_command (...) ---
 
+def find_script_files ( root, file_extensions=frozenset ({ 'bash', 'sh' }) ):
+   my_root = os.path.normpath ( root )
+   relpath_start = len ( my_root ) + 1
+   for subroot, dirnames, filenames in os.walk ( my_root ):
+      relroot = subroot[relpath_start:]
+      if relroot:
+         relroot += os.sep
+
+      for filename in filenames:
+         visited = set()
+         name, dot, fext = filename.rpartition ( '.' )
+         if fext in file_extensions and name not in visited:
+            yield ( name, relroot + name )
+            visited.add ( name )
+# --- end of find_script_files (...) ---
+
 def get_argument_parser():
 
    def create_fs_acceptor (
@@ -214,6 +230,7 @@ def get_argument_parser():
       help="target shlib name",
    )
 
+   # --- subparsers ---
    subparsers = parser.add_subparsers (
       title="commands", dest="command", help="action to perform"
    )
@@ -246,6 +263,13 @@ def get_argument_parser():
       "posargs", nargs="+", metavar='<spec>',
       help="comma-separated build spec(s)",
    )
+
+   # TODO/FIXME: subparser alias?
+   lss_parser = subparsers.add_parser ( "list-scripts", help="list scripts" )
+   subparsers.add_parser ( "lss", help="list scripts" )
+
+   lsl_parser = subparsers.add_parser ( "list-libs", help="list libs" )
+   subparsers.add_parser ( "lsl", help="list libs" )
 
    return parser
 # --- end of get_argument_parser (...) ---
@@ -533,6 +557,22 @@ class ScriptGenerationRuntime ( object ):
       elif COMMAND == 'build':
          for recipe_file in self.posargs:
             self.build_recipe ( recipe_file )
+
+      elif COMMAND in { 'lss', 'list-scripts' }:
+         for name, script_file in sorted (
+            find_script_files ( self.shlib_scriptdir ),
+            key = lambda s: ( 1 if os.sep in s[1] else 0, s )
+         ):
+            print ( script_file )
+
+      elif COMMAND in { 'lsl', 'list-libs' }:
+         for name, script_file in sorted (
+            find_script_files ( self.shlib_libdir ),
+            key = lambda s: ( 1 if os.sep in s[1] else 0, s )
+         ):
+            if name not in { 'all', }:
+               print ( script_file )
+
       else:
          die ( "unknown command {}".format ( self.command ) )
 
