@@ -226,6 +226,6 @@ fspath_bind_functions_if_required() {
 }
 
 
-if [ $$ -ne 0 ] && [ "${FSPATH_BIND_FUNCTIONS:-y}" = "y" ]; then
+if [ $$ -ne 1 ] && [ "${FSPATH_BIND_FUNCTIONS:-y}" = "y" ]; then
    fspath_bind_functions
 fi
