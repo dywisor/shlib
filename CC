@@ -18,4 +18,4 @@ else
    fi
 fi
 
-"${CC}" -S "${SCRIPT_DIR}/lib" "$@"
+"${CC}" -S "${SCRIPT_DIR}/lib" --stable-sort "$@"
