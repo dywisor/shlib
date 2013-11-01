@@ -1,2 +1,4 @@
-vdr/info
 readconfig
+fs/path
+function/die
+vdr/info

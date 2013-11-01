@@ -1,17 +1,157 @@
 : ${VDR_RECORD_EXT=ts}
 
-VDR_RECORD_VARS="
+VDR_RECORD_VARS_NONEMPTY="
 VDR_INITIAL_PWD
 VDR_RECORD_STATE
-VDR_RECORD_NEW_DIR
 VDR_RECORD_DIR
 VDR_RECORD_ROOT
-VDR_RECORD_ROOT_ALT
 VDR_RECORD_DATE
-VDR_RECORD_DATE_APPEND
-VDR_RECORD_NAME
 VDR_RECORD_EXT
-"
+VDR_RECORD_NAME"
+
+VDR_RECORD_VARS_EMPTYOK="
+VDR_RECORD_NEW_DIR
+VDR_RECORD_ROOT_ALT
+VDR_RECORD_DATE_APPEND"
+
+VDR_RECORD_VARS="${VDR_RECORD_VARS_NONEMPTY}
+${VDR_RECORD_VARS_EMPTYOK}"
+
+
+
+# @extern int vdr_get_record_files (
+#    type="default"
+#    **VDR_RECORD_DIR, **VDR_RECORD_EXT, **v0!, **v1!
+# )
+#
+#  Searches for record files in VDR_RECORD_DIR and stores their names in v0.
+#  Also counts the # of record files and stores the result in v1.
+#
+
+# void vdr_validate_record_vars(), raises die()
+#
+vdr_validate_record_vars() {
+   local badvars=
+   local v0 vname
+
+   for vname in ${VDR_RECORD_VARS_NONEMPTY?}; do
+      var_is_set_nonempty "${vname}" || badvars="${badvars} ${vname}"
+   done
+
+   for vname in ${VDR_RECORD_VARS_EMPTYOK?}; do
+      var_is_set "${vname}" || badvars="${badvars} ${vname}"
+   done
+
+   if [ -n "${badvars# }" ]; then
+      function_die \
+         "invalid vars detected:${badvars}" "vdr_validate_record_vars"
+   else
+      return 0
+   fi
+}
+
+
+# int vdr_guess_record_root_vars (
+#   record_dir, **VDR_ROOT,
+#   **VDR_RECORD_ROOT!, **VDR_RECORD_ROOT_ALT!, **VDR_RECORD_NAME!
+# )
+#
+vdr_guess_record_root_vars() {
+   local record_parent_dir="${VDR_RECORD_DIR%/*}"
+   local need_record_root_fallback=0
+
+   if [ -n "${VDR_ROOT-}" ]; then
+      case "${record_parent_dir}" in
+         ''|/)
+            # (a) invalid
+            return 50
+         ;;
+         "${VDR_ROOT}")
+            # (b) <vdr root>/<record dir>
+            #
+            #  Not likely.
+            #
+            VDR_RECORD_ROOT_ALT=
+            VDR_RECORD_ROOT="${VDR_RECORD_DIR}"
+            VDR_RECORD_NAME="${VDR_RECORD_ROOT##*/}"
+         ;;
+
+         #"${VDR_ROOT}"/?*/?*/_)
+         #   # (b) <vdr root>/{.../}/_/<record dir>
+         #   # handle differently
+         #;;
+
+         "${VDR_ROOT}"/?*/_)
+            # <vdr root>/{.../}/_/<record dir>
+            #
+            # (c) common case: <vdr root>/<record root>/_/<record dir>
+            #
+            VDR_RECORD_ROOT_ALT=
+            VDR_RECORD_ROOT="${record_parent_dir%/*}"
+            VDR_RECORD_NAME="${VDR_RECORD_ROOT##*/}"
+         ;;
+
+         "${VDR_ROOT}"/?*/?*)
+            # (d) <vdr root>/.../.../<record dir>
+            #
+            VDR_RECORD_ROOT_ALT="${record_parent_dir%/*}"
+            VDR_RECORD_ROOT="${record_parent_dir}"
+            VDR_RECORD_NAME="${VDR_RECORD_ROOT##*/}"
+         ;;
+
+         "${VDR_ROOT}"/?*)
+            # (e) <vdr root>/.../<record dir> (depth=1)
+            #
+            VDR_RECORD_ROOT_ALT=
+            VDR_RECORD_ROOT="${record_parent_dir}"
+            VDR_RECORD_NAME="${VDR_RECORD_ROOT##*/}"
+         ;;
+
+         *)
+            need_record_root_fallback=1
+         ;;
+      esac
+   else
+      need_record_root_fallback=1
+   fi
+
+   if [ ${need_record_root_fallback} -eq 1 ]; then
+      case "${record_parent_dir}" in
+         ''|/)
+            # (a)
+ewarn a,${VDR_RECORD_DIR}
+            return 51
+         ;;
+
+         ?*/?*/_)
+            # (c)
+            VDR_RECORD_ROOT_ALT=
+            VDR_RECORD_ROOT="${record_parent_dir%/*}"
+            VDR_RECORD_NAME="${VDR_RECORD_ROOT##*/}"
+         ;;
+
+         ?*/?*/?*)
+            # (d)
+            VDR_RECORD_ROOT_ALT="${record_parent_dir%/*}"
+            VDR_RECORD_ROOT="${record_parent_dir}"
+            VDR_RECORD_NAME="${VDR_RECORD_ROOT##*/}"
+         ;;
+
+         ?*/?*)
+            # (e)
+            VDR_RECORD_ROOT_ALT=
+            VDR_RECORD_ROOT="${record_parent_dir}"
+            VDR_RECORD_NAME="${VDR_RECORD_ROOT##*/}"
+         ;;
+
+         *)
+            return 52
+         ;;
+      esac
+   fi
+
+   return 0
+}
 
 # void vdr_get_record_vars (
 #    record_dir,
@@ -25,51 +165,36 @@ VDR_RECORD_EXT
 #
 vdr_get_record_vars() {
    : ${1:?}
+   local v0
+
    # zap vars
    VDR_INITIAL_PWD="${PWD}"
    VDR_RECORD_STATE=
    VDR_RECORD_NEW_DIR=
+   #VDR_RECORD_DIR=
+   VDR_RECORD_ROOT=
+   VDR_RECORD_ROOT_ALT=
+   VDR_RECORD_DATE=
+   VDR_RECORD_DATE_APPEND=
+   VDR_RECORD_NAME=
 
-   VDR_RECORD_DIR=$(readlink -f "${1}")
+   get_fspath "${1}"
+   VDR_RECORD_DIR="${v0}"
 
    # @ASSERT fs_level ( VDR_RECORD_DIR ) > 1
 
-   if [ -d "${VDR_RECORD_DIR}" ]; then
-      local n="${VDR_RECORD_DIR##*/}"
-      VDR_RECORD_DATE="${n%%.*rec}"
-      VDR_RECORD_DATE_APPEND="${n#*.}"
-      VDR_RECORD_DATE_APPEND="${VDR_RECORD_DATE_APPEND%.rec}"
-
-      n="${VDR_RECORD_DIR%/*}"
-      case "${n##*/}" in
-         '')
-            VDR_RECORD_ROOT=
-            VDR_RECORD_ROOT_ALT=
-            VDR_RECORD_NAME=
-            return 50
-         ;;
-         '_')
-            VDR_RECORD_ROOT="${n%/*}"
-            VDR_RECORD_ROOT_ALT=
-            VDR_RECORD_NAME="${VDR_RECORD_ROOT##*/}"
-         ;;
-         *)
-            VDR_RECORD_NAME="${n##*/}"
-            # this function cannot know which RECORD_ROOT is correct
-            VDR_RECORD_ROOT="${n%/*}"
-
-            if [ -n "${VDR_ROOT-}" ]; then
-               if [ "${VDR_ROOT}" = "${VDR_RECORD_ROOT}" ]; then
-                  VDR_RECORD_ROOT="${n}"
-                  VDR_RECORD_ROOT_ALT=
-               else
-                  VDR_RECORD_ROOT_ALT="${n}"
-               fi
-            else
-               VDR_RECORD_ROOT_ALT="${n}"
-            fi
-         ;;
-      esac
+   if \
+      [ -d "${VDR_RECORD_DIR}" ] && \
+      vdr_guess_record_root_vars "${VDR_RECORD_DIR}"
+   then
+      # <yyyy-mm-dd>.<HH.MM._-_>.rec
+      #
+      #  <VDR_RECORD_DATE>.[<VDR_RECORD_DATE_APPEND>.][.rec]
+      #
+      v0="${VDR_RECORD_DIR##*/}"
+      VDR_RECORD_DATE="${v0%%.*rec}"
+      v0="${v0#*.}"
+      VDR_RECORD_DATE_APPEND="${v0%.rec}"
 
       case "${VDR_RECORD_DATE}" in
          [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9])
@@ -82,24 +207,23 @@ vdr_get_record_vars() {
          ;;
       esac
 
-      local v0
-
       if \
          [ -n "${VDR_ROOT-}" ] && \
          get_fslevel_diff "${VDR_RECORD_DIR}" "${VDR_ROOT}"
       then
          VDR_RECORD_LEVEL="${v0}"
       else
-         VDR_RECORD_LEVEL=-1
+         VDR_RECORD_LEVEL=
       fi
 
    else
+      # zap vars that might have been set, just to be sure
+      # (vdr_guess_record_root_vars() doesn't set these vars if there is
+      #  an error, so zapping here is not neccessary)
+      #
       VDR_RECORD_ROOT=
       VDR_RECORD_ROOT_ALT=
-      VDR_RECORD_DATE=
-      VDR_RECORD_DATE_APPEND=
       VDR_RECORD_NAME=
-      VDR_RECORD_LEVEL=-10
    fi
 }
 
@@ -110,55 +234,15 @@ vdr_get_record_vars() {
 #  Sets all vdr record hook variables.
 #
 vdr_script_get_record_vars() {
+   local v0
    vdr_get_record_vars "${2:?}"
 
    VDR_RECORD_STATE="${1-}"
    if [ -n "${3-}" ]; then
-      VDR_RECORD_NEW_DIR=$(readlink -f "${3}")
+      get_fspath "${3}"
+      VDR_RECORD_NEW_DIR="${v0}"
    else
       VDR_RECORD_NEW_DIR=
    fi
 
-}
-
-# @private void vdr__print_record_file_names (
-#    **VDR_RECORD_DIR, **VDR_RECORD_EXT
-# )
-#
-vdr__print_record_file_names() {
-   (
-      cd "${VDR_RECORD_DIR}" && \
-      case "${VDR_RECORD_EXT#.}" in
-         'ts')
-            echo [0-9][0-9][0-9][0-9][0-9]*.ts
-         ;;
-         'vdr')
-            echo [0-9][0-9][0-9]*.vdr
-         ;;
-         *)
-            echo *.${VDR_RECORD_EXT#.}
-         ;;
-      esac
-   )
-}
-
-# void vdr_get_record_files (
-#    **VDR_RECORD_DIR, **VDR_RECORD_EXT, **v0!, **v1!
-# )
-#
-#  Searches for record files in VDR_RECORD_DIR and stores their name in v0.
-#  Also counts the # of record files and stores the result in v1.
-#
-vdr_get_record_files() {
-   : ${VDR_RECORD_DIR?} ${VDR_RECORD_EXT?}
-   v0=
-   v1=
-   set -- $(vdr__print_record_file_names)
-   local f i=0
-   for f; do
-      [ -f "${VDR_RECORD_DIR}/${f}" ] || return 1
-      i=$(( ${i} + 1 ))
-   done
-   v0="$*"
-   v1="${i}"
 }

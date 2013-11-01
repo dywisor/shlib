@@ -1,1 +1,6 @@
+eval_var
+
 fs/level
+fs/path
+function/die
+vdr/recordfiles
