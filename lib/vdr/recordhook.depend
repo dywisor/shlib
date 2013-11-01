@@ -1,4 +1,11 @@
+die
+eval_var
 readconfig
+varcheck
+
 fs/path
+
 function/die
+
 vdr/info
+vdr/recordfiles

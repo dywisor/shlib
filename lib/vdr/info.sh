@@ -228,7 +228,8 @@ vdr_get_record_vars() {
 }
 
 # void vdr_script_get_record_vars (
-#    record_state, record_dir, [record_new_dir]
+#    record_state, record_dir, [record_new_dir],
+#    **VDR_RECORD_STATE!, **VDR_RECORD_NEW_DIR!
 # )
 #
 #  Sets all vdr record hook variables.
