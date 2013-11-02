@@ -3,7 +3,7 @@
 #
 : ${__ATEXIT_FUNCTIONS=}
 
-# void atexit_enable ( *signals=INT, TERM, EXIT )
+# void atexit_enable ( *signals="TERM EXIT" )
 #
 # Activates atexit for the given signals.
 #
@@ -12,7 +12,7 @@ atexit_enable() {
    ATEXIT_ENABLED=y
 }
 
-# void atexit_disable ( *signals=INT, TERM, EXIT )
+# void atexit_disable ( *signals="TERM EXIT" )
 #
 # Deactivates atexit for the given signals by restoring the default
 # behavior.
