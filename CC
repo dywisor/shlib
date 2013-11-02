@@ -11,7 +11,7 @@ else
 
    if [ -x "${SHLIBCC_ROOT}/shlibcc.py" ]; then
       CC="${SHLIBCC_ROOT}/shlibcc.py"
-      export PYTHONPATH="${SHLIBCC_ROOT}/shlibcclib${PYTHONPATH:+:}${PYTHONPATH}"
+      export PYTHONPATH="${SHLIBCC_ROOT}/pymod${PYTHONPATH:+:}${PYTHONPATH}"
    else
       echo "cannot locate shlibcc" 1>&2
       exit 2
