@@ -168,6 +168,8 @@ phasemux_run_hook_script() {
    : ${1:?} ${PHASE:?}
 
    (
+      trap - INT TERM EXIT QUIT TSTP
+
       readonly LOGGER
       readonly PHASE
       readonly PHASEDEF_PHASEFUNC_PREFIX
