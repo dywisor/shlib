@@ -2,6 +2,10 @@
 #  modules may use this when logging is optional
 LOGGER=dolog
 
+# str|<empty> LOGFILE
+#
+: ${LOGFILE=}
+
 # int __logging_accept_level ( log_level )
 #
 #  Returns 0 if the given log level is (currently) accepted, else 1.
