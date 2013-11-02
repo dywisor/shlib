@@ -122,10 +122,12 @@ vdr_recordhook_main() {
       vdr_validate_record_vars
    then
       local MAIN_FUNC="${1}"
-      local S="${VDR_RECORD_DIR}"
-      local PHASE="${VDR_RECORD_STATE}"
-      shift 4
-      ${MAIN_FUNC} "$@"
+      if [ -n "${5+SET}" ]; then
+         shift 4 || function_die
+         ${MAIN_FUNC} "$@"
+      else
+         ${MAIN_FUNC}
+      fi
    else
       function_die \
          "error ${?} while getting record vars" "vdr_recordhook_main"
