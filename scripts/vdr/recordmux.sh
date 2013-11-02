@@ -84,7 +84,7 @@ vdr_remove_record_dir_files() {
       shift
    done
 
-   ### (retcode not correct if %fail > 255)
+## (retcode not correct if %fail > 255)
    return ${fail}
 }
 
