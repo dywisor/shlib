@@ -1,11 +1,32 @@
-vdr/info
-
-function/defined
-
-fs/dodir
-
-message
+# modules required by the recordmux script
 logging
+message
+vdr/recordhook
+hookmux/phasemux
+function/annotate
+misc/pragma
+
+
+# essential modules for hooks
+autodie
+defsym
+die
 list_has
-readconfig
-varcheck
+function/die
+
+
+# optional modules for hooks
+misc/qwhich
+misc/repeat
+misc/sleeploop
+
+net-misc/host_alive
+
+fs/dir_empty
+fs/dodir
+fs/filesize
+fs/foreach
+
+strutil/fnmatch
+strutil/stdstr
+strutil/yesno

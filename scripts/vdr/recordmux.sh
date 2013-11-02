@@ -1,121 +1,147 @@
-# config keys
-# * VDR_ROOT
-# * VDR_ROOT_DONE
-# * VDR_ROOT_ARRAY
-# * VDR_RECORD_HOOK_DIR
+VDR_RECORDMUX_PHASES="before after edited __null__"
+
+VDR_FSPATH_VARS_ESSENTIAL="VDR_ROOT VDR_RECORD_HOOK_DIR"
+VDR_FSPATH_VARS_UNSETOK="VDR_ROOT_DONE VDR_CHROOT_DIR LOGFILE"
+VDR_FSPATH_VARS="${VDR_FSPATH_VARS_ESSENTIAL} ${VDR_FSPATH_VARS_UNSETOK}"
+VDR_SCRIPT_VARS="${VDR_FSPATH_VARS_ESSENTIAL} VDR_RECORD_EXT"
+VDR_SCRIPT_VARS_EMPTYOK="${VDR_SCRIPT_VARS_EMPTYOK-}"
+VDR_SCRIPT_VARS_UNSETOK="${VDR_FSPATH_VARS_UNSETOK} VDR_KEEP_SORT"
+
+
+### helper functions
+
+# int cd_to_any_of ( *dirs )
 #
-readconfig /etc/vdr/recordhook.conf
-
-VDR_ROOT=$(readlink -f "${VDR_ROOT}")
-varcheck VDR_ROOT VDR_RECORD_HOOK_DIR
-
-if [ -n "${VDR_ROOT_DONE-}" ]; then
-   VDR_ROOT_DONE=$(readlink -f "${VDR_ROOT_DONE}")
-   varcheck VDR_ROOT_DONE
-fi
-
-vdr_script_get_record_vars "$@"
-VARCHECK_ALLOW_EMPTY=y varcheck ${VDR_RECORD_VARS}
-
-readonly ${VDR_RECORD_VARS}
-
-readonly S="${VDR_RECORD_DIR}"
-readonly PHASE="${VDR_RECORD_STATE}"
+#  Changes the working directory to the first non-empty dir that exists.
+#
+cd_to_any_of() {
+   while [ $# -gt 0 ]; do
+      if [ -n "${1}" ] && cd "${1}"; then
+         return 0
+      fi
+      shift
+   done
+   return 1
+}
 
 # int vdr_chroot_dir ( **VDR_CHROOT_DIR= )
 #
 #  Changes the working directory to VDR_CHROOT_DIR, /tmp or /.
 #
 vdr_chroot_dir() {
-   if [ -z "${VDR_CHROOT_DIR-}" ] || ! cd "${VDR_CHROOT_DIR}"; then
-      cd /tmp || cd /
+   cd_to_any_of "${VDR_CHROOT_DIR-}" /tmp /
+}
+
+# @dont-override int run_cmd ( *cmdv )
+#
+#  Logs cmdv and executes it afterwards if %FAKE_MODE is disabled,
+#  else prints the command to stdout.
+#
+NOT_OVERRIDING run_cmd
+run_cmd() {
+   if __faking__; then
+      einfo "$*" "(cmd)"
+   else
+      ${LOGGER} --level=DEBUG "cmd: $*"
+      "$@"
    fi
 }
 
-# int is_phase ( phase=**PHASE )
+# @function_alias rmdir_if_empty ( *args ) renames rmdir()
 #
-#  Returns 0 if phase is a phase.
+#  Removes empty dirs.
 #
-is_phase() {
-   case "${1-${PHASE}}" in
-      'before'|'after'|'edited')
-         return 0
-      ;;
-      *)
-         return 1
-      ;;
-   esac
+rmdir_if_empty() {
+   rmdir --ignore-fail-on-non-empty "$@"
 }
 
+# int vdr_remove_record_dir()
+#
+vdr_remove_record_dir() {
+   # touch VDR_ROOT/.keep again (just to be sure)
+   vdr_touch_keepfile "${VDR_ROOT}"
 
-# int is_null_phase ( phase=**PHASE )
-#
-#  Returns 0 if phase is the null phase.
-#
-is_null_phase() { [ "${1-${PHASE}}" = "__null__" ]; }
-
-if [ "${FAKE_MODE:-n}" = "y" ]; then
-# void run_cmd ( *cmdv )
-#
-#  Echoes cmdv to stdout.
-#
-run_cmd() {
-   einfo "$*" "(cmd)"
+   if cd_to_any_of \
+      "${VDR_ROOT}" "${VDR_RECORD_ROOT}" "${VDR_CHROOT_DIR-}" /tmp /
+   then
+      run_cmd rmdir_if_empty -p -- "${VDR_RECORD_DIR}" 2>>${DEVNULL}
+   else
+      run_cmd rmdir_if_empty -- "${VDR_RECORD_DIR}"
+   fi
 }
-else
-# void run_cmd ( *cmdv )
+
+# int vdr_remove_record_dir_files ( *filenames )
 #
-#  Logs cmdv and executes it.
-#
-run_cmd() {
-   ${LOGGER} --level=DEBUG "cmd: $*"
-   "$@"
-}
-fi
+vdr_remove_record_dir_files() {
+   local fail=0
+   local f
 
-# int run_hooks ( **... )
-#
-#  Runs all vdr record hooks.
-#
-run_hooks() {
-   is_phase || is_null_phase || return
-
-   local hook hook_name
-   for hook in "${VDR_RECORD_HOOK_DIR}/"*.sh; do
-      hook_name="${hook##*/}"
-      hook_name="${hook_name%.sh}"
-
-      [ ! -f "${hook}" ] || \
-      (
-         readonly __SUBSHELL__=y
-
-         PHASE_RESTRICT=
-
-         unset -f before after edited __null__ any_phase
-
-         ! is_null_phase || __null__() { echo "${hook_name}::__null__()"; }
-
-         if ! . "${hook}"; then
-            false
-
-         elif list_has "${PHASE}" ${PHASE_RESTRICT}; then
-            true
-
-         elif function_defined "${PHASE}"; then
-            vdr_chroot_dir
-            ${PHASE}
-
-         elif function_defined any_phase; then
-            vdr_chroot_dir
-            any_phase
-
-         else
-            true
-         fi
-      )
+   while [ $# -gt 0 ]; do
+      f="${VDR_RECORD_DIR}/${1#/}"
+      if [ -f "${f}" ] || [ -h "${f}" ]; then
+         run_cmd rm -- "${f}" || fail=$(( ${fail} + 1 ))
+      fi
+      shift
    done
 
+   ### (retcode not correct if %fail > 255)
+   return ${fail}
 }
 
-vdr_chroot_dir
-run_hooks
+# int vdr_touch_keepfile ( *dirs )
+#
+vdr_touch_keepfile() {
+   while [ $# -gt 0 ]; do
+      [ -z "${1}" ] || [ -e "${1}/.keep" ] || run_cmd touch -- "${1}/.keep"
+      shift
+   done
+}
+
+
+### recordmux functions (not useful in hooks)
+
+# @override void phasemux_enter()
+#
+#  Makes some vars readonly.
+#
+OVERRIDE_FUNCTION phasemux_enter
+phasemux_enter() {
+   readonly S VDR_RECORDMUX_PHASES DEVNULL
+   readonly ${VDR_FSPATH_VARS?}
+   readonly ${VDR_SCRIPT_VARS?}
+   readonly ${VDR_SCRIPT_VARS_EMPTYOK?}
+   readonly ${VDR_SCRIPT_VARS_UNSETOK?}
+
+   return 0
+}
+
+# @override int phasemux_hook_prepare ( **VDR_CHROOT_DIR= )
+#
+#  pre-phasefunc function that changes to working directory to
+#  VDR_CHROOT_DIR if possible and to /tmp or / as fallback.
+#
+OVERRIDE_FUNCTION phasemux_hook_prepare
+phasemux_hook_prepare() {
+   vdr_chroot_dir
+}
+
+# int vdr_recordmux_run()
+#
+#  Calls phasemux_run_hook_dir().
+#
+vdr_recordmux_run() {
+   local S="${VDR_RECORD_DIR}"
+   local PHASE="${VDR_RECORD_STATE}"
+   vdr_touch_keepfile "${VDR_ROOT}"
+   phasemux_run_hook_dir "${VDR_RECORD_HOOK_DIR}"
+}
+
+# int vdr_recordmux_main ( record_state, record_name, [record_new_name] )
+#
+vdr_recordmux_main() {
+   phasedef_register ${VDR_RECORDMUX_PHASES}
+   vdr_recordhook_main vdr_recordmux_run "$@"
+}
+
+
+vdr_recordmux_main "$@"
