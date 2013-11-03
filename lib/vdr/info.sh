@@ -64,6 +64,7 @@ vdr_guess_record_root_vars() {
       case "${record_parent_dir}" in
          ''|/)
             # (a) invalid
+            ${LOGGER} --level=DEBUG "vdr_guess_record_root_vars(): VDR_ROOT#a"
             return 50
          ;;
          "${VDR_ROOT}")
@@ -71,43 +72,48 @@ vdr_guess_record_root_vars() {
             #
             #  Not likely.
             #
+            ${LOGGER} --level=DEBUG "vdr_guess_record_root_vars(): VDR_ROOT#b"
             VDR_RECORD_ROOT_ALT=
             VDR_RECORD_ROOT="${VDR_RECORD_DIR}"
             VDR_RECORD_NAME="${VDR_RECORD_ROOT##*/}"
          ;;
 
          #"${VDR_ROOT}"/?*/?*/_)
-         #   # (b) <vdr root>/{.../}/_/<record dir>
+         #   # (c) <vdr root>/{.../}/_/<record dir>
          #   # handle differently
          #;;
 
          "${VDR_ROOT}"/?*/_)
             # <vdr root>/{.../}/_/<record dir>
             #
-            # (c) common case: <vdr root>/<record root>/_/<record dir>
+            # (d) common case: <vdr root>/<record root>/_/<record dir>
             #
+            ${LOGGER} --level=DEBUG "vdr_guess_record_root_vars(): VDR_ROOT#d"
             VDR_RECORD_ROOT_ALT=
             VDR_RECORD_ROOT="${record_parent_dir%/*}"
             VDR_RECORD_NAME="${VDR_RECORD_ROOT##*/}"
          ;;
 
          "${VDR_ROOT}"/?*/?*)
-            # (d) <vdr root>/.../.../<record dir>
+            # (e) <vdr root>/.../.../<record dir>
             #
+            ${LOGGER} --level=DEBUG "vdr_guess_record_root_vars(): VDR_ROOT#e"
             VDR_RECORD_ROOT_ALT="${record_parent_dir%/*}"
             VDR_RECORD_ROOT="${record_parent_dir}"
             VDR_RECORD_NAME="${VDR_RECORD_ROOT##*/}"
          ;;
 
          "${VDR_ROOT}"/?*)
-            # (e) <vdr root>/.../<record dir> (depth=1)
+            # (f) <vdr root>/.../<record dir> (depth=1)
             #
+            ${LOGGER} --level=DEBUG "vdr_guess_record_root_vars(): VDR_ROOT#f"
             VDR_RECORD_ROOT_ALT=
             VDR_RECORD_ROOT="${record_parent_dir}"
             VDR_RECORD_NAME="${VDR_RECORD_ROOT##*/}"
          ;;
 
          *)
+            ${LOGGER} --level=DEBUG "vdr_guess_record_root_vars(): VDR_ROOT#fail"
             need_record_root_fallback=1
          ;;
       esac
@@ -119,32 +125,36 @@ vdr_guess_record_root_vars() {
       case "${record_parent_dir}" in
          ''|/)
             # (a)
-ewarn a,${VDR_RECORD_DIR}
+            ${LOGGER} --level=DEBUG "vdr_guess_record_root_vars(): FALLBACK#a"
             return 51
          ;;
 
          ?*/?*/_)
-            # (c)
+            # (d)
+            ${LOGGER} --level=DEBUG "vdr_guess_record_root_vars(): FALLBACK#d"
             VDR_RECORD_ROOT_ALT=
             VDR_RECORD_ROOT="${record_parent_dir%/*}"
             VDR_RECORD_NAME="${VDR_RECORD_ROOT##*/}"
          ;;
 
          ?*/?*/?*)
-            # (d)
+            # (e)
+            ${LOGGER} --level=DEBUG "vdr_guess_record_root_vars(): FALLBACK#e"
             VDR_RECORD_ROOT_ALT="${record_parent_dir%/*}"
             VDR_RECORD_ROOT="${record_parent_dir}"
             VDR_RECORD_NAME="${VDR_RECORD_ROOT##*/}"
          ;;
 
          ?*/?*)
-            # (e)
+            # (f)
+            ${LOGGER} --level=DEBUG "vdr_guess_record_root_vars(): FALLBACK#f"
             VDR_RECORD_ROOT_ALT=
             VDR_RECORD_ROOT="${record_parent_dir}"
             VDR_RECORD_NAME="${VDR_RECORD_ROOT##*/}"
          ;;
 
          *)
+            ${LOGGER} --level=DEBUG "vdr_guess_record_root_vars(): FALLBACK#fail"
             return 52
          ;;
       esac
