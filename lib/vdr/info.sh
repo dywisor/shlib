@@ -12,7 +12,8 @@ VDR_RECORD_NAME"
 VDR_RECORD_VARS_EMPTYOK="
 VDR_RECORD_NEW_DIR
 VDR_RECORD_ROOT_ALT
-VDR_RECORD_DATE_APPEND"
+VDR_RECORD_DATE_APPEND
+VDR_RECORD_LEVEL"
 
 VDR_RECORD_VARS="${VDR_RECORD_VARS_NONEMPTY}
 ${VDR_RECORD_VARS_EMPTYOK}"
@@ -219,7 +220,7 @@ vdr_get_record_vars() {
 
       if \
          [ -n "${VDR_ROOT-}" ] && \
-         get_fslevel_diff "${VDR_RECORD_DIR}" "${VDR_ROOT}"
+         get_fslevel_diff "${VDR_ROOT}" "${VDR_RECORD_DIR}"
       then
          VDR_RECORD_LEVEL="${v0}"
       else
