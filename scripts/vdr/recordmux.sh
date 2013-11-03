@@ -16,6 +16,7 @@ VDR_SCRIPT_VARS_UNSETOK="${VDR_FSPATH_VARS_UNSETOK} VDR_KEEP_SORT"
 #
 get_all_vdr_script_vars() {
    list_redux \
+      ${VDR_RECORD_VARS?} \
       ${VDR_SCRIPT_VARS?} \
       ${VDR_SCRIPT_VARS_EMPTYOK?} \
       ${VDR_SCRIPT_VARS_UNSETOK?}
@@ -104,7 +105,10 @@ vdr_remove_record_dir_files() {
 #
 vdr_touch_keepfile() {
    while [ $# -gt 0 ]; do
-      [ -z "${1}" ] || [ -e "${1}/.keep" ] || run_cmd touch -- "${1}/.keep"
+      if [ -n "${1}" ] && [ ! -e "${1}/.keep" ]; then
+         run_cmd touch -- "${1}/.keep" || \
+            ${LOGGER} --level=WARN "failed to touch ${1}/.keep"
+      fi
       shift
    done
 }
