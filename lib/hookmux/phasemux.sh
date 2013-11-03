@@ -257,7 +257,10 @@ phasemux_run_hook_script() {
 phasemux_run_hook_dir() {
    : ${LOGGER:?}
    if [ -z "${1-}" ] || [ -z "${2-}" ]; then
-      function_die "bad usage" phasemux_run_hook_dir
+      local err_msg=
+      [ -n "${1-}" ] || err_msg="no phase"
+      [ -n "${2-}" ] || err_msg="${err_msg}${err_msg:+, }no dir"
+      function_die "bad usage: ${err_msg}" phasemux_run_hook_dir
    fi
 
    local PHASE="${1}" HOOKDIR="${2}"
