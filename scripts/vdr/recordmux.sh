@@ -118,11 +118,10 @@ vdr_touch_keepfile() {
 #
 OVERRIDE_FUNCTION phasemux_enter
 phasemux_enter() {
-   readonly S VDR_RECORDMUX_PHASES DEVNULL
-   readonly ${VDR_FSPATH_VARS?}
-   readonly ${VDR_SCRIPT_VARS?}
-   readonly ${VDR_SCRIPT_VARS_EMPTYOK?}
-   readonly ${VDR_SCRIPT_VARS_UNSETOK?}
+   readonly \
+      S VDR_RECORDMUX_PHASES DEVNULL \
+      ${VDR_FSPATH_VARS?} ${VDR_SCRIPT_VARS?} \
+      ${VDR_SCRIPT_VARS_EMPTYOK?} ${VDR_SCRIPT_VARS_UNSETOK?}
 
    return 0
 }
@@ -143,9 +142,8 @@ phasemux_hook_prepare() {
 #
 vdr_recordmux_run() {
    local S="${VDR_RECORD_DIR}"
-   local PHASE="${VDR_RECORD_STATE}"
    vdr_touch_keepfile "${VDR_ROOT}"
-   phasemux_run_hook_dir "${VDR_RECORD_HOOK_DIR}"
+   phasemux_run_hook_dir "${VDR_RECORD_STATE}" "${VDR_RECORD_HOOK_DIR}"
 }
 
 # int vdr_recordmux_main ( record_state, record_name, [record_new_name] )
