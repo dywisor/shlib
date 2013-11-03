@@ -30,11 +30,29 @@ vdr_recordhook_move_get_recfile() {
    if [ -f "${VDR_RECORD_DIR?}/all.${VDR_RECORD_EXT#.}" ]; then
       v0="${VDR_RECORD_DIR}/all.${VDR_RECORD_EXT#.}"
 
-   elif vdr_get_record_files && [ "${v1}" -eq 1 ]; then
+   elif vdr_get_record_files && [ -n "${v1}" ] && [ ${v1} -eq 1 ]; then
       v0="${VDR_RECORD_DIR}/${v0}"
 
    else
-      ${LOGGER} --level=WARN "cannot move files from ${VDR_RECORD_DIR}"
+      local err_msg="cannot move files from ${VDR_RECORD_DIR}"
+
+      case "${v1}" in
+         '')
+            err_msg="${err_msg}: error while getting record files"
+         ;;
+         0)
+            err_msg="${err_msg}: no record files found"
+         ;;
+         *)
+            if [ ${v1} -gt 0 2>/dev/null ]; then
+               err_msg="${err_msg}: too many record files found (${v1})"
+            else
+               err_msg="${err_msg}: undefined record file count '${v1}'"
+            fi
+         ;;
+      esac
+
+      ${LOGGER} --level=WARN "${err_msg}"
       return 2
    fi
 }
