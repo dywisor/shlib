@@ -48,11 +48,11 @@ get_fslevel() {
 #
 get_fs_level() { get_fslevel "$@"; }
 
-# int get_fslevel_diff ( fspath1, fspath2, **v0! )
+# int get_fslevel_diff ( root, subpath, **v0! )
 #
-#  Compares the level of two filesystem paths where %fspath1 is the root of
-#  %fspath2 (or vice versa) and returns the difference
-#  level(fspath2) - level(fspath1) via %v0.
+#  Compares the level of two filesystem paths where %root is the root of
+#  %subpath (or vice versa) and returns the difference
+#  level(subpath) - level(root) via %v0.
 #
 get_fslevel_diff() {
    : ${1?} ${2?}
