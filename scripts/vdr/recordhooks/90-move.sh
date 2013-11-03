@@ -84,7 +84,7 @@ vdr_recordhook_move_get_vars() {
    vdr_recordhook_move_get_recfile || return
    recfile="${v0}"
 
-   vdr_recordhook_move_get_destfile || return
+   vdr_recordhook_move_get_destfile "${destdir}" || return
    destfile="${v0}"
 }
 
