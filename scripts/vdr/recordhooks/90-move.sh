@@ -1,18 +1,10 @@
 # int vdr_recordhook_move_get_destdir ( **v0! )
 #
-#  TODO: describe how %destdir is set (and/or fix the code below)
 vdr_recordhook_move_get_destdir() {
+   : ${VDR_RECORD_NAME:?}
    v0=
    if [ -n "${VDR_ROOT_DONE-}" ]; then
-      if \
-         [ -z "${VDR_RECORD_LEVEL?}" ] || \
-         [ ${VDR_RECORD_LEVEL} -lt 3 ] || \
-         [ -z "${VDR_RECORD_ROOT_ALT?}" ]
-      then
-         v0="${VDR_ROOT_DONE}/${VDR_RECORD_NAME}"
-      else
-         v0="${VDR_ROOT_DONE}/${VDR_RECORD_ROOT##*/}"
-      fi
+      v0="${VDR_ROOT_DONE}/${VDR_RECORD_NAME}"
    else
       v0="${VDR_RECORD_ROOT}"
    fi
