@@ -1,4 +1,4 @@
-VDR_RECORDMUX_PHASES="before after edited __null__"
+VDR_RECORDMUX_PHASES="before after edited __null__ info"
 
 VDR_FSPATH_VARS_ESSENTIAL="VDR_ROOT VDR_RECORD_HOOK_DIR"
 VDR_FSPATH_VARS_UNSETOK="VDR_ROOT_DONE VDR_CHROOT_DIR LOGFILE"
@@ -9,6 +9,18 @@ VDR_SCRIPT_VARS_UNSETOK="${VDR_FSPATH_VARS_UNSETOK} VDR_KEEP_SORT"
 
 
 ### helper functions
+
+# int get_all_vdr_script_vars ( **v0! )
+#
+#  Stores the names of all VDR_* script vars in %v0.
+#
+get_all_vdr_script_vars() {
+   list_redux \
+      ${VDR_SCRIPT_VARS?} \
+      ${VDR_SCRIPT_VARS_EMPTYOK?} \
+      ${VDR_SCRIPT_VARS_UNSETOK?}
+}
+
 
 # int cd_to_any_of ( *dirs )
 #
