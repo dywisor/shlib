@@ -4,7 +4,11 @@
 vdr_recordhook_move_get_destdir() {
    v0=
    if [ -n "${VDR_ROOT_DONE-}" ]; then
-      if [ ${VDR_RECORD_LEVEL} -lt 3 ] || [ -z "${VDR_RECORD_ROOT_ALT-}" ]; then
+      if \
+         [ -z "${VDR_RECORD_LEVEL?}" ] || \
+         [ ${VDR_RECORD_LEVEL} -lt 3 ] || \
+         [ -z "${VDR_RECORD_ROOT_ALT?}" ]
+      then
          v0="${VDR_ROOT_DONE}/${VDR_RECORD_NAME}"
       else
          v0="${VDR_ROOT_DONE}/${VDR_RECORD_ROOT##*/}"
