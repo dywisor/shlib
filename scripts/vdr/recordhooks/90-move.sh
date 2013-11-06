@@ -128,6 +128,30 @@ after() {
                "Please clean up ${VDR_RECORD_DIR} manually."
          ;;
       esac
+
+      if function_defined vdr_chown_destfile; then
+         if ! vdr_chown_destfile "${destfile}"; then
+            ${LOGGER} --level=WARN "could not chown ${destfile} (function)"
+         fi
+
+      elif [ -n "${VDR_DESTFILE_CHOWN-}" ]; then
+         if ! run_cmd \
+            chown -h --preserve-root -- ${VDR_DESTFILE_CHOWN} "${destfile}"
+         then
+            ${LOGGER} --level=WARN \
+               "could not chown ${destfile} (VDR_DESTFILE_CHOWN)"
+         fi
+      fi
+
+      if function_defined vdr_recfile_moved; then
+         if vdr_recfile_moved "${recfile}" "${destfile}" "${destdir}"; then
+            ${LOGGER} --level=DEBUG "vdr_recfile_moved() succeeded"
+         else
+            ${LOGGER} --level=WARN \
+               "vdr_recfile_moved() returned non-zero (${?})"
+         fi
+      fi
+
       return 0
    else
       return 40
