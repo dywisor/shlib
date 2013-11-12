@@ -7,17 +7,15 @@
 #
 daemonize__setup() {
    if [ -z "${X_START_STOP_DAEMON-}" ]; then
-      local x
       if [ -x /sbin/start-stop-daemon ]; then
-         x=/sbin/start-stop-daemon
+         X_START_STOP_DAEMON=/sbin/start-stop-daemon
       elif [ -x /usr/sbin/start-stop-daemon ]; then
-         x=/usr/sbin/start-stop-daemon
+         X_START_STOP_DAEMON=/usr/sbin/start-stop-daemon
       elif [ -x /bin/busybox ]; then
-         x="/bin/busybox start-stop-daemon"
+         X_START_STOP_DAEMON="/bin/busybox start-stop-daemon"
       else
-         x=start-stop-daemon
+         X_START_STOP_DAEMON=start-stop-daemon
       fi
-      X_START_STOP_DAEMON="${x:?}"
    fi
    : ${START_STOP_DAEMON_OPTS=-q}
 ##  : ${START_STOP_DAEMON_START_OPTS=}
