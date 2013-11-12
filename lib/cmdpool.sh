@@ -1,14 +1,18 @@
 # ----------------------------------------------------------------------------
 #
-# This module provides functions to manage one or multiple command pools,
-# which are filesystem structures containing subdirs. These so-called "slots"
-# (or "slot dirs") keep track a single command, e.g. by collecting its output
-# and returncode, and make such information available as file.
+# This module provides functions to manage one or more command pools,
+# which are directories (likely on a tmpfs) containing subdirs.
+# These so-called "slots" (or "slot dirs") keep track a single command,
+# e.g. by collecting its output and returncode, and make that information
+# available as file(s).
+#
+# Slot dir creation is safe if the underlying filesystem handles mkdir(2)
+# atomically, which is true for most filesystems.
 #
 # Useful for starting a series of commands asynchronously and collecting
 # the result (output, returncode) later, possibly in another process.
 #
-# A helper script is required for keeping track of commands, which is
+# A helper script is required for keeping track of the commands, which is
 # supposed to create some of the slot's files, in particular:
 #
 # * <slot>/environ    -- the command's environment (creation)
