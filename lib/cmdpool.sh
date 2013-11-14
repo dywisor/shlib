@@ -215,7 +215,6 @@ cmdpool_get_slot() {
    if [ ${i} -gt ${i_prev} ] && [ -d "${slot_base}${i}" ]; then
       slot="${slot_base}${i}"
       if cmdpool__populate_slot "${slot}" "$@"; then
-      echo "SETS, $slot"
          v0="${slot}"
       else
          cmdpool_log_error "failed to initialize slot '${slot}'"
@@ -289,7 +288,7 @@ cmdpool_start() {
 #
 cmdpool_stop() {
    local slot="${1:?}" exe_name
-   cmdpool__get_exe_name "${slot}" || return
+   cmdpool__get_exe_name "${slot}" "${2-}" || return
 
    if [ -e "${slot}/done" ]; then
       cmdpool_logger --level=INFO "not stopping ${exe_name}: already stopped"
