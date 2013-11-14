@@ -448,13 +448,25 @@ cmdpool_manage_do_stopall() {
 
 cmdpool_manage_main() {
    local v0
+   local libdir shlib_libdir
+   for libdir in /usr/lib64 /usr/lib32 /usr/lib; do
+      if [ -d "${libdir}/shlib" ]; then
+         shlib_libdir="${libdir}/shlib"
+         break
+      fi
+   done
+   libdir=
 
    [ -n "${RUNDIR-}" ] || local RUNDIR="/run"
    [ -n "${USER-}"   ] || local USER="$(id -nu)"
    local DEFAULT_CMDPOOL_ROOT="${RUNDIR}/cmdpool.${USER}/default"
    local CMDPOOL_ROOT="${DEFAULT_CMDPOOL_ROOT}"
    local CMDPOOL_COMMAND=
-   local DEFAULT_X_CMDPOOL_RUNCMD="/usr/bin/cmdpool-runcmd.sh"
+   if [ -n "${shlib_libdir-}" ]; then
+      local DEFAULT_X_CMDPOOL_RUNCMD="${shlib_libdir}/cmdpool-runcmd.sh"
+   else
+      local DEFAULT_X_CMDPOOL_RUNCMD="/usr/bin/cmdpool-runcmd.sh"
+   fi
    local X_CMDPOOL_RUNCMD="${DEFAULT_X_CMDPOOL_RUNCMD}"
 
    local NAME_ARGS
