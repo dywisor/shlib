@@ -12,8 +12,8 @@ eval_scriptinfo() {
          SCRIPT_FILE="$(readlink -f "${x}" 2>>${DEVNULL} )"
          [[ -n "${SCRIPT_FILE}" ]] || SCRIPT_FILE="${x}"
       fi
-
       SCRIPT_DIR="${SCRIPT_FILE%/*}"
+
    else
       SCRIPT_FILE="UNDEF"
       SCRIPT_DIR="${PWD}"
