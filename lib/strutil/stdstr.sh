@@ -79,3 +79,42 @@ str_remove_leading_chars() {
       a="${v0#[${2}]}"
    done
 }
+
+# int str_startswith ( str, *patterns, **v0! )
+#
+#  Returns 0 if %str starts with any of the given patterns, else 1.
+#  Stores the matching pattern in %v0.
+#
+str_startswith() {
+   local s="${1?}"
+   shift
+   while [ $# -gt 0 ]; do
+      case "${s}" in
+         "${1}"*)
+            v0="${1}"
+            return 0
+         ;;
+      esac
+      shift
+   done
+   return 1
+}
+
+# int str_endswith ( str, **patterns, **v0! )
+#
+#  Returns 0 if %str ends with any of the given patterns, else 1.
+#  Stores the matching pattern in %v0.
+#
+str_endswith() {
+   local s="${1?}"
+   shift
+   while [ $# -gt 0 ]; do
+      case "${s}" in
+         "${1}"*)
+            v0="${1}"
+            return 0
+         ;;
+      esac
+   done
+   return 1
+}
