@@ -24,6 +24,7 @@ ${I}${SCRIPT_FILENAME} [option...] check     <slot name> [command]
 ${I}${SCRIPT_FILENAME} [option...] stop      <slot name> [command]
 ${I}${SCRIPT_FILENAME} [option...] query
 ${I}${I}1|2|ret|stdout|stderr|returncode|slot <slot name>
+${I}${SCRIPT_FILENAME} [option...] wait [-t|--timeout <timeout>] {<slot name>}
 ${I}${SCRIPT_FILENAME} [option...] abandon|autodel <slot name>
 ${I}${SCRIPT_FILENAME} [option...] cleanup {[--exact] <name>}
 ${I}${SCRIPT_FILENAME} [option...] stopall [--exact] <name> [[--exact] <name>...]
@@ -36,6 +37,7 @@ Options:
 --cmdpool-root  (-C) -- set cmdpool root [${DEFAULT_CMDPOOL_ROOT}]
 --runcmd <file> (-X) -- cmdpool runcmd helper [${DEFAULT_X_CMDPOOL_RUNCMD-}]
 --names              -- print names only (one per line)
+--timeout       (-t) -- timeout for the \"wait\" command, in seconds
 
 
 Actions:
@@ -47,6 +49,13 @@ ${I}            is still running and exits non-zero if so (see Exit Codes).
 ${I}stop     -- stops a command (specified by the given slot name)
 ${I}query    -- prints information about a command (its location, stdout,
 ${I}            stderr, returncode) to stdout.
+${I}wait     -- waits for a series of commands (specified by their slot names)
+${I}            to complete. Waits forever unless a --timeout (in seconds) is
+${I}            specified. An exit code of ${EX_OK} indicates that none of
+${I}            the given command slots is running, even if the cmdpool root
+${I}            does not exist, whereas ${CMDPOOL_EX_CMDRUNNING}\
+means that at least one command
+${I}            is still running.
 ${I}abandon, -- marks a slot for auto-removal
 ${I}autodel
 ${I}cleanup  -- removes all slots that are marked for auto-removal
@@ -235,6 +244,41 @@ cmdpool_manage_get_slot() {
    fi
 }
 
+# int cmdpool_manage_check_any_running (
+#    **NAME_ARGS=, **SLOT_NAME_ARGS=, **CMDPOOL_ROOT
+# )
+cmdpool_manage_check_any_running() {
+   local slot slot_name
+
+   if [ -n "${SLOT_NAME_ARGS-}" ]; then
+      for slot_name in ${SLOT_NAME_ARGS}; do
+         slot="${CMDPOOL_ROOT}/${slot_name}"
+         if [ -e "${slot}/running" ]; then
+            return 0
+         fi
+      done
+   fi
+
+   if [ -n "${NAME_ARGS-}" ]; then
+      # unreachable code as there's no action that sets NAME_ARGS
+      # and uses this function
+      #
+      # Note, however, that the list of slots is re-evaluated each time
+      # this function is called.
+      #
+      for slot in "${CMDPOOL_ROOT}/"*; do
+         if [ -e "${slot}/running" ]; then
+            slot_name="${slot#${CMDPOOL_ROOT}/}"
+            if str_startswith "${slot_name}" ${NAME_ARGS}; then
+               return 0
+            fi
+         fi
+      done
+   fi
+
+   return 1
+}
+
 
 
 # @funcdef @cmdpool_action int cmdpool_manage_do_<action name> (
@@ -375,6 +419,35 @@ cmdpool_manage_do_query() {
    return ${EX_OK}
 }
 
+# @cmdpool_action cmdpool_manage_do_wait()
+#
+cmdpool_manage_do_wait() {
+   if \
+      [ -z "${SLOT_NAME_ARGS-}" ] || [ ! -d "${CMDPOOL_ROOT}" ] || \
+      ! cmdpool_manage_check_any_running
+   then
+      return ${EX_OK}
+
+   elif [ -n "${WAIT_TIMEOUT-}" ]; then
+      # time_elapsed in half-seconds
+      local time_elapsed=0
+      local timeout=$(( 2 * ${WAIT_TIMEOUT} ))
+
+      while [ ${time_elapsed} -lt ${timeout} ] && sleep 0.5; do
+         time_elapsed=$(( ${time_elapsed} + 1 ))
+         cmdpool_manage_check_any_running || return ${EX_OK}
+      done
+
+      return ${CMDPOOL_EX_CMDRUNNING}
+
+   else
+      while sleep 0.5; do
+         cmdpool_manage_check_any_running || return ${EX_OK}
+      done
+      return ${EX_ERR}
+   fi
+}
+
 # @cmdpool_action cmdpool_manage_do_abandon()
 #
 cmdpool_manage_do_abandon() {
@@ -474,6 +547,7 @@ cmdpool_manage_main() {
    local WANT_ALL_SLOTS
    local COMMAND_ARG
    local CMDPOOL_MANAGE_LIST_NAMES_ONLY
+   local WAIT_TIMEOUT
 
    local arg doshift
    while [ $# -gt 0 ]; do
@@ -517,7 +591,7 @@ cmdpool_manage_main() {
                   fi
                   doshift=2
                ;;
-               'ls'|'list'|'run'|'start'|'check'|'stop'|'query'|\
+               'ls'|'list'|'run'|'start'|'check'|'stop'|'query'|'wait'|\
                'abandon'|'autodel'|'cleanup'|'stopall')
                   CMDPOOL_COMMAND="${arg}"
                ;;
@@ -635,6 +709,27 @@ cmdpool_manage_main() {
                   else
                      cmdpool_manage_exit_usage "unknown query command '${arg}'"
                   fi
+               ;;
+            esac
+         ;;
+
+         'wait')
+            case "${arg}" in
+               '--help'|'-h')
+                  cmdpool_manage_print_subcmd_help
+                  return ${EX_OK}
+               ;;
+               '--timeout'|'-t')
+                  cmdpool_need_arg_nonempty 1 "$@"
+                  if is_natural "${2}"; then
+                     WAIT_TIMEOUT="${2}"
+                  else
+                     cmdpool_manage_exit_usage "timeout has to be an int >= 0"
+                  fi
+                  doshift=2
+               ;;
+               *)
+                  SLOT_NAME_ARGS="${SLOT_NAME_ARGS-}${SLOT_NAME_ARGS:+ }${arg}"
                ;;
             esac
          ;;

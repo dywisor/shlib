@@ -1,6 +1,7 @@
 cmdpool
 defsym
 die
+integer
 list_has
 scriptinfo
 
