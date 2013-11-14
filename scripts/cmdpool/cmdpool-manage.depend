@@ -1,0 +1,12 @@
+cmdpool
+defsym
+die
+list_has
+scriptinfo
+
+fs/path
+fs/dodir_minimal
+
+misc/qwhich
+
+strutil/stdstr
