@@ -43,7 +43,7 @@ Options:
 Actions:
 ${I}list     -- shows the status of all commands starting with the given name
 ${I}run,     -- starts a command using <name> as the slot's basename.
-${I}start        Prints <slot name> to stdout (as last line).
+${I}start       Prints <slot name> to stdout (as last line).
 ${I}check    -- checks whether the command (specified by the given slot name)
 ${I}            is still running and exits non-zero if so (see Exit Codes).
 ${I}stop     -- stops a command (specified by the given slot name)
@@ -53,7 +53,7 @@ ${I}wait     -- waits for a series of commands (specified by their slot names)
 ${I}            to complete. Waits forever unless a --timeout (in seconds) is
 ${I}            specified. An exit code of ${EX_OK} indicates that none of
 ${I}            the given command slots is running, even if the cmdpool root
-${I}            does not exist, whereas ${CMDPOOL_EX_CMDRUNNING}\
+${I}            does not exist, whereas ${CMDPOOL_EX_CMDRUNNING} \
 means that at least one command
 ${I}            is still running.
 ${I}abandon, -- marks a slot for auto-removal
@@ -549,6 +549,11 @@ cmdpool_manage_main() {
    local CMDPOOL_MANAGE_LIST_NAMES_ONLY
    local WAIT_TIMEOUT
 
+   if [ $# -eq 0 ]; then
+      cmdpool_manage_print_help
+      cmdpool_manage_exit_usage "no args supplied"
+   fi
+
    local arg doshift
    while [ $# -gt 0 ]; do
       doshift=1
@@ -781,7 +786,7 @@ cmdpool_manage_main() {
       cmdpool_manage_do_${CMDPOOL_COMMAND} "$@"
       return ${?}
    else
-      cmdpool_manage_exit_usage "no command specified."
+      cmdpool_manage_exit_usage "no command specified (try --help)"
    fi
 }
 
