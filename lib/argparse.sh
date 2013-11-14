@@ -1,6 +1,7 @@
 # @virtual int <argparse_handle> (
 #    *argv_remainder,
 #    **arg,
+#    **argno,
 #    **opt,
 #    **shortopt,
 #    **longopt,
@@ -187,9 +188,11 @@ argparse_parse_from_file() {
 #  Pre-parse argv and call arg parser functions for each arg.
 #
 argparse_parse() {
-   local real_arg arg value opt shortopt longopt doshift
+   local real_arg arg argno value opt shortopt longopt doshift
 
+   argno=0
    while [ $# -gt 0 ]; do
+      argno=$(( ${argno} + 1 ))
       real_arg="${1-}"
       arg="${real_arg%%=*}"
       value="${real_arg#*=}"
