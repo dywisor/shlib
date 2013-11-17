@@ -32,3 +32,15 @@ call_if_defined() {
    function_defined "${1:?}" || return 0
    "$@"
 }
+
+# ~int call_if_defined_else_false ( func, *args )
+#
+#  Calls func( *args ) and passes its return value if %func is defined,
+#  else returns 1.
+#
+#  %func must not be empty.
+#
+call_if_defined_else_false() {
+   function_defined "${1:?}" || return 1
+   "$@"
+}
