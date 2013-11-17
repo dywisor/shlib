@@ -1,13 +1,1 @@
-cmdpool
-defsym
-die
-integer
-list_has
-scriptinfo
-
-fs/path
-fs/dodir_minimal
-
-misc/qwhich
-
-strutil/stdstr
+cmdpool/manage/interface

@@ -1,0 +1,8 @@
+defsym
+die
+cmdpool/core
+cmdpool/manage/vars
+cmdpool/manage/util
+
+cmdpool/manage/actions/common
+!cmdpool/manage/actions/default

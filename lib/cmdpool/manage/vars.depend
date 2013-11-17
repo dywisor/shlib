@@ -1,0 +1,5 @@
+defsym
+die
+
+cmdpool/core
+fs/path

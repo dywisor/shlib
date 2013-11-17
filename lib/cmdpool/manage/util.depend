@@ -1,0 +1,10 @@
+defsym
+die
+list_has
+
+cmdpool/core
+cmdpool/manage/vars
+
+fs/dodir_minimal
+
+strutil/stdstr

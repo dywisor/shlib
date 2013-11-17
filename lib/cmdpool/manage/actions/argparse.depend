@@ -1,0 +1,6 @@
+defsym
+die
+integer
+scriptinfo
+function/annotate
+cmdpool/manage/vars
