@@ -96,8 +96,8 @@ def find_script_files ( root, file_extensions=frozenset ({ 'bash', 'sh' }) ):
       if relroot:
          relroot += os.sep
 
+      visited = set()
       for filename in filenames:
-         visited = set()
          name, dot, fext = filename.rpartition ( '.' )
          if fext in file_extensions and name not in visited:
             yield ( name, relroot + name )
@@ -163,6 +163,13 @@ def get_argument_parser():
       description="shlib script/lib generator",
    )
    arg = parser.add_argument
+
+
+   arg (
+      '--shlibcc-arg', '-o', metavar='<arg>',
+      dest='additional_shlibcc_args', default=[], action='append',
+      help="additional args to pass to shlibcc",
+   )
 
    builddirs_group = parser.add_argument_group ( 'build directories' )
    builddirs_arg   = builddirs_group.add_argument
@@ -465,7 +472,11 @@ class ScriptGenerationRuntime ( object ):
          self.shlib_buildscriptdir, "buildvars.sh"
       )
       self.shlibcc_exe          = config ['shlibcc']
-      self.shlibcc_args         = ( '--strip-virtual', '-u', '--as-lib', )
+      self.shlibcc_args         = (
+         ( '--strip-virtual', '-u', '--as-lib', )
+         + tuple ( config.get ( 'additional_shlibcc_args' ) or () )
+      )
+
       self.prefer_bash          = config ['prefer_bash']
       self.no_color             = config ['no_color']
 
