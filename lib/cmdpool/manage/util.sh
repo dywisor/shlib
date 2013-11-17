@@ -210,6 +210,8 @@ cmdpool_manage_print_slot() {
 
          if [ -e "${slot}/success" ]; then
             status="DS"
+         elif [ -e "${slot}/stopped" ]; then
+            status="DH"
          elif [ -e "${slot}/fail" ]; then
             status="DF"
          else
@@ -219,7 +221,7 @@ cmdpool_manage_print_slot() {
       elif [ -e "${slot}/running" ]; then
 
          if [ -e "${slot}/stopping" ]; then
-            status="RS"
+            status="RH"
          else
             status="R_"
          fi

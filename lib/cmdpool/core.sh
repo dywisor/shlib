@@ -28,6 +28,9 @@
 #                        was not successful (non-zero returncode) (creation)
 # * <slot>/stopping   -- file whose existence indicates that the command
 #                        is about to halt (removal)
+# * <slot>/stopped    -- file whose existence indicates that the command has
+#                        been stopped by a signal (SIGKILL, SIGTERM)
+#                        Contains the signal
 # * <slot>/done       -- file whose existence indicates that the command
 #                        is no longer running (creation)
 #                        Contains the time (as seconds since epoch) at which
