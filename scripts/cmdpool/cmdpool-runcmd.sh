@@ -41,6 +41,28 @@ get_user_vars() {
    fi
 }
 
+# void catch_signal_stop_child ( signal, **CHILD_PID, **__CMDPOOL_SLOT )
+#
+catch_signal_stop_child() {
+   [ -z "${1-}" ] || kill -${1} ${CHILD_PID?}
+
+   case "${1-}" in
+      'TERM'|'SIGTERM'|'15')
+         echo "SIGTERM" > "${__CMDPOOL_SLOT?}/stopped"
+      ;;
+      'KILL'|'SIGKILL'|'9')
+         echo "SIGKILL" > "${__CMDPOOL_SLOT?}/stopped"
+      ;;
+      '')
+         touch "${__CMDPOOL_SLOT?}/stopped"
+      ;;
+      *)
+         echo "${1}" > "${__CMDPOOL_SLOT?}/stopped"
+      ;;
+   esac
+   return 0
+}
+
 
 if cd "${__CMDPOOL_SLOT}"; then
 
@@ -81,8 +103,8 @@ if cd "${__CMDPOOL_SLOT}"; then
    #  _not_ propagating these signals as the "update status" code below
    #   should always be run
    #
-   trap "kill -15 ${CHILD_PID}" TERM
-   trap "kill -9  ${CHILD_PID}" KILL
+   trap "catch_signal_stop_child TERM" TERM
+   trap "catch_signal_stop_child KILL" KILL
 
    echo "${CHILD_PID}" > "${__CMDPOOL_SLOT}/child_pid"
 
