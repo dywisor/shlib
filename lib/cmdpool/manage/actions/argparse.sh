@@ -1,7 +1,11 @@
 cmdpool_manage_print_default_help() {
    local I="   "
 
-   echo "
+   if function_defined print_usage_help; then
+      print_usage_help "${I}"
+
+   else
+      echo "\
 ${SCRIPT_NAME} - manage command pools
 
 start/stop/list/query commands running in a command pool
@@ -16,7 +20,17 @@ ${I}${I}1|2|ret|stdout|stderr|returncode|slot <slot name>
 ${I}${SCRIPT_FILENAME} [option...] wait [-t|--timeout <timeout>] {<slot name>}
 ${I}${SCRIPT_FILENAME} [option...] abandon|autodel <slot name>
 ${I}${SCRIPT_FILENAME} [option...] cleanup {[--exact] <name>}
-${I}${SCRIPT_FILENAME} [option...] stopall [--exact] <name> [[--exact] <name>...]
+${I}${SCRIPT_FILENAME} [option...] stopall [--exact] <name> [[--exact] <name>...]"
+
+      call_if_defined print_additional_usage_help "${I}"
+   fi
+
+
+   if function_defined print_option_help; then
+      print_option_help "${I}"
+
+   else
+      echo "
 
 
 Options:
@@ -26,7 +40,17 @@ Options:
 --cmdpool-root  (-C) -- set cmdpool root [${DEFAULT_CMDPOOL_ROOT}]
 --runcmd <file> (-X) -- cmdpool runcmd helper [${DEFAULT_X_CMDPOOL_RUNCMD-}]
 --names              -- print names only (one per line)
---timeout       (-t) -- timeout for the \"wait\" command, in seconds
+--timeout       (-t) -- timeout for the \"wait\" command, in seconds"
+
+      call_if_defined print_additional_option_help "${I}"
+   fi
+
+
+   if function_defined print_action_help; then
+      print_action_help "${I}"
+
+   else
+      echo "
 
 
 Actions:
@@ -48,7 +72,18 @@ ${I}            is still running.
 ${I}abandon, -- marks a slot for auto-removal
 ${I}autodel
 ${I}cleanup  -- removes all slots that are marked for auto-removal
-${I}stopall  -- stops a series of commands (\"@all\" stops _all_ commands)
+${I}stopall  -- stops a series of commands (\"@all\" stops _all_ commands)"
+
+
+      call_if_defined print_additional_action_help "${I}"
+   fi
+
+
+   if function_defined print_exit_code_help; then
+      print_exit_code_help "${I}"
+
+   else
+      echo "
 
 
 Exit codes (except for \"query returncode\"):
@@ -64,6 +99,10 @@ ${I}${CMDPOOL_EX_STARTFAIL} -- command failed to start
 ${I}${CMDPOOL_EX_CMDRUNNING} -- command is running
 ${I}${CMDPOOL_EX_NOHELPER} -- runcmd helper script is missing
 ${I}${EX_USAGE} -- bad usage"
+
+      call_if_defined print_additional_exit_code_help "${I}"
+   fi
+   return 0
 }
 
 

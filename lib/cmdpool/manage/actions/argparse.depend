@@ -3,4 +3,5 @@ die
 integer
 scriptinfo
 function/annotate
+function/defined
 cmdpool/manage/vars
