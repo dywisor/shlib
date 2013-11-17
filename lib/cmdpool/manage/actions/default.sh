@@ -83,6 +83,7 @@ cmdpool_manage_do_stop() {
 # @cmdpool_action cmdpool_manage_do_stopall()
 #
 cmdpool_manage_do_stopall() {
+
    cmdpool_manage_has_root && cmdpool_manage_has_runcmd || return ${?}
 
    cmdpool_manage_iter_slots_with_flag \

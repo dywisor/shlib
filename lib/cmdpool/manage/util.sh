@@ -36,7 +36,7 @@ cmdpool_manage_get_slot_dir() {
       die "${CMDPOOL_COMMAND:-error}: no slot name given" ${EX_USAGE?}
 
    elif cmdpool_manage_has_root; then
-      slot=_dir"${CMDPOOL_ROOT}/${slot_name}"
+      slot_dir="${CMDPOOL_ROOT}/${slot_name}"
 
       if [ ! -d "${slot_dir}" ]; then
          return ${CMDPOOL_EX_NOSLOT}

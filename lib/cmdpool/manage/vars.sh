@@ -179,7 +179,7 @@ cmdpool_manage_add_slot_basenames() {
    local any_name
    while [ $# -gt 0 ]; do
       if [ -n "${1}" ]; then
-         any_slot="${1}"
+         any_name="${1}"
          if [ -n "${CMDPOOL_SLOT_BASENAMES-}" ]; then
             CMDPOOL_SLOT_BASENAMES="${CMDPOOL_SLOT_BASENAMES} ${1}"
          else
@@ -188,6 +188,7 @@ cmdpool_manage_add_slot_basenames() {
       else
          die "slot basename must not be empty." ${EX_USAGE?}
       fi
+      shift
    done
    [ -n "${any_name-}" ]
 }

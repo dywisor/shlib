@@ -44,7 +44,7 @@ cmdpool_manage_parse_args_and_dispatch() {
       autodie cmdpool_manage_parse_options "$@"
 
       if [ ${doshift} -gt 0 ]; then
-         shift || die "broken parser: out of bounds"
+         shift ${doshift} || die "broken parser: out of bounds"
       fi
    done
 

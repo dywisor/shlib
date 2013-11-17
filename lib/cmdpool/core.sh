@@ -167,7 +167,7 @@ cmdpool_get_slot() {
    case "${2}" in
       '')
          if [ -z "${slot_root}" ]; then
-            cmdpool_log_error "implciit slot name needs slot_root"
+            cmdpool_log_error "implicit slot name needs slot_root"
             return 2
          else
             slot_basename="${exe##*/}"
