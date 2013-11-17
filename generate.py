@@ -146,6 +146,12 @@ def get_argument_parser():
       return retfunc
    # --- end of create_fs_acceptor (...) ---
 
+   def is_shlibcc_arg ( value ):
+      if value and value[:2] == '^-':
+         return value[1:]
+      else:
+         return value
+   # --- end of is_shlibcc_arg (...) ---
 
    is_fs_dir       = create_fs_acceptor ( os.path.isdir )
    couldbe_fs_dir  = create_fs_acceptor (
@@ -166,7 +172,7 @@ def get_argument_parser():
 
 
    arg (
-      '--shlibcc-arg', '-o', metavar='<arg>',
+      '--shlibcc-arg', '-o', metavar='<arg>', type=is_shlibcc_arg,
       dest='additional_shlibcc_args', default=[], action='append',
       help="additional args to pass to shlibcc",
    )
