@@ -189,7 +189,7 @@ _cmdpool_comp() {
 
       'cleanup')
          [[ "${prev}" == "--exact" ]] || option_words+=" --exact"
-         _cmdpool_comp_slots "${cmdpool_root}" done
+         _cmdpool_comp_slots "${cmdpool_root}" auto_cleanup
       ;;
 
       'stopall')
