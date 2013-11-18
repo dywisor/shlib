@@ -1,1 +1,1 @@
-cmdpool_manage_main "$@"
+cmdpool-manage.sh

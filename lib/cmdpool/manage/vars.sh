@@ -32,16 +32,20 @@ cmdpool_manage_defsym() {
    [ -n "${RUNDIR-}" ] || RUNDIR="/run"
    [ -n "${USER-}"   ] || USER="$(id -nu)"
 
-   DEFAULT_CMDPOOL_ROOT="${RUNDIR}/cmdpool.${USER}/default"
+   if [ -z "${DEFAULT_CMDPOOL_ROOT-}" ]; then
+      DEFAULT_CMDPOOL_ROOT="${RUNDIR}/cmdpool.${USER}/default"
+   fi
    CMDPOOL_ROOT="${DEFAULT_CMDPOOL_ROOT}"
 
-   DEFAULT_X_CMDPOOL_RUNCMD="/usr/bin/cmdpool-runcmd.sh"
-   for libdir in /usr/lib64 /usr/lib32 /usr/lib; do
-      if [ -f "${libdir}/shlib/cmdpool-runcmd.sh" ]; then
-         DEFAULT_X_CMDPOOL_RUNCMD="${libdir}/shlib/cmdpool-runcmd.sh"
-         break
-      fi
-   done
+   if [ -z "${DEFAULT_X_CMDPOOL_RUNCMD-}" ]; then
+      DEFAULT_X_CMDPOOL_RUNCMD="/usr/bin/cmdpool-runcmd.sh"
+      for libdir in /usr/lib64 /usr/lib32 /usr/lib; do
+         if [ -f "${libdir}/shlib/cmdpool-runcmd.sh" ]; then
+            DEFAULT_X_CMDPOOL_RUNCMD="${libdir}/shlib/cmdpool-runcmd.sh"
+            break
+         fi
+      done
+   fi
    X_CMDPOOL_RUNCMD="${DEFAULT_X_CMDPOOL_RUNCMD}"
 
    unset -v \
