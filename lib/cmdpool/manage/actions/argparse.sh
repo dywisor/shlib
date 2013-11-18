@@ -181,6 +181,9 @@ cmdpool_manage_parse_command_options_query() {
          'ret'|'returncode')
             CMDPOOL_SUBCOMMAND="returncode"
          ;;
+         'slot')
+            CMDPOOL_SUBCOMMAND="slot_dir"
+         ;;
          *)
             die "unknown query command '${arg}'" ${EX_USAGE?}
          ;;

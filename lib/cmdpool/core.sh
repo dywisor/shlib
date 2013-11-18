@@ -360,7 +360,8 @@ cmdpool_remove_slot() {
 #  Marks a slot for auto removal (cmdpool_cleanup_slots()).
 #
 cmdpool_mark_for_removal() {
-   touch "${slot}/auto_cleanup"
+   cmdpool_logger --level=DEBUG "marking slot '${1-UNDEF}' for auto-removal"
+   touch "${1:?}/auto_cleanup"
 }
 
 
