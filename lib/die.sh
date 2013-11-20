@@ -6,7 +6,11 @@ die__minimal() {
    [ "${HAVE_BREAKPOINT_SUPPORT:-n}" != "y" ] || breakpoint die
 
    if [ "${__HAVE_MESSAGE_FUNCTIONS:-n}" = "y" ]; then
-      eerror "${1}" "died:"
+      if [ -n "${1-}" ]; then
+         eerror "" "died."
+      else
+         eerror "${1}" "died:"
+      fi
    elif [ -n "${1-}" ]; then
       echo "died: ${1}" 1>&2
    else
