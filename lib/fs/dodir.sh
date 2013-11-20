@@ -47,8 +47,10 @@ dodir() {
                ${F_DODIR_EXISTED} "${d}" || return
 
 
-         elif mkdir ${MKDIR_OPTS--p} ${MKDIR_OPTS_APPEND-} -- "${d}" 2>/dev/null; then
-
+         elif mkdir \
+            ${MKDIR_OPTS--p} ${MKDIR_OPTS_APPEND-} -- "${d}" 2>/dev/null || \
+            [ -d "${d}" ]
+         then
             [ "${KEEPDIR:-n}" != "y" ] || touch "${d}/.keep" || true
 
             [ -z "${F_DODIR_CREATED-}" ] || \
