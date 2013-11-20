@@ -6,9 +6,9 @@ einfo_nocolor()   { printf -- "${2:-[INFO]}${1:+ }${1-}\n"; }
 ewarn_nocolor()   { printf -- "${2:-[WARN]}${1:+ }${1-}\n"; }
 eerror_nocolor()  { printf -- "${2:-[ERROR]}${1:+ }${1-}\n"; }
 
-einfon_nocolor()   { printf -- "${2:-[INFO]}${1:+ }${1-}"; }
-ewarnn_nocolor()   { printf -- "${2:-[WARN]}${1:+ }${1-}"; }
-eerrorn_nocolor()  { printf -- "${2:-[ERROR]}${1:+ }${1-}"; }
+einfon_nocolor()  { printf -- "${2:-[INFO]}${1:+ }${1-}"; }
+ewarnn_nocolor()  { printf -- "${2:-[WARN]}${1:+ }${1-}"; }
+eerrorn_nocolor() { printf -- "${2:-[ERROR]}${1:+ }${1-}"; }
 
 # void __message_colored ( text_colored, color, text_nocolor )
 #
@@ -36,9 +36,9 @@ __messagen_colored() {
 ##ewarn_color()  { __message_colored "${2:-[WARN]}"  '1;33m' "${1-}"; }
 ##eerror_color() { __message_colored "${2:-[ERROR]}" '1;31m' "${1-}"; }
 
-einfo_color()  { __message_colored "${2:-*}" '1;32m' "${1-}"; }
-ewarn_color()  { __message_colored "${2:-*}" '1;33m' "${1-}"; }
-eerror_color() { __message_colored "${2:-*}" '1;31m' "${1-}"; }
+einfo_color()   { __message_colored "${2:-*}" '1;32m' "${1-}"; }
+ewarn_color()   { __message_colored "${2:-*}" '1;33m' "${1-}"; }
+eerror_color()  { __message_colored "${2:-*}" '1;31m' "${1-}"; }
 
 einfon_color()  { __messagen_colored "${2:-*}" '1;32m' "${1-}"; }
 ewarnn_color()  { __messagen_colored "${2:-*}" '1;33m' "${1-}"; }
@@ -148,6 +148,7 @@ printvar() {
 #  * /NO_COLOR exists (can also be a broken symlink)
 #  * stdout or stderr are not connected to a tty
 #  * stdin is connected to a special terminal, e.g. serial console (ttyS*)
+#  * /dev/null is missing, which prevents the ttyS* check
 #
 #  Automatically rebinds the message functions if necessary or
 #  if %force_rebind is set to 'y'.
@@ -157,7 +158,7 @@ printvar() {
 message_autoset_nocolor() {
    if [ "${NO_COLOR:-n}" != "y" ]; then
       if \
-         [ -e /NO_COLOR ] || [ -h /NO_COLOR ] || \
+         [ -e /NO_COLOR ] || [ -h /NO_COLOR ] || [ ! -c /dev/null ] \
          [ ! -t 1 ] || [ ! -t 2 ]
       then
          NO_COLOR=y
