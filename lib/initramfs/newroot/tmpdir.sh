@@ -1,3 +1,5 @@
+#@section functions
+
 # @private void newroot_tmpdir__setperm_user ( dir, **tmpdir_owner_id )
 #
 #  Sets permissions (chown&chmod) for a user tmpdir.

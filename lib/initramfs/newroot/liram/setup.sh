@@ -1,10 +1,16 @@
+#@section functions_export
+
 # @extern int  newroot_setup_dirs        ( *file=<default> )
 # @extern int  newroot_setup_mountpoints ( fstab_file=<default> )
 # @extern int  newroot_setup_premount    ( file=<default>, **CMDLINE_FSCK )
 # @extern int newroot_setup_tmpdir       ( file=<default> )
 # @extern void newroot_setup_all()
 
+#@section module_init
 : ${NEWROOT_CONFIG_DIR?}
+
+
+#@section functions
 
 # int liram_setup_subtrees ( *file=<detect>, **NEWROOT, **NEWROOT_CONFIG_DIR )
 #

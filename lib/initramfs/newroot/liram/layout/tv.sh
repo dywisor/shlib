@@ -1,3 +1,4 @@
+#@section header
 # int liram_populate_layout_tv ( **NEWROOT_HOME_DIR! )
 #
 # ----------------------------------------------------------------------------
@@ -45,6 +46,10 @@
 # * /home should be a symlink to /var/users
 #
 # ----------------------------------------------------------------------------
+#
+
+#@section functions
+# int liram_populate_layout_tv ( **NEWROOT_HOME_DIR! )
 #
 liram_populate_layout_tv() {
    : ${LIRAM_LAYOUT_TV_WITH_VDR:=y}

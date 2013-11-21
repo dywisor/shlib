@@ -1,6 +1,11 @@
+#@section functions_export
+
 # @external int devfs_mount()
 # @external int devfs_mdadm()
 # @external int devfs_seed()
+
+
+#@section functions
 
 # int devfs_lvm()
 #

@@ -1,3 +1,5 @@
+#@section functions
+
 # void __newroot_premount_fstab (
 #    **fs, **mp, **fstype, **opts,
 #    **want_mp, **mounted!

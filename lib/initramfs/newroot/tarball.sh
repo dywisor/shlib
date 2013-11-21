@@ -1,3 +1,5 @@
+#@section functions
+
 # int newroot_unpack_tarball ( tarball_file, dest="/" )
 #
 #  Unpacks a tarball file into NEWROOT/dest.

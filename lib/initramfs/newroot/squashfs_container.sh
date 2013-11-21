@@ -1,3 +1,4 @@
+#@section header
 # this module provides newroot-specific function wrappers
 #
 # quickref
@@ -9,6 +10,9 @@
 # int newroot_sfs_container_downsize()
 # int newroot_sfs_container_finalize()
 # int newroot_sfs_container_avail()
+
+
+#@section functions
 
 # int newroot_sfs_container_mount ( sfs_name, mp, **SFS_CONTAINER )
 #

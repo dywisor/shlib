@@ -1,3 +1,5 @@
+#@section functions_export
+
 ## functions from initramfs/newroot/liram/logging
 
 # @extern void liram_log()
@@ -20,6 +22,9 @@
 # @extern int newroot_sfs_container_finalize()
 # @extern int newroot_sfs_container_avail()
 # @extern int newroot_sfs_container_mount_writable() -- sfs_name, mp, size, aufs_root
+
+
+#@section functions
 
 # int liram_sfs_container_import ( name, sfs_name=name, **v0! )
 #

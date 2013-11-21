@@ -1,3 +1,5 @@
+#@section functions
+
 # void __devfs_resolve_disk_do_scan (...)
 #
 #  Helper function for devfs_resolve_disk(). "Updates" /dev.

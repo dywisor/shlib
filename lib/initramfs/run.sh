@@ -1,3 +1,5 @@
+#@section functions
+
 # @noreturn initramfs_die (
 #    [message], [code], **F_INITRAMFS_DIE=, **INITRAMFS_SHELL_ON_DIE=y
 # )
@@ -77,6 +79,8 @@ inonfatal() {
    return ${rc}
 }
 
+
+#@section vars
 # @implicit void main()
 #
 #  Sets the F_AUTODIE, AUTODIE and AUTODIE_NONFATAL variables.

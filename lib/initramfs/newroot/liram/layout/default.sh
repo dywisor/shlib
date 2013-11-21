@@ -1,3 +1,4 @@
+#@section header
 # int liram_populate_layout_default()
 #
 # ----------------------------------------------------------------------------
@@ -32,8 +33,8 @@
 # * Extracts the 'scripts' tarball into /sh
 #
 #
-# Tarballs take higher precedence, so if there's a a usr.sfs and a usr.tgz
-# available, the usr.tgz file will be used.
+# Tarballs take higher precedence, so if both usr.sfs and usr.tgz are
+# available, then the usr.tgz file will be used.
 #
 # Calls liram_setup_subtrees() after unpacking the rootfs and
 # newroot_setup_all() after populating newroot.
@@ -45,6 +46,10 @@
 #
 #
 # ----------------------------------------------------------------------------
+#
+
+#@section functions
+# int liram_populate_layout_default()
 #
 liram_populate_layout_default() {
    if [ "${LIRAM_LAYOUT:?}" = "default" ]; then

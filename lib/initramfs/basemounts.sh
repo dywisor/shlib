@@ -1,4 +1,9 @@
+#@section functions_export
+
 # @extern int basemounts_mount()
+
+
+#@section functions
 
 # @private void basemounts__default_umount()
 #

@@ -1,3 +1,5 @@
+#@section functions
+
 # void liram_mount_subtree (
 #    mp, size_m, name=<auto>, opts="mode=0755", **NEWROOT
 # ), raises liram_die()

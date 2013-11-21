@@ -1,8 +1,10 @@
+#@section header
 # This file should be included by non-liram modules in order to get
 # "full" liram functionality (core + all non-experimental layouts)
-
-## functions from newroot/initramfs/liram/core
-
+#
+#
+## function from newroot/initramfs/liram/core
+#
 # @extern void liram_init(), raises *die()
 #
 #  This function does everything that is needed to initialize and populate
@@ -11,10 +13,10 @@
 #  External modules should use this function after setting variables
 #  like LIRAM_DISK, LIRAM_LAYOUT etc..
 #
-
-## variables that are expected to be set by external modules,
-## e.g. by initramfs/cmdline/
-
+#
+# variables that are expected to be set by external modules,
+# e.g. by initramfs/cmdline/:
+#
 # LIRAM_DISK (mandatory)
 #
 #  disk identifier of the liram sysdisk, e.g. "LABEL=liram_sysdisk"

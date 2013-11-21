@@ -1,3 +1,5 @@
+#@section functions
+
 # @private int initramfs__unpack_tarball ( file, dest )
 #
 #  Unpacks a tarball into dest. Does not apply any prefixes etc.

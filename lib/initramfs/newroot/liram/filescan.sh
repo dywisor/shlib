@@ -1,5 +1,9 @@
+#@section header
 # This module provides generic file search functions
 # !!! It is not a file scanning "frontend", see liram/util->liram_scan_files()
+
+
+#@section functions
 
 # void liram_filescan() {
 #    *file_name,

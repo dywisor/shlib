@@ -1,6 +1,9 @@
+#@section module_init_vars
 __CMDLINE_ARGPARSE_FUNCTIONS="${__CMDLINE_ARGPARSE_FUNCTIONS-}
 cmdline_parser_core
 "
+
+#@section functions
 
 cmdline_parser_core() {
    case "${arg}" in

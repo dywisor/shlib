@@ -1,3 +1,5 @@
+#@section functions
+
 # int initramfs_launch_shell ( cmd_prefix=, shell_exe=**SHELL, **CONSOLE )
 #
 #  Starts a shell (default: /bin/sh).

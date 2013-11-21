@@ -1,9 +1,14 @@
+#@section user_vars
+
 # Names of the tarballs that will be searched if tarball_scan_names() is
 # called without any name arg
 : ${TARBALL_SCAN_NAMES:="rootfs var usr etc home scripts log"}
 
 # Tarball file extensions - order *does* matter
 : ${TARBALL_SCAN_EXTENSIONS:="tar tar.gz tgz tar.bz2 tbz2 tar.lzo tar.xz txz"}
+
+
+#@section functions
 
 # void liram_scan_tarball (
 #    sync_dir,

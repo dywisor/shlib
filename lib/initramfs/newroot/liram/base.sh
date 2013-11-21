@@ -1,3 +1,4 @@
+#@section const
 # be extra careful:
 #  LIRAM_DISK_MNT_DIR is the directory where the liram disk will be mounted.
 #  It should not be confused with the %LIRAM_DISK_MP variable, which
@@ -10,6 +11,9 @@
 #  modified at runtime.
 #
 readonly LIRAM_DISK_MNT_DIR="/mnt/liram_sysdisk"
+
+
+#@section functions
 
 # @noreturn liram_die(...) wraps initramfs_die(...)
 #

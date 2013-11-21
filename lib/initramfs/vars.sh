@@ -1,3 +1,5 @@
+#@section functions
+
 # void initramfs_vars ( **<see function body> )
 #
 #  Initializes some variables using initramfs-specific code.
@@ -50,6 +52,8 @@ initramfs_vars() {
    : ${MOUNTOPTS_APPEND=-n}
 }
 
+
+#@section module_init
 # @implicit void main()
 #
 #  Calls initramfs_vars() if the id of this process is 1.

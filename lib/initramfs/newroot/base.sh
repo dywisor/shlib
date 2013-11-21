@@ -1,6 +1,13 @@
+#@section functions_export
+
 # @extern int dodir (...)
 
+
+#@section vars
 : ${NEWROOT:=/newroot}
+
+
+#@section functions
 
 # void newroot_doprefix ( fspath, **NEWROOT )
 #

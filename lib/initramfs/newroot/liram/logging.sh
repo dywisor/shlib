@@ -1,3 +1,5 @@
+#@section functions
+
 # function liram_log ( level, ... )
 #  IS dolog ( "-0", "--level=<level>", "--facility=liram", ... )
 liram_log() {

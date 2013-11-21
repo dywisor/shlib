@@ -1,3 +1,5 @@
+#@section functions_export
+
 ## functions from initramfs/newroot/tmpdir
 
 # @extern int newroot_tmpdir_users ( *user_spec )
@@ -6,9 +8,11 @@
 # @extern int newroot_tmpdir_avail()
 
 
-## BEGIN module
-
+#@section user_vars
 : ${NEWROOT_CONFIG_DIR=/initramfs-config}
+
+
+#@section functions
 
 # @private void newroot_setup__dodir ( dirpath, **NEWROOT, **fail! )
 #

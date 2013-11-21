@@ -1,7 +1,11 @@
+#@section header
 ## this is a virtual module that pulls in the initramfs base modules
 ## (nearly all initramfs/ top-level modules are direct dependencies)
 ##
 ##  the following functionality is guaranteed to be provided:
+
+
+#@section functions_export
 
 ## functions from die, function_die
 

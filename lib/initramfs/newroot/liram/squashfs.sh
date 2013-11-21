@@ -1,5 +1,9 @@
+#@section user_vars
 : ${SFS_SCAN_NAMES="usr"}
 : ${SFS_SCAN_EXTENSIONS="sfs squashfs"}
+
+
+#@section functions
 
 # void liram_scan_squashfs (
 #    sync_dir,

@@ -1,3 +1,5 @@
+#@section functions_export
+
 ## This module must not depend on any file from ./layout/
 
 # You probably want to include ./layouts and not this module (./core).

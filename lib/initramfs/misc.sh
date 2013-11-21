@@ -1,3 +1,5 @@
+#@section functions
+
 # int initramfs_sleep ( *time )
 #
 #  Sleeps for the specified amount of time.
@@ -77,11 +79,11 @@ initramfs_switch_root() {
 #  Copies a file verbosely using rsync or cp. rsync is preferred.
 #
 initramfs_copy_file() {
-#   if [ -x /usr/bin/rsync ]; then
-#      ${LOGGER} -0 --level=DEBUG "Copying ${1} -> ${2} using /usr/bin/rsync"
-#
-#      /usr/bin/rsync -L -W --progress -- "${1}" "${2}"
-
+##   if [ -x /usr/bin/rsync ]; then
+##      ${LOGGER} -0 --level=DEBUG "Copying ${1} -> ${2} using /usr/bin/rsync"
+##
+##      /usr/bin/rsync -L -W --progress -- "${1}" "${2}"
+##
    if qwhich rsync; then
       ${LOGGER} -0 --level=DEBUG "Copying ${1} -> ${2} using rsync"
 

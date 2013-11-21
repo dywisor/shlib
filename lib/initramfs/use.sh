@@ -1,3 +1,5 @@
+#@section functions
+
 # int  initramfs_use         ( *flag )
 # void initramfs_enable_use  ( *flag )
 # void initramfs_disable_use ( *flag )

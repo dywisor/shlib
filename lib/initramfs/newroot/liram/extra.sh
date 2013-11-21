@@ -1,7 +1,12 @@
+#@section header
 # non-essential helper functions
 
+#@section user_vars
 # path relative to NEWROOT
 : ${LIRAM_ENV_FILE:=LIRAM_ENV}
+
+
+#@section functions
 
 # void liram_zap_env_file ( **NEWROOT, **LIRAM_ENV_FILE )
 #

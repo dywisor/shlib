@@ -1,3 +1,5 @@
+#@section functions
+
 # void initramfs_default_start (
 #    **SUPPRESS_PRINTK=y,
 #    **INIT_NEWROOT=y,

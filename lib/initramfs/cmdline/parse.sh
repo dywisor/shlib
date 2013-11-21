@@ -1,3 +1,5 @@
+#@section functions
+
 # void cmdline_parse ( **CMDLINE_FILE=/proc/cmdline )
 #
 #  Parses /proc/cmdline by calling __cmdline_parse_mux(<arg>) for each arg.

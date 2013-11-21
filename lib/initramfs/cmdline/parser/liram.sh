@@ -1,6 +1,9 @@
+#@section module_init_vars
 __CMDLINE_ARGPARSE_FUNCTIONS="${__CMDLINE_ARGPARSE_FUNCTIONS-}
 cmdline_parser_liram
 "
+
+#@section functions
 
 __cmdline_parser_liram_opts() {
    local k="${1%%=*}" v="${1#*=}"

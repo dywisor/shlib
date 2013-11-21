@@ -1,5 +1,8 @@
+#@section header
 ## this module provides initramfs versions of mount()/umount() which
 ## wrap the actual call with irun().
+
+#@section functions
 
 # void imount ( *argv )
 #
@@ -34,6 +37,7 @@ imount_fs() {
 }
 
 
-# @implcit void main ( **F_DOMOUNT_MP! )
+#@section module_init_vars
+# @implicit void main ( **F_DOMOUNT_MP! )
 #
 F_DOMOUNT_MP=imount_mp

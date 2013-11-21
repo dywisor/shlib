@@ -1,3 +1,4 @@
+#@section header
 # quickref
 #
 # int newroot_sfs_container_mount_writable() -- sfs_name, mp, size, aufs_root
@@ -10,6 +11,8 @@
 # @extern int newroot_sfs_container_downsize()
 # @extern int newroot_sfs_container_finalize()
 
+
+#@section functions
 
 # int newroot_sfs_container_mount_writable (
 #    sfs_name, mp, size[_m]:=100, **SFS_CONTAINER_NAME
@@ -32,6 +35,7 @@ newroot_sfs_container_mount_writeable() {
    newroot_sfs_container_mount_writable "$@"
 }
 
+#@section functions_export
 
 # @extern int newroot_sfs_container_mount()          -- sfs_name, mp
 # @extern void newroot_sfs_container_init()          -- mp, size_m

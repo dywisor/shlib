@@ -1,5 +1,10 @@
+#@section functions_export
+
 # @extern int  newroot_premount ( mp )
 # @extern void newroot_premount_all()
+
+
+#@section functions
 
 # void newroot_mount_rootfs ( **CMDLINE_ROOT... )
 #
