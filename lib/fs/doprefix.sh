@@ -1,3 +1,5 @@
+#@section functions_public
+
 # void fs_doprefix ( fspath=, prefix=**FS_PREFIX=, *sub_prefix )
 #
 #  Applies a prefix to a filesystem path and stores the result in %v0.

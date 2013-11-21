@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int dir_empty ( dir )
 #
 #  Returns true if the given directory is empty, else false.

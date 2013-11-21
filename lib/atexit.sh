@@ -1,7 +1,12 @@
+#@section module_vars
+
 # linelist __ATEXIT_FUNCTIONS
 #  a list of statements "function *args" that will be called at exit.
 #
 : ${__ATEXIT_FUNCTIONS=}
+
+
+#@section functions_public
 
 # void atexit_enable ( *signals="TERM EXIT" )
 #
@@ -21,6 +26,34 @@ atexit_disable() {
    trap - ${*:-TERM EXIT}
    ATEXIT_ENABLED=n
 }
+
+# void atexit_register_unsafe ( *argv )
+#
+#  Registers argv for atexit execution without doing any checks.
+#
+atexit_register_unsafe() {
+   if [ -n "${__ATEXIT_FUNCTIONS:-}" ]; then
+
+__ATEXIT_FUNCTIONS="${__ATEXIT_FUNCTIONS}
+$*"
+
+   else
+      __ATEXIT_FUNCTIONS="$*"
+   fi
+}
+
+# void atexit_register ( *argv )
+#
+# Registers argv for atexit execution if not already registered.
+#
+atexit_register() {
+   [ -z "$*" ] || \
+      linelist_has "$*" "${__ATEXIT_FUNCTIONS}" || \
+      atexit_register_unsafe "$*"
+}
+
+
+#@section functions_private
 
 # true __atexit_run ( *argv )
 #
@@ -59,30 +92,9 @@ __atexit__() {
    F_ITER=__atexit_clear_pipe
 }
 
-# void atexit_register_unsafe ( *argv )
-#
-#  Registers argv for atexit execution without doing any checks.
-#
-atexit_register_unsafe() {
-   if [ -n "${__ATEXIT_FUNCTIONS:-}" ]; then
 
-__ATEXIT_FUNCTIONS="${__ATEXIT_FUNCTIONS}
-$*"
 
-   else
-      __ATEXIT_FUNCTIONS="$*"
-   fi
-}
-
-# void atexit_register ( *argv )
-#
-# Registers argv for atexit execution if not already registered.
-#
-atexit_register() {
-   [ -z "$*" ] || \
-      linelist_has "$*" "${__ATEXIT_FUNCTIONS}" || \
-      atexit_register_unsafe "$*"
-}
+#@section module_init
 
 # implicit atexit_main ( **ATEXIT_ENABLE=y )
 #

@@ -1,3 +1,5 @@
+#@section functions
+
 # @noreturn assert_die ( message, exit_code= ), raises die()
 #
 #  DEFINES @assert <function name> ( <arg> ), raises assert_die()

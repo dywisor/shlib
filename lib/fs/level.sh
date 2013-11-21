@@ -1,3 +1,5 @@
+#@section functions_private
+
 # @private int fslevel__get_level ( normalized_fspath, **v0! )
 #
 #  See get_fs_level().
@@ -26,6 +28,9 @@ fslevel__get_level() {
 
    [ -n "${v0}" ]
 }
+
+
+#@section functions_public
 
 # int get_fslevel ( fspath, **v0! )
 #

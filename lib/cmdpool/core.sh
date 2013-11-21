@@ -1,3 +1,4 @@
+#@section header
 # ----------------------------------------------------------------------------
 #
 # This module provides functions to manage one or more command pools,
@@ -73,6 +74,9 @@
 #
 # ----------------------------------------------------------------------------
 
+
+#@section functions_public
+
 # @logger cmdpool_logger()
 #
 #  logger function that passes "cmdpool" as root facility.
@@ -91,6 +95,9 @@ cmdpool_log_error() {
    ${LOGGER?} --facility=cmdpool --level=ERROR "$@"
 }
 
+
+
+#@section functions_private
 
 # @private int cmdpool__populate_slot ( slot, exe, *argv )
 #
@@ -141,6 +148,8 @@ cmdpool__get_exe_name() {
    [ -n "${exe_name}" ]
 }
 
+
+#@section functions_public
 
 # void cmdpool_set_runcmd ( helper_exe, **X_CMDPOOL_RUNCMD! )
 #

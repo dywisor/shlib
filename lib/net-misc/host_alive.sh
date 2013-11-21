@@ -1,3 +1,5 @@
+#@section functions
+
 # int host_alive ( [sync_dir], *host_spec, **HOST_ALIVE_WAIT=2 )
 #
 #  Calls host_alive_multi ( sync_dir, *host_spec ) if the first arg starts
@@ -106,4 +108,3 @@ host_alive__coproc() {
       rm "${2}"
    fi
 }
-

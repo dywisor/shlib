@@ -1,3 +1,5 @@
+#@section functions
+
 # void assert_pipe ( expected_value=0 )
 #
 #  Dies if PIPESTATUS != expected_value.

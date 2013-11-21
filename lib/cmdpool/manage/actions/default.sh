@@ -1,6 +1,8 @@
+#@section vars
 CMDPOOL_KNOWN_COMMANDS="${CMDPOOL_KNOWN_COMMANDS?} \
 abandon autodel cleanup run start stop stopall"
 
+#@section functions_public
 
 # @cmdpool_action cmdpool_manage_do_abandon ( **CMDPOOL_SINGLE_SLOT )
 #

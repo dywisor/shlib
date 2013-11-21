@@ -1,6 +1,11 @@
+#@section header
 ## EXPERIMENTAL, needs testing
 
+#@section vars
 : ${AUFS_TMPFS_OPTS=mode=0775,dev,exec,suid}
+
+
+#@section functions
 
 # void __aufs_branchline ( perm, *branches )
 #

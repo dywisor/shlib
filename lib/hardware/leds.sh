@@ -1,3 +1,5 @@
+#@section functions
+
 # int led__get_brightness ( **led_file, **v0! )
 #
 #  Read a leds brightness from led_file.

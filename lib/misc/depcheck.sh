@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int depcheck ( *dep, **DEPCHECK_DIE=y, **RDEPEND=**DEPEND= ), raises die()
 #
 #  Tries to locate all dependencies (using which <dep>).

@@ -1,3 +1,4 @@
+#@section funcdef
 # @funcdef @cmdpool_action int cmdpool_manage_do_<action name> (
 #    *args,
 #    **DEFAULT_CMDPOOL_ROOT, **CMDPOOL_ROOT, **CMDPOOL_COMMAND,
@@ -7,8 +8,11 @@
 #  cmdpool action function.
 #
 
+#@section vars
 CMDPOOL_KNOWN_COMMANDS="check list ls query wait"
 
+
+#@section functions_public
 
 # @virtual @cmdpool_action cmdpool_manage_do_TODO(), raises die()
 #

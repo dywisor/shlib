@@ -1,3 +1,5 @@
+#@section functions_public
+
 # void fspath_remove_trailing_slashes ( fspath, **v0! )
 #
 fspath_remove_trailing_slashes() {
@@ -76,6 +78,8 @@ fspath_trim() {
 }
 
 
+#@section functions_private
+
 # @private @stdout ~int readlink__abspath ( fspath )
 #
 #  abspath() function using readlink.
@@ -143,6 +147,9 @@ realpath__realpath() {
 realpath__realpath_safe() {
    realpath -Leq -- "${1?}"
 }
+
+
+#@section functions_public
 
 # void fspath_bind_implementation (
 #    impl, **HAVE_FSPATH_FUNCTIONS!
@@ -226,6 +233,7 @@ fspath_bind_functions_if_required() {
 }
 
 
+#@section module_init
 if [ $$ -ne 1 ] && [ "${FSPATH_BIND_FUNCTIONS:-y}" = "y" ]; then
    fspath_bind_functions
 fi

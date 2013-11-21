@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int list_has ( word, *list_items )
 #
 #  Returns true if word is in list_items, else false.

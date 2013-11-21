@@ -1,3 +1,5 @@
+#@section functions_private
+
 # @private int readconfig__search ( name, **config_file! )
 #
 #  Searches for a config file with the given name at the following locations,
@@ -59,6 +61,9 @@ readconfig__read() {
 readconfig__die_not_found() {
    die "cannot read config file(s) '${*}'"
 }
+
+
+#@section functions_public
 
 # int readconfig_optional ( *config_file, **READCONFIG_READ_ALL=n )
 #

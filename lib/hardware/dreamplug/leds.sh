@@ -1,3 +1,5 @@
+#@section functions
+
 # int dreamplug_control_leds ( <see control_leds()> )
 #
 #  Wraps control_leds() form hardware/leds.sh and provides access to dreamplug

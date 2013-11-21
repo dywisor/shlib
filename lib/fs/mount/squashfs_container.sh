@@ -1,3 +1,4 @@
+#@section header
 # ----------------------------------------------------------------------------
 #
 # This module provides functions to manage a squashfs file container,
@@ -53,6 +54,8 @@
 #
 # ----------------------------------------------------------------------------
 
+
+#@section functions
 
 # @private int sfs_container__resize ( new_size_m )
 #

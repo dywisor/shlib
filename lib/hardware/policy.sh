@@ -1,3 +1,4 @@
+#@section header
 # This module is heavily inspired by linrunner's TLP [0]. It does not,
 # however, try to reimplement TLP nor provide its entire feature set.
 # Instead, this module is targeted at use for home servers (and other
@@ -31,6 +32,8 @@
 #        so disks with unknown status will be skipped, too
 #
 
+
+#@section functions
 
 # void hardware_policy_depcheck(), raises die()
 #

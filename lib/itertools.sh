@@ -1,10 +1,15 @@
+#@section header
+
 # itertools
 #  create/parse lists and entities that can be perceived as such,
 #  e.g. directory/filesystem trees, file text lines, ...
 #
 
+#@section functions_export
 # @extern int list_has ( word, *list_items )
 
+
+#@section functions_private
 # @private int __itertools_kw_is_not ( word, **kw )
 #
 #  Returns true if kw != word else false.
@@ -12,6 +17,9 @@
 __itertools_kw_is_not() {
    [ "x${kw?}" != "x$*" ]
 }
+
+
+#@section functions_public
 
 # void generic_iterator (
 #    item_separator, *words,

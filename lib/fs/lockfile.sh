@@ -1,3 +1,5 @@
+#@section header
+
 ## symlinking is atomic (even for nfs v2/v3)
 
 # quickref
@@ -14,8 +16,14 @@
 # yesno LOCKFILE_AUTO_DELETE     (=n) -- must set before/when retrieving a lock
 #
 
+
+#@section vars
 # not supported by busybox ln
+#  ^FIXME: still true?
 : ${LOCKFILE_LN_OPTS=-T}
+
+
+#@section functions_private
 
 # @private void lockfile__atexit_release ( lock )
 #
@@ -120,6 +128,9 @@ __lockfile_acquire_now() {
       lockfile__atexit_register "${1}"
 }
 fi
+
+
+#@section functions_public
 
 # int lockfile_acquire_now ( lock, **LOCKFILE_AUTO_DELETE=n )
 #

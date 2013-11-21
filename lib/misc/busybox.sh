@@ -1,4 +1,8 @@
+#@section vars
 : ${BUSYBOX:=/bin/busybox}
+
+
+#@section functions_public
 
 # int busybox_overlay ( overlay_dir, **BUSYBOX )
 #

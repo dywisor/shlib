@@ -1,3 +1,5 @@
+#@section functions
+
 # int as_function ( *argv, **MAIN_FUNCTION=**SCRIPT_NAME )
 #
 #  Calls a function named MAIN_FUNCTION or SCRIPT_NAME.

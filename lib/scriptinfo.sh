@@ -1,3 +1,4 @@
+# @section functions_public
 eval_scriptinfo() {
    local x
    if [ ${#} -gt 0 ]; then
@@ -23,4 +24,5 @@ eval_scriptinfo() {
    SCRIPT_NAME="${SCRIPT_FILENAME%.*}"
 }
 
+# @section module_init
 eval_scriptinfo

@@ -1,5 +1,7 @@
+#@section user_vars
 : ${VDR_RECORD_EXT=ts}
 
+#@section vars
 VDR_RECORD_VARS_NONEMPTY="
 VDR_INITIAL_PWD
 VDR_RECORD_STATE
@@ -19,6 +21,7 @@ VDR_RECORD_VARS="${VDR_RECORD_VARS_NONEMPTY}
 ${VDR_RECORD_VARS_EMPTYOK}"
 
 
+#@section functions_export
 
 # @extern int vdr_get_record_files (
 #    type="default"
@@ -28,6 +31,9 @@ ${VDR_RECORD_VARS_EMPTYOK}"
 #  Searches for record files in VDR_RECORD_DIR and stores their names in v0.
 #  Also counts the # of record files and stores the result in v1.
 #
+
+
+#@section functions
 
 # void vdr_validate_record_vars(), raises die()
 #

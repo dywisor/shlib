@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int unless_exists ( fs_item, *cmdv )
 #
 #  Runs cmdv if fs_item does not exist.

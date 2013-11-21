@@ -1,3 +1,5 @@
+#@section functions
+
 # int remount ( *mp, **REMOUNT_MODE ), raises function_die()
 #
 #  Remounts the given mountpoints. Returns on first failure.

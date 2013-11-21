@@ -1,3 +1,5 @@
+#@section functions_export
+
 # @extern @noreturn die ( message, code, **DIE=exit )
 #
 #  Prints %message to stderr and calls %DIE(code) afterwards.
@@ -40,6 +42,9 @@
 # @extern void vdr_validate_record_vars(), raises die()
 #
 
+
+#@section user_vars
+
 # str|<empty> VDR_RECORDSCRIPT_CONFFILE
 #
 #  Config file that is loaded in vdr_recordscript_init().
@@ -48,6 +53,9 @@
 #  Defaults to "/etc/vdr/recordhook.conf".
 #
 : ${VDR_RECORDSCRIPT_CONFFILE=/etc/vdr/recordhook.conf}
+
+
+#@section vars
 
 # list VDR_FSPATH_VARS
 #
@@ -73,6 +81,9 @@
 #  (even if no file loaded).
 #
 : ${VDR_SCRIPT_VARS_EMPTYOK=}
+
+
+#@section functions
 
 # void vdr_recordscript_init (
 #    **VDR_RECORDSCRIPT_CONFFILE=,

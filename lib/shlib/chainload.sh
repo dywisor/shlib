@@ -1,3 +1,5 @@
+#@section functions
+
 # @private int chainload__locate_file (
 #    filenames, file_extensions=, *dirs=[**SCRIPT_DIR,], **v0!
 # )

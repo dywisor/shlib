@@ -1,3 +1,5 @@
+#@section functions_private
+
 # @private void dotar__get_file_ext ( short="n", **DOTAR__COMPRESS_OPT, **v0! )
 #
 #  Determines a file extension suitable for %DOTAR__COMPRESS_OPT and stores
@@ -36,6 +38,20 @@ dotar__doprefix_if() {
    fi
    v0=$(readlink -${3:-f} "${v0}")
 }
+
+# @private void dotar__exclude_append ( relpath, **DOTAR_EXCLUDE! )
+#
+#  Adds ./%relpath to dotar's exclude list.
+#
+dotar__exclude_append() {
+DOTAR_EXCLUDE="${DOTAR_EXCLUDE-}
+--exclude
+./${1#/}"
+}
+
+
+
+#@section functions_public
 
 # void dotar_from ( src_dir, **DOTAR_ROOT_DIR, **DOTAR__SRC_DIR! )
 #
@@ -86,16 +102,6 @@ dotar_set_compression() {
       DOTAR_COMPRESS=
       DOTAR__COMPRESS_OPT=
    fi
-}
-
-# @private void dotar__exclude_append ( relpath, **DOTAR_EXCLUDE! )
-#
-#  Adds ./%relpath to dotar's exclude list.
-#
-dotar__exclude_append() {
-DOTAR_EXCLUDE="${DOTAR_EXCLUDE-}
---exclude
-./${1#/}"
 }
 
 # void dotar_exclude ( *fspath, **DOTAR_EXCLUDE! )

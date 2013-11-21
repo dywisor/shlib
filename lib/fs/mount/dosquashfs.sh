@@ -1,3 +1,5 @@
+#@section functions
+
 # int dosquashfs ( squashfs_file, mp )
 #
 #  Mounts a squashfs file at the given mountpoint.

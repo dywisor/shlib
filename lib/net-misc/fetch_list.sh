@@ -1,3 +1,5 @@
+#@section functions
+
 # {int,void} fetch_item (
 #    remote_uri,
 #    [spacer],

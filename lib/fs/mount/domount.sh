@@ -1,7 +1,11 @@
+#@section funcdef
+
 # @funcdef int|void domount_mp <function name> ( mp, *args )
 #
 #  Function that mounts the first arg, optionally with the given args.
 #
+
+#@section functions
 
 # @private void domount__logger ( log_level, message, **LOGGER=true )
 #
@@ -138,4 +142,5 @@ domount3() {
    fi
 }
 
+#@section module_init_vars
 : ${F_DOMOUNT_MP:=domount3}

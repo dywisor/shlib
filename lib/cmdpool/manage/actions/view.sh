@@ -1,7 +1,10 @@
+#@section vars
 CMDPOOL_KNOWN_COMMANDS="${CMDPOOL_KNOWN_COMMANDS?} \
 abandon autodel cleanup run start stop stopall"
 
-# void cmdpool_remove_slot__virtual ( slot_dir )
+#@section functions_private
+
+# @private void cmdpool_remove_slot__virtual ( slot_dir )
 #
 cmdpool_remove_slot__virtual() {
    if cmdpool_check_running "${1:?}"; then
@@ -14,6 +17,8 @@ cmdpool_remove_slot__virtual() {
    return 0
 }
 
+
+#@section functions_public
 
 # @cmdpool_action cmdpool_manage_do_abandon ( **CMDPOOL_SINGLE_SLOT )
 #

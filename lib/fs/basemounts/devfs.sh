@@ -1,3 +1,5 @@
+#@section functions
+
 # int devfs_do_blockdev ( dev, major, minor, **X_MKNOD=mknod )
 #
 #  Creates a block dev if it doesn't exist.

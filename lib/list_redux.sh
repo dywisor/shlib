@@ -1,3 +1,5 @@
+#@section functions_public
+
 # void list_redux ( *list_item, **v0! )
 #
 #  Creates a new list %v0 that contains unique items taken from *list_item.

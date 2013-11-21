@@ -1,3 +1,5 @@
+#@section functions
+
 # void print_functrace ( message_function=**F_FUNCTRACE_MSG=ewarn )
 #
 #  Prints the function backtrace (this function excluded)
@@ -13,4 +15,5 @@ print_functrace() {
    ${1:-${F_FUNCTRACE_MSG:-ewarn}} "${ftrace% }" "[FUNCTRACE]"
 }
 
+#@section module_features
 readonly FUNCTRACE_AVAILABLE=y

@@ -1,3 +1,4 @@
+#@section vars
 #X_MKNOD=mknod
 #X_MDEV=/sbin/mdev
 

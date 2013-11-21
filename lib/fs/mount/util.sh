@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int unmount_if_mounted ( mp, [dev] )
 #
 #  Unmounts mp if

@@ -1,3 +1,5 @@
+#@section functions_public
+
 # void chmod_normalize_mode ( mode, **v0! )
 #
 chmod_normalize_mode() {

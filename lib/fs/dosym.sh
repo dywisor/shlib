@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int dosym ( target, link )
 #
 #  Creates a link to the given target if it (the link) does not exist.

@@ -1,3 +1,5 @@
+#@section functions
+
 # @private ~int external_ip__default_wget ( remote_uri, num_matches=1 )
 #
 #  Prints up to num_matches ip addresses read from remote_uri to stdout.

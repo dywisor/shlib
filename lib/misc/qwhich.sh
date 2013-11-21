@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int qwhich ( *prog )
 #
 #  Returns 0 if all listed programs are found by which, else 1.

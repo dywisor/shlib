@@ -1,3 +1,5 @@
+#@section functions
+
 # void eval_function ( func_name, *code )
 #
 #  Creates a function.

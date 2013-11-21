@@ -1,4 +1,7 @@
+#@section vars
 : ${TMPFS_MOUNT_CONTAINER_OPTS=mode=0775,uid=0,gid=6,nodev,noexec,nosuid,sync}
+
+#@section functions
 
 # int dotmpfs ( mp, name=none, opts=rw, fstype=tmpfs )
 #

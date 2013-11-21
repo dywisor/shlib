@@ -1,3 +1,5 @@
+#@section functions
+
 # @stdout int print_disk_status ( dev, **DEVNULL )
 #
 #  Runs a hdparm command that prints dev's status to stdout.

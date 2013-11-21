@@ -1,5 +1,4 @@
-if [ -z "${__HAVE_SHLIB_DIE__:-}" ]; then
-readonly __HAVE_SHLIB_DIE__=y
+#@section functions_private
 
 # @private @noreturn die__extended (
 #    message=, code=2, **DIE=exit, **F_ON_DIE=, **PRINT_FUNCTRACE=n
@@ -30,7 +29,6 @@ die__extended() {
    return 0
 }
 
+#@section funcvars
 # make die__extended() available
 __F_DIE=die__extended
-
-fi

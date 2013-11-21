@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int get_filesize ( fs_item )
 #
 #  Determines the size of a file or directory in MiB.

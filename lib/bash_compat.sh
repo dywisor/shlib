@@ -1,4 +1,7 @@
+#@section header
 ## bash_compat sets some handy variables
+
+#@section functions_public
 
 # void bash_compat()
 #
@@ -22,4 +25,5 @@ bash_compat() {
    fi
 }
 
+#@section module_init
 [ -n "${BASH_VERSION-}" ] || [ $$ -eq 1 ] || bash_compat

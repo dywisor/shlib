@@ -1,8 +1,12 @@
+#@section header
 # This module provides atomic (exclusive) access to files/dirs.
 # It's a rather naive approach to avoid the lost update problem and
 # quite useful if the status of a file (value, existence, ...) depends on
 # its previous one.
 #
+
+
+#@section functions_public
 
 # int atomic_file (
 #    file, *cmdv,

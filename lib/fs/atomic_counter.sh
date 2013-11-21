@@ -1,3 +1,5 @@
+#@section functions_private
+
 # @private int atomic_file_counter__add (
 #    file, delta, min_val=0, **v0!
 # )
@@ -45,6 +47,9 @@ atomic_file_counter__read() {
 atomic_file_counter__reset() {
    echo "${2:-0}" > "${1?}"
 }
+
+
+#@section functions_public
 
 # int atomic_file_counter ( counter_file, action, *action_args )
 #

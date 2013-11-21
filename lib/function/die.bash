@@ -1,5 +1,4 @@
-if [ -z "${__HAVE_SHLIB_FUNCTION_DIE__:-}" ]; then
-readonly __HAVE_SHLIB_FUNCTION_DIE__=y
+#@section functions
 
 # @noreturn function_die (
 #    message,
@@ -13,4 +12,3 @@ function_die() {
       die__function "${FUNCNAME[1]}" "${1:-}" "${3:-}"
    fi
 }
-fi

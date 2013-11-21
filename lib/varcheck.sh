@@ -1,3 +1,5 @@
+#@section functions_public
+
 # void|int varcheck (
 #    *varname,
 #    **VARCHECK_ALLOW_EMPTY=n, **VARCHECK_PREFIX=, **VARCHECK_DIE=y

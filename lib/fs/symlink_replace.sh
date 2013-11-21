@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int symlink_replace ( symlink, new_target )
 #
 #  Safely replaces a symlink. It is guaranteed that the symlink exists at any

@@ -1,14 +1,4 @@
-# void {einfo,ewarn,eerror}{,n}_nocolor ( message, header=<INFO,WARN,ERROR> )
-#
-#  Prints ${header}${message} to stdout.
-#
-einfo_nocolor()   { printf -- "${2:-[INFO]}${1:+ }${1-}\n"; }
-ewarn_nocolor()   { printf -- "${2:-[WARN]}${1:+ }${1-}\n"; }
-eerror_nocolor()  { printf -- "${2:-[ERROR]}${1:+ }${1-}\n"; }
-
-einfon_nocolor()  { printf -- "${2:-[INFO]}${1:+ }${1-}"; }
-ewarnn_nocolor()  { printf -- "${2:-[WARN]}${1:+ }${1-}"; }
-eerrorn_nocolor() { printf -- "${2:-[ERROR]}${1:+ }${1-}"; }
+#@section functions_private
 
 # void __message_colored ( text_colored, color, text_nocolor )
 #
@@ -25,6 +15,22 @@ __message_colored() {
 __messagen_colored() {
    printf -- "\033[${2:?}${1:?}\033[0m${3:+ }${3-}"
 }
+
+
+
+#@section functions
+
+# void {einfo,ewarn,eerror}{,n}_nocolor ( message, header=<INFO,WARN,ERROR> )
+#
+#  Prints ${header}${message} to stdout.
+#
+einfo_nocolor()   { printf -- "${2:-[INFO]}${1:+ }${1-}\n"; }
+ewarn_nocolor()   { printf -- "${2:-[WARN]}${1:+ }${1-}\n"; }
+eerror_nocolor()  { printf -- "${2:-[ERROR]}${1:+ }${1-}\n"; }
+
+einfon_nocolor()  { printf -- "${2:-[INFO]}${1:+ }${1-}"; }
+ewarnn_nocolor()  { printf -- "${2:-[WARN]}${1:+ }${1-}"; }
+eerrorn_nocolor() { printf -- "${2:-[ERROR]}${1:+ }${1-}"; }
 
 
 # void {einfo,ewarn,eerror}{,n}_color ( message, header=<*|INFO,WARN,ERROR> )
@@ -182,6 +188,9 @@ message_autoset_nocolor() {
       message_bind_functions
    fi
 }
+
+
+#@section module_init
 
 # @implicit void main ( **MESSAGE_BIND_FUNCTIONS=y )
 #

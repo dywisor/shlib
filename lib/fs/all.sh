@@ -1,3 +1,4 @@
+#@section module_export
 EXPORT_FUNCTIONS \
    dir_empty dir_not_empty \
    dodir_clean dodir \

@@ -1,3 +1,5 @@
+#@section functions_export
+
 # @extern funcref LOGGER
 
 # @extern @noreturn die ( message, code, **DIE=exit )
@@ -31,6 +33,9 @@
 #  Adds a phase to the list of virtual phases.
 #
 
+
+#@section vars
+
 # str PHASEMUX_FALLBACK_PHASE
 #
 #  phase that is executed if a hook script doesn't implement the
@@ -38,6 +43,9 @@
 #  Can be set to the empty str, which disables the fallback behavior.
 #
 : ${PHASEMUX_FALLBACK_PHASE="any_phase"}
+
+
+#@section functions
 
 # @can-override int phasemux_enter()
 #

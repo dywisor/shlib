@@ -1,4 +1,8 @@
+#@section NULL
 # virtual module that pulls in functions/modules for standard scripts
+
+
+#@section functions_export
 
 ## functions from die
 

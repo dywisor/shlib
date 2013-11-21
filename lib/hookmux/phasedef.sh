@@ -1,3 +1,5 @@
+#@section module_vars
+
 # @private list __PHASEDEF_PHASES
 #
 #  whitespace-separated list containing all known phases
@@ -21,6 +23,9 @@ __PHASEDEF_VIRTUAL_PHASES=
 #
 __IN_HOOK_PHASE__=
 
+
+#@section vars
+
 # str PHASEDEF_PHASEFUNC_PREFIX
 #
 #  Prefix for phase function names.
@@ -28,6 +33,8 @@ __IN_HOOK_PHASE__=
 #
 PHASEDEF_PHASEFUNC_PREFIX=
 
+
+#@section funcdef
 
 # @funcdef <return type> @nophase <function name> (
 #    *args, **kwargs, **__IN_HOOK_PHASE__
@@ -43,6 +50,8 @@ PHASEDEF_PHASEFUNC_PREFIX=
 #  A function that is only allowed to be called while executing a phase.
 #
 
+
+#@section functions
 
 # int phasedef_in_phase ( **__IN_HOOK_PHASE__ )
 #

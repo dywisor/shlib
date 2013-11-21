@@ -1,3 +1,5 @@
+#@section functions
+
 # @private @stdout void vdr__print_all_record_file_names (
 #    **VDR_RECORD_DIR, **VDR_RECORD_EXT
 # )

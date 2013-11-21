@@ -1,8 +1,13 @@
+#@section header
 ## The functions provided by this module are "more or less" compatible with
 ## the ones listed in Gentoo's Package Manager Specification (EAPI 5),
 ## which can be found at http://www.gentoo.org/proj/en/qa/pms.xml
 
+#@section functions_export
 # @extern int use ( *flag, **USE_PREFIX= )
+
+
+#@section functions
 
 # void usex (
 #    flag,
@@ -43,6 +48,7 @@ use_enable() {
    usex "${1}" "--enable-" "--disable-" "${2:-${1}}${3+=}${3-}" "${2:-${1}}"
 }
 
+#@section module_init_vars
 # @implicit void main ( **__USE_FUNCTIONS )
 #
 #  Adds the functions provided by this module to the __USE_FUNCTIONS variable.

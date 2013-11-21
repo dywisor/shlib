@@ -1,3 +1,5 @@
+#@section functions
+
 # int get_yn ( prompt, char_y, char_n )
 #
 #  Asks the user a yes/no question and expects a single char as response.

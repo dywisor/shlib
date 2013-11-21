@@ -1,3 +1,4 @@
+#@section const
 # CMDPOOL_EX_
 #  exit/return codes
 #
@@ -11,6 +12,8 @@ readonly CMDPOOL_EX_STARTFAIL=27
 readonly CMDPOOL_EX_CMDRUNNING=28
 readonly CMDPOOL_EX_NOHELPER=29
 
+
+#@section functions_public
 
 # void cmdpool_manage_defsym (
 #    **RUNDIR!, **USER!,

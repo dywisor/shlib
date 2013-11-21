@@ -1,3 +1,5 @@
+#@section functions
+
 # @private @noreturn die__function ( function_name, message=, code=3 )
 #
 #  Common functionality for function_die().

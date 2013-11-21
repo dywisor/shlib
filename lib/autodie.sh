@@ -1,3 +1,5 @@
+#@section functions_private
+
 # @private void die__autodie ( *argv )
 #
 #  Runs *argv. Dies on non-zero return code.
@@ -9,6 +11,9 @@ die__autodie() {
       die "command '$*' returned $?."
    fi
 }
+
+
+#@section functions_public
 
 # void autodie ( *argv, **F_AUTODIE=die__autodie )
 #
@@ -22,6 +27,7 @@ autodie() { ${F_AUTODIE:-die__autodie} "$@"; }
 run() { ${F_AUTODIE:-die__autodie} "$@"; }
 
 
+#@section vars
 # modules/scripts may want to use/set %AUTODIE, %AUTODIE_NONFATAL
 # if autodie behavior is optional
 : ${AUTODIE=}

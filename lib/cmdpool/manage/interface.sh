@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int cmdpool_manage_run_action ( *argv, **CMDPOOL_COMMAND )
 #
 #  Runs a cmdpool-manage action and passes its return value.

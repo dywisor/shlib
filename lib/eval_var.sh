@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int var_is_set ( varname )
 #
 #  Returns 0 if the variable with the given name is set, else 1.

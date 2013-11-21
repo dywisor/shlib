@@ -1,5 +1,4 @@
-if [ -z "${__HAVE_SHLIB_FUNCTION_DIE__:-}" ]; then
-readonly __HAVE_SHLIB_FUNCTION_DIE__=y
+#@section functions
 
 # @noreturn function_die (
 #    message,
@@ -9,5 +8,3 @@ readonly __HAVE_SHLIB_FUNCTION_DIE__=y
 function_die() {
    die__function "${2:-unknown}" "${1:-}" "${3:-}"
 }
-
-fi

@@ -1,10 +1,15 @@
+#@section funcvars
 # function "pointer" LOGGER
 #  modules may use this when logging is optional
 LOGGER=dolog
 
+#@section user_vars
 # str|<empty> LOGFILE
 #
 : ${LOGFILE=}
+
+
+#@section functions_private
 
 # int __logging_accept_level ( log_level )
 #
@@ -18,6 +23,9 @@ __logging_accept_level() {
    esac
    return 0
 }
+
+
+#@section functions_public
 
 # @pass-through dolog (
 #    <var args>,

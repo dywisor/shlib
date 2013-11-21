@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int yesno ( word )
 #
 #  Returns:
@@ -39,4 +41,3 @@ yesno_strict() {
       ;;
    esac
 }
-

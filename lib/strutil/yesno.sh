@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int yesno ( word )
 #
 #  Returns:

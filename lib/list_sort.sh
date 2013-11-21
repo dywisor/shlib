@@ -1,3 +1,5 @@
+#@section header
+
 # this module provides one (or more) algorithms for sorting lists
 #
 # The default implementation is available via list_sort() (tries to determine
@@ -16,6 +18,9 @@
 ## TODO: move generic list_* (len,partition,...) to a new module
 #
 
+
+#@section funcdef
+
 # @funcdef shbool @sort_compare <function name> ( left, right )
 #
 #  sort_compare :: ( A, B ) -> Bool
@@ -30,6 +35,8 @@
 #  Sorts a list and stores the result in %v0.
 #
 
+
+#@section functions_public
 
 # void list_len ( *list_item, **v0! )
 #
@@ -68,7 +75,9 @@ list_split() {
    list_partition $(( ( ${#} + 1 ) / 2 )) "$@"
 }
 
-# void mergesort__sub ( *list_item, **__MERGESORT!, **F_SORT_COMPARE )
+
+#@section functions_private
+# @private void mergesort__sub ( *list_item, **__MERGESORT!, **F_SORT_COMPARE )
 #
 #  Performs the mergesort sorting algorithm on the given list.
 #  The resulting list is stored in the %__MERGESORT variable.
@@ -126,6 +135,7 @@ mergesort__sub() {
       fi
    fi
 }
+#@section functions_public
 
 # @sort_compare list_sort__int_compare :: ( int, int ) -> Bool
 #

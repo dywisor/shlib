@@ -1,3 +1,5 @@
+#@section funcdef
+
 # @funcdef void cmdpool_manage_parsefunc <function name> (
 #    *argv_remainder, **arg, **argno, **doshift!, **breakpos!, **breakparse!
 # ), raises die(code=**EX_USAGE)
@@ -5,6 +7,8 @@
 #  (%argv_remainder includes %arg)
 #
 
+
+#@section functions_public
 
 # int cmdpool_manage_parse_args_and_dispatch ( main_func, *argv )
 #

@@ -1,3 +1,5 @@
+#@section functions_public
+
 # @function_alias void str_trim() renames sed()
 #
 #  Removes whitespace at the beginning + end of a string

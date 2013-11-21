@@ -1,8 +1,13 @@
+#@section funcdef
+
 # @funcdef shbool pragma __<name>__()
 #
 #  Returns true (0) if a certain behavior is desired (e.g. "be verbose?"),
 #  else false (1).
 #
+
+
+#@section functions_public
 
 # @pragma debug
 #

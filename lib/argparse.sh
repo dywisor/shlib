@@ -1,3 +1,5 @@
+#@section funcdef
+
 # @virtual int <argparse_handle> (
 #    *argv_remainder,
 #    **arg,
@@ -15,11 +17,17 @@
 #  consume zero or more of the remaining args.
 #
 
+
+#@section functions_public
+
 # void argparse_die ( message, code=**EX_USAGE=64 )
 #
 #  die() wrapper function.
 #
 argparse_die() { die "argparse: ${1-}" "${2:-${EX_USAGE:-64}}"; }
+
+
+#@section functions_private
 
 # @private void __argparse_print_help ( **<see function body> ), raises exit()
 #
@@ -87,6 +95,9 @@ __argparse_handle_internal() {
    return 0
 }
 
+
+#@section functions_public
+
 # @argparse_handle argparse_need_arg (...)
 #
 #  Calls die() if $1 is empty or unset. Also sets doshift to 1.
@@ -122,6 +133,9 @@ argparse_need_args() {
    doshift=${nargs}
 }
 
+
+#@section functions_private
+
 # @argparse_handle __argparse_handle_shortopt (
 #    [ word ] :: [ *argv_remainder ], ...
 # )
@@ -142,6 +156,8 @@ __argparse_handle_shortopt() {
       fi
    fi
 }
+
+#@section functions_public
 
 # @argparse_handle argparse_unknown (
 #    **real_arg,

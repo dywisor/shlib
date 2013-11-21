@@ -1,3 +1,5 @@
+#@section functions
+
 # @private void daemonize__setup (
 #    **X_START_STOP_DAEMON!, **START_STOP_DAEMON_OPTS!,
 ##    **START_STOP_DAEMON_START_OPTS!, **START_STOP_DAEMON_STOP_OPTS!
@@ -88,6 +90,7 @@ daemonize_stop_simple() {
 }
 
 
+#@section module_init
 # @implicit void main()
 #
 daemonize__setup

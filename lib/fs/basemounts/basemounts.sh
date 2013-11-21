@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int basemounts_mount (
 #    root=/, **DEVFS_TYPE, **PROCFS_OPTS, **SYSFS_OPTS,
 #    **F_DOMOUNT_MP=domount3, **F_DOMOUNT_PROC=**F_DOMOUNT_MP,

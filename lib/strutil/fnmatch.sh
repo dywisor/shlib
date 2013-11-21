@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int fnmatch ( str, pattern )
 #
 #  Returns 0 if %str matches %pattern, else 1.

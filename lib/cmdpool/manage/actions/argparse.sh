@@ -1,3 +1,5 @@
+#@section functions_public
+
 cmdpool_manage_print_default_help() {
    local I="   "
 

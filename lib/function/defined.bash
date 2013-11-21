@@ -1,3 +1,5 @@
+#@section functions
+
 # int function_defined ( *func )
 #
 # Returns true if all listed functions are defined (as function), else

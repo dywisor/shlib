@@ -1,3 +1,4 @@
+#@section header
 # ----------------------------------------------------------------------------
 #
 # This module extends squashfs_container by memory-writable squashfs mounts,
@@ -21,6 +22,8 @@
 # @extern int  sfs_container_unlock()
 #
 # ----------------------------------------------------------------------------
+
+#@section functions
 
 ## @extern @private int aufs_tmpfs_backed (
 ##    aufs_mp, tmpfs_mp, tmpfs_size[_m],

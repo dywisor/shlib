@@ -1,3 +1,5 @@
+#@section functions
+
 # int disk_mounted ( [disk], [mp] )
 #
 #  This function has 3 (4) uses cases:

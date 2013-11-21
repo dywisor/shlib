@@ -1,7 +1,12 @@
+#@section funcdef
+
 # @funcdef shbool @intcheck [<condition>:=true] <function name> ( word )
 #
 #   Returns true if word is a number and condition(word) evaluates to true.
 #
+
+
+#@section functions_public
 
 # @intcheck is_int()
 is_int() {

@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int charwise ( func, chars, [*argv] )
 #
 #  Runs func <char> *argv for each char in chars.

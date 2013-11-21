@@ -1,3 +1,5 @@
+#@section functions_private
+
 # @private int compress__detect_format (
 #    compression_format|file,
 #    **decompress_args!, **compress_exe!
@@ -33,6 +35,9 @@ compress__detect_format() {
    esac
    return 0
 }
+
+
+#@section functions_public
 
 # void compress_detect_taropt ( compression_format|file )
 #

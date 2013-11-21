@@ -1,3 +1,5 @@
+#@section functions_public
+
 # void runcmd_printcmd ( *cmdv, **RUNCMD_PRINT_STDERR=y )
 #
 #  Prints cmdv to stderr or stdout.

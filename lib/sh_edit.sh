@@ -1,3 +1,4 @@
+#@section header
 # ----------------------------------------------------------------------------
 #
 # This module provides functions for dealing with scripts, particularly
@@ -14,6 +15,9 @@
 # int edit_shell_vars_in_file() -- file, *vardef
 #
 # ----------------------------------------------------------------------------
+
+
+#@section functions_private
 
 # @private int sh_edit__check_vardefs ( *vardef )
 #
@@ -115,6 +119,9 @@ sh_edit__has_hashbang() {
       ;;
    esac
 }
+
+
+#@section functions_public
 
 # int edit_shell_var (
 #    varname, new_value=, shell_file=, add_comment=, re_old_value:=<default>

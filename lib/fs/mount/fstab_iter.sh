@@ -1,3 +1,5 @@
+#@section functions
+
 # @iterator <fstab> fstab_iterator (
 #    fstab_file=/etc/fstab,
 #    ...,

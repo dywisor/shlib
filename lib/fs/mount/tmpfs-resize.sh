@@ -1,3 +1,5 @@
+#@section functions
+
 # int tmpfs_resize ( mp, size )
 #
 #  Resizes the tmpfs mounted at mp to size (str).

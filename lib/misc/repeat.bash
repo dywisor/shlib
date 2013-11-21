@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int repeat ( count, *cmdv )
 #
 #  Executes cmdv %count times (or until cmdv returns failure).

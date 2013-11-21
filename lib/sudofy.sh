@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int sudofy (
 #    *cmdv,
 #    **USER, **SUDOFY_NOPASS=y, **SUDOFY_REEXEC=n,

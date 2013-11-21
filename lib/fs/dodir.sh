@@ -1,5 +1,9 @@
+#@section functions_export
 # @extern int dodir_minimal (  dir, **KEEPDIR=n )
 # @extern int dodir_clean   ( *dir, **KEEPDIR=n )
+
+
+#@section functions_public
 
 # int dodir (
 #    *dir,

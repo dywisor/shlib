@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int dodir_minimal ( dir, **KEEPDIR=n )
 #
 #  Ensures that the given directory exists by creating it if necessary.

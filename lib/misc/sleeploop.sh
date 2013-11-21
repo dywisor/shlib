@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int sleeploop ( *argv, SLEEPLOOP_RETRY=INF, SLEEPLOOP_INTVL=0.1 )
 #
 #  Periodically executes *argv until it returns 0.

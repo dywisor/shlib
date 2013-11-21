@@ -1,3 +1,5 @@
+#@section functions
+
 # int portage_sfs_reload_tree ( portage_tree_name, portage_tree_mp, ... )
 #
 #  Does whatever necessary to get a writable variant of a squashfs file

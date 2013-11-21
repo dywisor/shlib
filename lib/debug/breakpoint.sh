@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int breakpoint (
 #    breakpoint_name, *breakpoint_name_alias,
 #    **BREAKPOINTS_ALL=n, **BREAKPOINTS=,
@@ -108,4 +110,6 @@ critical_breakpoint() {
       breakpoint__die "at critical breakpoint ${1-} (rc=$?)" ${?}
 }
 
+
+#@section module_features
 HAVE_BREAKPOINT_SUPPORT=y

@@ -1,3 +1,5 @@
+#@section funcdef
+
 # @funcdef <return type> @override <function name> ( *args )
 #
 #  A function that overrides (redefines) an already defined function.
@@ -13,6 +15,9 @@
 #  A function that is expected to be overridden in order to be useful.
 #  @can-override functions usually do nothing.
 #
+
+
+#@section functions
 
 # void OVERRIDE_FUNCTION ( function_name ), raises die()
 #

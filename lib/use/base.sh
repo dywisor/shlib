@@ -1,7 +1,12 @@
+#@section header
 ## This module offers basic USE flag functionality, that is checking whether
 ## a flag is set or not (via use()) and enabling/disabling flags.
 
+#@section module_vars
 readonly __USE_BASE_FUNCTIONS="use use_any use_call disable_use enable_use set_use"
+
+
+#@section functions
 
 # void __use_get_prefix ( **USE_PREFIX= )
 #

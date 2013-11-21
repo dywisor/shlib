@@ -1,3 +1,5 @@
+#@section functions
+
 # int hardware_hacks_i915()
 #
 #  Applies i915-specific hardware hacks (disables polling).

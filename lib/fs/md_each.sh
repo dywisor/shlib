@@ -1,3 +1,5 @@
+#@section functions_public
+
 # int md_foreach_member (
 #    md_identifier=<detect>,
 #    *cmdv=**F_MD_FOREACH_MEMBER=einfo,
