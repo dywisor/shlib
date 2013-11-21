@@ -1,3 +1,4 @@
 atexit
 function/die
 misc/sleeploop
+fs/defsym

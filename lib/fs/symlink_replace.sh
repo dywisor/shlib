@@ -13,9 +13,10 @@ symlink_replace() {
    symlink_tmp=$(mktemp -u "${symlink}.XXXXXXXXXXX")
 
    [ -n "${symlink_tmp}" ] && \
-      ln -s -T -- "${ltarget_new}" "${symlink_tmp}" || return
+      ln -s ${LN_OPT_NO_TARGET_DIR-} -- \
+         "${ltarget_new}" "${symlink_tmp}" || return
 
-   if mv -T -- "${symlink_tmp}" "${symlink}"; then
+   if mv ${MV_OPT_NO_TARGET_DIR-} -- "${symlink_tmp}" "${symlink}"; then
       return 0
    else
       local rc=$?

@@ -90,7 +90,8 @@ kcomp_prepare_build_dir() {
                do_uncompress "${initial_config}" > "${__KCOMP_CONFIG}" || __KCOMP_CONFIG=
             else
                dolog_info -0 "Importing config file ${initial_config}"
-               cp -T -L -- "${initial_config}" "${__KCOMP_CONFIG}" || __KCOMP_CONFIG=
+               cp ${CP_OPT_NO_TARGET_DIR-} -L -- \
+                  "${initial_config}" "${__KCOMP_CONFIG}" || __KCOMP_CONFIG=
             fi
          fi
       elif [ ! -e "${__KCOMP_CONFIG}" ]; then

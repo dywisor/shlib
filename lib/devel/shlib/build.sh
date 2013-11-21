@@ -224,7 +224,7 @@ SYMSTORM() {
       if [ -n "${dest}" ]; then
          print_command "DOSYM" "${dest_name#/} => ${target}"
          remove_destfile
-         autodie ln -s -T -- "${target}" "${dest}"
+         autodie ln -s ${LN_OPT_NO_TARGET_DIR-} -- "${target}" "${dest}"
       fi
    done
 
@@ -250,7 +250,7 @@ CP() {
    printcmd_indent
 
    remove_destfile
-   autodie cp -T -- "${script}" "${dest}"
+   autodie cp ${CP_OPT_NO_TARGET_DIR-} -- "${script}" "${dest}"
 
    if [ "${SCRIPT_AUTO_VERIFY:-n}" = "y" ]; then
       local h=$( head -n 1 "${dest}" | sed -e 's,^\#\![[:blank:]]*,,' )

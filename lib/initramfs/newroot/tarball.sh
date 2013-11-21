@@ -91,7 +91,7 @@ newroot_unpack_tarball_replace() {
          if [ -d "${newroot_dest}" ]; then
             inonfatal rm -r -- "${newroot_dest}"
          fi
-         mv -f -T -- "${newroot_bak}" "${newroot_dest}"
+         mv -f ${MV_OPT_NO_TARGET_DIR-} -- "${newroot_bak}" "${newroot_dest}"
       fi
 
       sync

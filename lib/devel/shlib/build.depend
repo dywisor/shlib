@@ -4,6 +4,8 @@ list_has
 list_redux
 varcheck
 
+fs/defsym
+
 function/functrace
 
 use/extra

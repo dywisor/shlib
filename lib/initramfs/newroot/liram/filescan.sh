@@ -39,9 +39,11 @@ liram_filescan() {
 
             file="${SCAN_DIR}${name}.${ext#.}"
             if [ -f "${file}" ]; then
-               inonfatal \
-                  ln -s -f -T "${file}" "${FILE_SCAN_SYNC_DIR}/${name}" && \
+               if inonfatal ln -s -f ${LN_OPT_NO_TARGET_DIR-} -- \
+                     "${file}" "${FILE_SCAN_SYNC_DIR}/${name}"
+               then
                   file_count=$(( ${file_count} + 1 ))
+               fi
             fi
          fi
       done

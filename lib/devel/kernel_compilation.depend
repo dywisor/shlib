@@ -4,6 +4,7 @@ sudofy
 
 function/die
 
+fs/defsym
 fs/dodir
 fs/uncompress
 

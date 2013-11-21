@@ -1,6 +1,7 @@
 defsym
 message
 
+fs/defsym
 fs/dodir_minimal
 
 fs/mount/squashfs_container_aufs

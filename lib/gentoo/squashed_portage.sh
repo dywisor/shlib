@@ -264,7 +264,7 @@ portage_sfs_update_image_file() {
    if [ -h "${f}" ] || [ ! -e "${f}" ]; then
       ${LOGGER} --level=INFO "Updating symlink ${f}"
 
-      if ln -T -s -f -- "${1}" "${f}"; then
+      if ln ${LN_OPT_NO_TARGET_DIR-} -s -f -- "${1}" "${f}"; then
          return 0
       else
          ${LOGGER} -0 --level=ERROR "Failed to update symlink ${f}!"
@@ -274,7 +274,7 @@ portage_sfs_update_image_file() {
    else
       ${LOGGER} --level=INFO "Moving ${1} => ${f}"
 
-      if mv -T -b -- "${1}" "${f}"; then
+      if mv ${MV_OPT_NO_TARGET_DIR-} -- "${1}" "${f}"; then
          return 0
       else
          ${LOGGER} -0 --level=ERROR "Failed to move ${1}!"

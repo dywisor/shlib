@@ -17,12 +17,6 @@
 #
 
 
-#@section vars
-# not supported by busybox ln
-#  ^FIXME: still true?
-: ${LOCKFILE_LN_OPTS=-T}
-
-
 #@section functions
 
 # @private void lockfile__atexit_release ( lock )
@@ -117,13 +111,17 @@ __lockfile_release() {
 #
 if [ "${LOCKFILE_DEBUG_ACQUIRE:-n}" != "y" ]; then
 __lockfile_acquire_now() {
-   ln -s ${LOCKFILE_LN_OPTS-} -- "${2:?}" "${1:?}" 2>/dev/null || return
+   ln -s ${LOCKFILE_LN_OPTS-${LN_OPT_NO_TARGET_DIR-}} \
+      -- "${2:?}" "${1:?}" 2>/dev/null || return
+
    [ "${LOCKFILE_AUTO_DELETE:-n}" != "y" ] || \
       lockfile__atexit_register "${1}"
 }
 else
 __lockfile_acquire_now() {
-   ln -s ${LOCKFILE_LN_OPTS-} -- "${2:?}" "${1:?}" || return
+   ln -s ${LOCKFILE_LN_OPTS-${LN_OPT_NO_TARGET_DIR-}} \
+      -- "${2:?}" "${1:?}" || return
+
    [ "${LOCKFILE_AUTO_DELETE:-n}" != "y" ] || \
       lockfile__atexit_register "${1}"
 }
