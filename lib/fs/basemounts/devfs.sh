@@ -1,5 +1,11 @@
 #@section functions
 
+# @private int devfs__write_file ( file, text )
+#
+devfs__write_file() {
+   echo "${2-}" > "${1:?}"
+}
+
 # int devfs_do_blockdev ( dev, major, minor, **X_MKNOD=mknod )
 #
 #  Creates a block dev if it doesn't exist.
@@ -21,8 +27,13 @@ devfs_do_chardev() {
 #  Sets %DEVFS_TYPE if unset. Returns 0 if successful, else 1.
 #
 devfs__configure() {
+   : ${X_MDEV=/sbin/mdev}
+   : ${BUSYBOX=/bin/busybox}
+
    if [ -z "${DEVFS_TYPE-}" ]; then
-      if [ -x "${X_MDEV:?}" ] || [ -x "${BUSYBOX:?}" ]; then
+      if [ -n "${X_MDEV-}" ] && [ -x "${X_MDEV}" ]; then
+         DEVFS_TYPE=mdev
+      elif [ -n "${BUSYBOX-}" ] && [ -x "${BUSYBOX}" ]; then
          DEVFS_TYPE=mdev
       elif fstype_supported devtmpfs; then
          DEVFS_TYPE=devtmpfs
@@ -39,7 +50,7 @@ devfs__configure() {
 #
 devfs_set_hotplug_agent() {
    if [ -e /proc/sys/kernel/hotplug ]; then
-      echo "${1-}" > /proc/sys/kernel/hotplug "${1-}"
+      devfs__write_file /proc/sys/kernel/hotplug "${1-}"
    elif [ -x /sbin/sysctl ]; then
       /sbin/sysctl -w kernel.hotplug="${1-}"
    elif [ -x /usr/sbin/sysctl ]; then
@@ -177,7 +188,7 @@ devfs_populate_mdev() {
    [ -e /etc/mdev.conf ] || ${AUTODIE_NONFATAL-} touch /etc/mdev.conf
 
    if [ "${MDEV_SEQ:-y}" = "y" ]; then
-      ${AUTODIE-} touch "${devfs}/mdev.seq" || return
+      ${AUTODIE-} devfs__write_file "${devfs}/mdev.seq" || return
    fi
 
    if [ "${MDEV_LOG:-n}" = "y" ]; then
