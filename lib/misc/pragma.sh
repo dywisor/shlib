@@ -7,7 +7,7 @@
 #
 
 
-#@section functions_public
+#@section functions
 
 # @pragma debug
 #

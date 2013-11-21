@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int tmpdir_cleanup ( dir=[T=""] )
 #

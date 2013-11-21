@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int unless_exists ( fs_item, *cmdv )
 #

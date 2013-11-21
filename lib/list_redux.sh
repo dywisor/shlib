@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # void list_redux ( *list_item, **v0! )
 #

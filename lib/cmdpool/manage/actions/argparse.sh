@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 cmdpool_manage_print_default_help() {
    local I="   "

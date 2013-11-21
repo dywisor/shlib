@@ -6,7 +6,7 @@
 #
 
 
-#@section functions_public
+#@section functions
 
 # @intcheck is_int()
 is_int() {

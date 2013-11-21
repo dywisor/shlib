@@ -1,4 +1,4 @@
-#@section functions_private
+#@section functions
 
 # @private int fs_foreach__do_if (
 #    test_condition, func, *fs_item, **F_FS_FOREACH_ON_ERROR=return
@@ -21,7 +21,7 @@ fs_foreach__do_if() {
 }
 
 
-#@section functions_public
+#@section functions
 
 # int fs_foreach_do_if (
 #    f_condition, func, *fs_item, **F_FS_FOREACH_ON_ERROR=return

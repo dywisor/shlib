@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int get_filesize ( fs_item )
 #

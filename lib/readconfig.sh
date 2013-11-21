@@ -1,4 +1,4 @@
-#@section functions_private
+#@section functions
 
 # @private int readconfig__search ( name, **config_file! )
 #
@@ -63,7 +63,7 @@ readconfig__die_not_found() {
 }
 
 
-#@section functions_public
+#@section functions
 
 # int readconfig_optional ( *config_file, **READCONFIG_READ_ALL=n )
 #

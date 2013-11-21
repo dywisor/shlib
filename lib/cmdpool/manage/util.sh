@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int cmdpool_manage_create_root ( **CMDPOOL_ROOT )
 #

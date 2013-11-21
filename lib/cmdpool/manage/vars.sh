@@ -13,7 +13,7 @@ readonly CMDPOOL_EX_CMDRUNNING=28
 readonly CMDPOOL_EX_NOHELPER=29
 
 
-#@section functions_public
+#@section functions
 
 # void cmdpool_manage_defsym (
 #    **RUNDIR!, **USER!,

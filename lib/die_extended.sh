@@ -1,4 +1,4 @@
-#@section functions_private
+#@section functions
 
 # @private @noreturn die__extended (
 #    message=, code=2, **DIE=exit, **F_ON_DIE=, **PRINT_FUNCTRACE=n

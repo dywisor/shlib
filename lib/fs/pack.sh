@@ -1,4 +1,4 @@
-#@section functions_private
+#@section functions
 
 # @private void dotar__get_file_ext ( short="n", **DOTAR__COMPRESS_OPT, **v0! )
 #
@@ -51,7 +51,7 @@ DOTAR_EXCLUDE="${DOTAR_EXCLUDE-}
 
 
 
-#@section functions_public
+#@section functions
 
 # void dotar_from ( src_dir, **DOTAR_ROOT_DIR, **DOTAR__SRC_DIR! )
 #

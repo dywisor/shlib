@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int list_has ( word, *list_items )
 #

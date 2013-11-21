@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int dir_empty ( dir )
 #

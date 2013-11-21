@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int get_disk ( disk_identifier )
 #
@@ -37,7 +37,7 @@ get_disk() {
 }
 
 
-#@section functions_private
+#@section functions
 
 # int __waitfor_disk_action ( disk_identifier, **F_WAITFOR_DISK_DEV_SCAN= )
 #
@@ -53,7 +53,7 @@ __waitfor_disk_action() {
 }
 
 
-#@section functions_public
+#@section functions
 
 # int waitfor_disk (
 #    disk_identifier,

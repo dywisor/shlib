@@ -1,4 +1,4 @@
-#@section functions_private
+#@section functions
 
 # @private int compress__detect_format (
 #    compression_format|file,
@@ -37,7 +37,7 @@ compress__detect_format() {
 }
 
 
-#@section functions_public
+#@section functions
 
 # void compress_detect_taropt ( compression_format|file )
 #

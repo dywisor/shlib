@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int md_foreach_member (
 #    md_identifier=<detect>,

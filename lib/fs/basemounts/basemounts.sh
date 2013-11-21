@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int basemounts_mount (
 #    root=/, **DEVFS_TYPE, **PROCFS_OPTS, **SYSFS_OPTS,

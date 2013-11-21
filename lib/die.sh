@@ -1,4 +1,4 @@
-#@section functions_private
+#@section functions
 
 # @private @noreturn die__minimal ( message, code, **DIE=exit )
 #
@@ -22,7 +22,7 @@ die__minimal() {
 }
 
 
-#@section functions_public
+#@section functions
 
 # @noreturn die ( message=, code=2, **__F_DIE=die__minimal )
 #

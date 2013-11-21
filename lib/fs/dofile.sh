@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int dofile (
 #    file, str=, dofile_create=**DOFILE_CREATE=y, DOFILE_WARN_MISSING=n

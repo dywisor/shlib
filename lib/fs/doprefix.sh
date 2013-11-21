@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # void fs_doprefix ( fspath=, prefix=**FS_PREFIX=, *sub_prefix )
 #

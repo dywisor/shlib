@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int depcheck ( *dep, **DEPCHECK_DIE=y, **RDEPEND=**DEPEND= ), raises die()
 #

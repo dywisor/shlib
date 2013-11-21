@@ -1,4 +1,4 @@
-#@section functions_private
+#@section functions
 
 # void __message_colored ( text_colored, color, text_nocolor )
 #

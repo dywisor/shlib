@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int breakpoint (
 #    breakpoint_name, *breakpoint_name_alias,

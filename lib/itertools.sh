@@ -9,7 +9,7 @@
 # @extern int list_has ( word, *list_items )
 
 
-#@section functions_private
+#@section functions
 # @private int __itertools_kw_is_not ( word, **kw )
 #
 #  Returns true if kw != word else false.
@@ -19,7 +19,7 @@ __itertools_kw_is_not() {
 }
 
 
-#@section functions_public
+#@section functions
 
 # void generic_iterator (
 #    item_separator, *words,

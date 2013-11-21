@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # void runcmd_printcmd ( *cmdv, **RUNCMD_PRINT_STDERR=y )
 #

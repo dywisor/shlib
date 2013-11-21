@@ -1,7 +1,7 @@
 #@section header
 ## bash_compat sets some handy variables
 
-#@section functions_public
+#@section functions
 
 # void bash_compat()
 #

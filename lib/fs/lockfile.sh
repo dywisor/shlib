@@ -23,7 +23,7 @@
 : ${LOCKFILE_LN_OPTS=-T}
 
 
-#@section functions_private
+#@section functions
 
 # @private void lockfile__atexit_release ( lock )
 #
@@ -130,7 +130,7 @@ __lockfile_acquire_now() {
 fi
 
 
-#@section functions_public
+#@section functions
 
 # int lockfile_acquire_now ( lock, **LOCKFILE_AUTO_DELETE=n )
 #

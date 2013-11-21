@@ -2,7 +2,7 @@
 : ${BUSYBOX:=/bin/busybox}
 
 
-#@section functions_public
+#@section functions
 
 # int busybox_overlay ( overlay_dir, **BUSYBOX )
 #

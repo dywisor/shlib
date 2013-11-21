@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int charwise ( func, chars, [*argv] )
 #

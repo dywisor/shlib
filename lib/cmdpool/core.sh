@@ -75,7 +75,7 @@
 # ----------------------------------------------------------------------------
 
 
-#@section functions_public
+#@section functions
 
 # @logger cmdpool_logger()
 #
@@ -97,7 +97,7 @@ cmdpool_log_error() {
 
 
 
-#@section functions_private
+#@section functions
 
 # @private int cmdpool__populate_slot ( slot, exe, *argv )
 #
@@ -149,7 +149,7 @@ cmdpool__get_exe_name() {
 }
 
 
-#@section functions_public
+#@section functions
 
 # void cmdpool_set_runcmd ( helper_exe, **X_CMDPOOL_RUNCMD! )
 #

@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int sleeploop ( *argv, SLEEPLOOP_RETRY=INF, SLEEPLOOP_INTVL=0.1 )
 #

@@ -8,7 +8,7 @@
 #
 
 
-#@section functions_public
+#@section functions
 
 # int cmdpool_manage_parse_args_and_dispatch ( main_func, *argv )
 #

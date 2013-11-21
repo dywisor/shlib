@@ -1,4 +1,4 @@
-#@section functions_private
+#@section functions
 
 # @private int atomic_file_counter__add (
 #    file, delta, min_val=0, **v0!
@@ -49,7 +49,7 @@ atomic_file_counter__reset() {
 }
 
 
-#@section functions_public
+#@section functions
 
 # int atomic_file_counter ( counter_file, action, *action_args )
 #

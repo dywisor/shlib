@@ -1,4 +1,4 @@
-# @section functions_public
+# @section functions
 eval_scriptinfo() {
    local x
    if [ ${#} -gt 0 ]; then

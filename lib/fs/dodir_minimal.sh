@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int dodir_minimal ( dir, **KEEPDIR=n )
 #

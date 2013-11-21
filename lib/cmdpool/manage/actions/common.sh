@@ -12,7 +12,7 @@
 CMDPOOL_KNOWN_COMMANDS="check list ls query wait"
 
 
-#@section functions_public
+#@section functions
 
 # @virtual @cmdpool_action cmdpool_manage_do_TODO(), raises die()
 #

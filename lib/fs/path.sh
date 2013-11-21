@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # void fspath_remove_trailing_slashes ( fspath, **v0! )
 #
@@ -78,7 +78,7 @@ fspath_trim() {
 }
 
 
-#@section functions_private
+#@section functions
 
 # @private @stdout ~int readlink__abspath ( fspath )
 #
@@ -149,7 +149,7 @@ realpath__realpath_safe() {
 }
 
 
-#@section functions_public
+#@section functions
 
 # void fspath_bind_implementation (
 #    impl, **HAVE_FSPATH_FUNCTIONS!

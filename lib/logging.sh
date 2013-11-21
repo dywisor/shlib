@@ -9,7 +9,7 @@ LOGGER=dolog
 : ${LOGFILE=}
 
 
-#@section functions_private
+#@section functions
 
 # int __logging_accept_level ( log_level )
 #
@@ -25,7 +25,7 @@ __logging_accept_level() {
 }
 
 
-#@section functions_public
+#@section functions
 
 # @pass-through dolog (
 #    <var args>,

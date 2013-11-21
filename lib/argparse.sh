@@ -18,7 +18,7 @@
 #
 
 
-#@section functions_public
+#@section functions
 
 # void argparse_die ( message, code=**EX_USAGE=64 )
 #
@@ -27,7 +27,7 @@
 argparse_die() { die "argparse: ${1-}" "${2:-${EX_USAGE:-64}}"; }
 
 
-#@section functions_private
+#@section functions
 
 # @private void __argparse_print_help ( **<see function body> ), raises exit()
 #
@@ -96,7 +96,7 @@ __argparse_handle_internal() {
 }
 
 
-#@section functions_public
+#@section functions
 
 # @argparse_handle argparse_need_arg (...)
 #
@@ -134,7 +134,7 @@ argparse_need_args() {
 }
 
 
-#@section functions_private
+#@section functions
 
 # @argparse_handle __argparse_handle_shortopt (
 #    [ word ] :: [ *argv_remainder ], ...
@@ -157,7 +157,7 @@ __argparse_handle_shortopt() {
    fi
 }
 
-#@section functions_public
+#@section functions
 
 # @argparse_handle argparse_unknown (
 #    **real_arg,

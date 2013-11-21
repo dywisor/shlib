@@ -17,7 +17,7 @@
 # ----------------------------------------------------------------------------
 
 
-#@section functions_private
+#@section functions
 
 # @private int sh_edit__check_vardefs ( *vardef )
 #
@@ -121,7 +121,7 @@ sh_edit__has_hashbang() {
 }
 
 
-#@section functions_public
+#@section functions
 
 # int edit_shell_var (
 #    varname, new_value=, shell_file=, add_comment=, re_old_value:=<default>

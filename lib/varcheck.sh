@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # void|int varcheck (
 #    *varname,

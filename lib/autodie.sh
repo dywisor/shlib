@@ -1,4 +1,4 @@
-#@section functions_private
+#@section functions
 
 # @private void die__autodie ( *argv )
 #
@@ -13,7 +13,7 @@ die__autodie() {
 }
 
 
-#@section functions_public
+#@section functions
 
 # void autodie ( *argv, **F_AUTODIE=die__autodie )
 #

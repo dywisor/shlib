@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int cmdpool_manage_run_action ( *argv, **CMDPOOL_COMMAND )
 #

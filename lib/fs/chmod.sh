@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # void chmod_normalize_mode ( mode, **v0! )
 #

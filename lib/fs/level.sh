@@ -1,4 +1,4 @@
-#@section functions_private
+#@section functions
 
 # @private int fslevel__get_level ( normalized_fspath, **v0! )
 #
@@ -30,7 +30,7 @@ fslevel__get_level() {
 }
 
 
-#@section functions_public
+#@section functions
 
 # int get_fslevel ( fspath, **v0! )
 #

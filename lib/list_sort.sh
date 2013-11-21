@@ -36,7 +36,7 @@
 #
 
 
-#@section functions_public
+#@section functions
 
 # void list_len ( *list_item, **v0! )
 #
@@ -76,7 +76,7 @@ list_split() {
 }
 
 
-#@section functions_private
+#@section functions
 # @private void mergesort__sub ( *list_item, **__MERGESORT!, **F_SORT_COMPARE )
 #
 #  Performs the mergesort sorting algorithm on the given list.
@@ -135,7 +135,7 @@ mergesort__sub() {
       fi
    fi
 }
-#@section functions_public
+#@section functions
 
 # @sort_compare list_sort__int_compare :: ( int, int ) -> Bool
 #

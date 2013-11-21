@@ -6,7 +6,7 @@
 #
 
 
-#@section functions_public
+#@section functions
 
 # int atomic_file (
 #    file, *cmdv,

@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # int symlink_replace ( symlink, new_target )
 #

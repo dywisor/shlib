@@ -6,7 +6,7 @@
 : ${__ATEXIT_FUNCTIONS=}
 
 
-#@section functions_public
+#@section functions
 
 # void atexit_enable ( *signals="TERM EXIT" )
 #
@@ -53,7 +53,7 @@ atexit_register() {
 }
 
 
-#@section functions_private
+#@section functions
 
 # true __atexit_run ( *argv )
 #

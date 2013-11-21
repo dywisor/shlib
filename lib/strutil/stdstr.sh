@@ -1,4 +1,4 @@
-#@section functions_public
+#@section functions
 
 # @function_alias void str_trim() renames sed()
 #

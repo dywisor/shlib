@@ -3,7 +3,7 @@
 # @extern int dodir_clean   ( *dir, **KEEPDIR=n )
 
 
-#@section functions_public
+#@section functions
 
 # int dodir (
 #    *dir,
