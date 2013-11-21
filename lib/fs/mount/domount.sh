@@ -8,7 +8,23 @@
 #  Logs a message with the given log level if %LOGGER is available.
 #
 domount__logger() {
-   [ -z "${2-}" ] || ${LOGGER:-true} -0 --level="${1:-UNDEF}" "${2-}"
+   if [ -z "${2-}" ]; then
+      true
+
+   elif [ "${LOGGER:-true}" != "true" ]; then
+      ${LOGGER:?} -0 --level="${1:-UNDEF}" "${2}"
+
+   elif [ "${HAVE_MESSAGE_FUNCTIONS:-n}" = "y" ]; then
+      case "${1:-UNDEF}" in
+         'WARN')
+            ewarn "${2}"
+         ;;
+         'ERROR')
+            eerror "${2}"
+         ;;
+      esac
+   fi
+   return 0
 }
 
 # int do_mount ( *argv, **MOUNT=mount, **MOUNTOPTS_APPEND= )
@@ -114,6 +130,7 @@ domount_smart() { domount2 "$@"; }
 domount3() {
    local mp="${1-}"
    if [ -n "${mp}" ]; then
+      shift
       do_mount "$@" "${mp}"
    else
       domount__logger ERROR "domount3($*): bad usage"
