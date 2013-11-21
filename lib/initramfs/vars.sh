@@ -50,6 +50,9 @@ initramfs_vars() {
    : ${LOGFILE=/init.log}
 
    : ${MOUNTOPTS_APPEND=-n}
+
+   CP_OPT_NO_TARGET_DIR=
+   MV_OPT_NO_TARGET_DIR=
 }
 
 
