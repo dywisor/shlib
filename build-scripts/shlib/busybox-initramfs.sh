@@ -55,9 +55,9 @@ http_nofetch() {
 }
 
 if [ "${NOFETCH:-n}" = "y" ]; then
+   einfo "Disabling download of source files (NOFETCH=y)."
    F_FETCH_ITEM=http_nofetch
 else
-   einfo "Disabling download of source files (NOFETCH=y)."
    F_FETCH_ITEM=http_fetch
 fi
 
