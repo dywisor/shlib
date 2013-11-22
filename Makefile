@@ -78,7 +78,7 @@ clean-initramfs:
 # targets for installing shlib's sources
 
 $(SHLIB_SRC_DEST):
-	-mkdir $(SHLIB_SRC_DEST)
+	-mkdir -p -- $(SHLIB_SRC_DEST)
 	test -d $(SHLIB_SRC_DEST)
 
 .PHONY += install-src
