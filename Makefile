@@ -13,9 +13,10 @@ SHLIB_MODE  ?= 0644
 _SHLIB_FILE := ./build/shlib_$(shell date +%F).sh
 #_SHLIB_FILE := ./shlib_$(shell git rev-parse --verify HEAD).sh
 
-DESTDIR        :=
-SHLIB_DEST     := $(DESTDIR)/sh/lib/shlib.sh
-SHLIB_SRC_DEST := $(DESTDIR)/usr/share/shlib
+DESTDIR             :=
+SHLIB_DEST          := $(DESTDIR)/sh/lib/shlib.sh
+SHLIB_SRC_DEST      := $(DESTDIR)/usr/share/shlib
+SHLIB_SRC_REAL_DEST := $(SHLIB_SRC_DEST)
 
 
 .PHONY =
@@ -91,17 +92,20 @@ install-script-templates: $(GENINSTALL)
 	sh $(GENINSTALL) "$(CURDIR)/scripts" \
 		"$(SHLIB_SRC_DEST)/examples" "-m 0644" "" "-m 0755" | sh
 
-# the shlibcc wrappers should always be rebuilt
+./build/shlibcc-wrapper.sh: ./build
+	sh $(GENWRAPPER) shlibcc "$(SHLIB_SRC_REAL_DEST)/lib" > $@
+	chmod 0755 -- $@
+
+./build/shlibcc-scriptgen.sh: ./build
+	sh $(GENWRAPPER) scriptgen "$(SHLIB_SRC_REAL_DEST)/lib" > $@
+	chmod 0755 -- $@
+
 .PHONY += build-shlibcc-wrapper
-build-shlibcc-wrapper: $(GENWRAPPER) ./build
-	sh $(GENWRAPPER) shlibcc   \
-		"$(SHLIB_SRC_DEST)/lib" > ./build/shlibcc-wrapper.sh
-	sh $(GENWRAPPER) scriptgen \
-		"$(SHLIB_SRC_DEST)/lib" > ./build/shlibcc-scriptgen.sh
-	chmod 0755 -- ./build/shlibcc-wrapper.sh ./build/shlibcc-scriptgen.sh
+build-shlibcc-wrapper: ./build/shlibcc-wrapper.sh ./build/shlibcc-scriptgen.sh
+	@true
 
 .PHONY += install-shlibcc-wrapper
-install-shlibcc-wrapper: build-shlibcc-wrapper $(SHLIB_SRC_DEST)
+install-shlibcc-wrapper:  build-shlibcc-wrapper $(SHLIB_SRC_DEST)
 	install -T -m 0755 -- ./build/shlibcc-wrapper.sh \
 		"$(SHLIB_SRC_DEST)/shlibcc-wrapper.sh"
 	install -T -m 0755 -- ./build/shlibcc-scriptgen.sh \
