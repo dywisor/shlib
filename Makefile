@@ -1,34 +1,50 @@
-BASH         ?= 0
-SHLIBCC       = ./CC
-MAKE_SCRIPTS  = ./make_scripts.sh
+BASH       ?= 0
+SHLIBCC    := ./CC
+GENINSTALL := ./build-scripts/generate-install-src.sh
+GENWRAPPER := ./build-scripts/generate-shlibcc-wrapper.sh
+
 ifeq ($(BASH),1)
-SHLIBCCFLAGS    = --as-lib --strip-virtual --stable-sort --bash
-MAKESCRIPT_BASH = y
+SHLIBCCFLAGS := --as-lib --strip-virtual --stable-sort --bash
 else
-SHLIBCCFLAGS    = --as-lib --strip-virtual --stable-sort
-MAKESCRIPT_BASH = n
+SHLIBCCFLAGS := --as-lib --strip-virtual --stable-sort
 endif
 
-SHLIB_MODE   ?= 0644
+SHLIB_MODE  ?= 0644
+_SHLIB_FILE := ./build/shlib_$(shell date +%F).sh
+#_SHLIB_FILE := ./shlib_$(shell git rev-parse --verify HEAD).sh
 
-_SHLIB_FILE = ./build/shlib_$(shell date +%F).sh
-#_SHLIB_FILE = ./shlib_$(shell git rev-parse --verify HEAD).sh
+DESTDIR        :=
+SHLIB_DEST     := $(DESTDIR)/sh/lib/shlib.sh
+SHLIB_SRC_DEST := $(DESTDIR)/usr/share/shlib
 
-DESTDIR ?=
-DEST    ?= $(DESTDIR)/sh/lib/shlib.sh
-USE     ?=
-ifeq ($(LOCAL),1)
-USE := local $(USE)
-endif
 
+.PHONY =
+
+.PHONY += default
 default: shlib verify
 
 ./build:
-	@mkdir ./build
+	-mkdir $@
+	test -d $@
 
+
+.PHONY += clean
+clean:
+	rm -rf ./build
+
+
+# targets for building the "big" lib file
 $(_SHLIB_FILE): ./build
 	$(SHLIBCC) $(SHLIBCCFLAGS) all > $(_SHLIB_FILE)
 
+.PHONY += shlib
+shlib: $(_SHLIB_FILE)
+
+.PHONY += clean-shlib
+clean-shlib:
+	rm -vf -- $(_SHLIB_FILE)
+
+.PHONY += verify
 verify: $(_SHLIB_FILE)
 ifneq ($(BASH),1)
 	/bin/busybox ash -n $(_SHLIB_FILE)
@@ -36,53 +52,57 @@ ifneq ($(BASH),1)
 endif
 	/bin/bash -n $(_SHLIB_FILE)
 
-shlib: $(_SHLIB_FILE)
-
+.PHONY += install
 install: $(_SHLIB_FILE) verify
-	install -C -D -m $(SHLIB_MODE) $(_SHLIB_FILE) $(DEST)
+	install -C -D -m $(SHLIB_MODE) $(_SHLIB_FILE) $(SHLIB_DEST)
 
-uninstall: $(DEST)
-	rm -- $(DEST)
+.PHONY += uninstall
+uninstall: $(SHLIB_DEST)
+	rm -- $(SHLIB_DEST)
 
-clean:
-	rm -rf ./build
 
-clean-scripts:
-	rm -rf ./build/scripts
+# targets for building the initramfs
+./build/initramfs.cpio: ./build-scripts/buildvars.sh
+	QUIET=y ./build-scripts/buildvars.sh --force \
+		$(CURDIR) $(CURDIR)/build/work busybox-initramfs $@
 
-reinstall: clean install
+.PHONY += initramfs
+initramfs: ./build/initramfs.cpio
 
-scripts-linked: clean-scripts $(MAKE_SCRIPTS)
-	MAKESCRIPT_DEST=./build/scripts \
-	MAKESCRIPT_SHLIB=$(DEST) \
-	MAKESCRIPT_STANDALONE=n \
-	MAKESCRIPT_FLAT=y \
-	MAKESCRIPT_BASH=$(MAKESCRIPT_BASH) \
-	$(MAKE_SCRIPTS)
+.PHONY += clean-initramfs
+clean-initramfs:
+	rm -rf -- ./build/work
+	rm -vf -- ./build/initramfs.cpio
 
-scripts-standalone: clean-scripts $(MAKE_SCRIPTS)
-	MAKESCRIPT_DEST=./build/scripts \
-	MAKESCRIPT_SHLIB=$(DEST) \
-	MAKESCRIPT_STANDALONE=y \
-	MAKESCRIPT_FLAT=y \
-	MAKESCRIPT_BASH=$(MAKESCRIPT_BASH) \
-	$(MAKE_SCRIPTS)
 
-scripts: scripts-linked
+# targets for installing shlib's sources
 
-initramfs: ./build-scripts/buildvars.sh
-	QUIET=y ./build-scripts/buildvars.sh --force $(CURDIR) $(CURDIR)/build/work busybox-initramfs $(CURDIR)/build/initramfs.cpio
+$(SHLIB_SRC_DEST):
+	-mkdir $(SHLIB_SRC_DEST)
+	test -d $(SHLIB_SRC_DEST)
 
-tv-scripts: ./build-scripts/buildvars.sh
-	USE=$(USE) ./build-scripts/buildvars.sh --force $(CURDIR) $(CURDIR)/build/work -x dobuild-ng $(CURDIR)/files/recipe/tv
-	( cd $(CURDIR)/build/work/tv && tar c ./ -f $(CURDIR)/build/tv-scripts.txz --xz --owner=root --group=root; )
+.PHONY += install-src
+install-src: $(GENINSTALL)
+	sh $(GENINSTALL) "$(CURDIR)/lib" \
+		"$(SHLIB_SRC_DEST)/lib" "-m 0644" "" "-m 0755" | sh
 
-tv-scripts-host: ./build-scripts/buildvars.sh
-	USE=$(USE) ./build-scripts/buildvars.sh --force $(CURDIR) $(CURDIR)/build/work -x dobuild-ng $(CURDIR)/files/recipe/tv-host
+.PHONY += install-script-templates
+install-script-templates: $(GENINSTALL)
+	sh $(GENINSTALL) "$(CURDIR)/scripts" \
+		"$(SHLIB_SRC_DEST)/examples" "-m 0644" "" "-m 0755" | sh
 
-# @lazy
-tv-all: tv-scripts-host tv-scripts initramfs
+# the shlibcc wrappers should always be rebuilt
+.PHONY += build-shlibcc-wrapper
+build-shlibcc-wrapper: $(GENWRAPPER) ./build
+	sh $(GENWRAPPER) shlibcc   \
+		"$(SHLIB_SRC_DEST)/lib" > ./build/shlibcc-wrapper.sh
+	sh $(GENWRAPPER) scriptgen \
+		"$(SHLIB_SRC_DEST)/lib" > ./build/shlibcc-scriptgen.sh
+	chmod 0755 -- ./build/shlibcc-wrapper.sh ./build/shlibcc-scriptgen.sh
 
-.PHONY: shlib install uninstall clean clean-scripts verify default reinstall \
-	scripts-linked scripts-standalone scripts initramfs \
-	tv-scripts tv-scripts-host tv-all
+.PHONY += install-shlibcc-wrapper
+install-shlibcc-wrapper: build-shlibcc-wrapper $(SHLIB_SRC_DEST)
+	install -T -m 0755 -- ./build/shlibcc-wrapper.sh \
+		"$(SHLIB_SRC_DEST)/shlibcc-wrapper.sh"
+	install -T -m 0755 -- ./build/shlibcc-scriptgen.sh \
+		"$(SHLIB_SRC_DEST)/shlibcc-scriptgen.sh"
