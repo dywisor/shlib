@@ -14,6 +14,7 @@ _SHLIB_FILE := ./build/shlib_$(shell date +%F).sh
 #_SHLIB_FILE := ./shlib_$(shell git rev-parse --verify HEAD).sh
 
 DESTDIR             :=
+# FIXME: _SHLIB_FILE should be installed to FHS-incompliant dir
 SHLIB_DEST          := $(DESTDIR)/sh/lib/shlib.sh
 SHLIB_SRC_DEST      := $(DESTDIR)/usr/share/shlib
 SHLIB_SRC_REAL_DEST := $(SHLIB_SRC_DEST)
@@ -82,22 +83,31 @@ $(SHLIB_SRC_DEST):
 	-mkdir -p -- $(SHLIB_SRC_DEST)
 	test -d $(SHLIB_SRC_DEST)
 
+# install-*: buffer xtrace output to file so that it doesn't slow down
+# the install process (without relying on a shell with the pipefail feature)
+#
 .PHONY += install-src
-install-src: $(GENINSTALL)
+install-src: $(GENINSTALL) ./lib ./build
+	-rm -f -- ./build/install-src.log
 	sh $(GENINSTALL) "$(CURDIR)/lib" \
-		"$(SHLIB_SRC_DEST)/lib" "-m 0644" "" "-m 0755" | sh
+		"$(SHLIB_SRC_DEST)/include" "-m 0644" "" "-m 0755" | \
+		INSTALL_LOGFILE=./build/install-src.log sh
+	-cat ./build/install-src.log
 
 .PHONY += install-script-templates
-install-script-templates: $(GENINSTALL)
+install-script-templates: $(GENINSTALL) ./scripts ./build
+	-rm -f -- ./build/install-script-templates.log
 	sh $(GENINSTALL) "$(CURDIR)/scripts" \
-		"$(SHLIB_SRC_DEST)/examples" "-m 0644" "" "-m 0755" | sh
+		"$(SHLIB_SRC_DEST)/examples" "-m 0644" "" "-m 0755" | \
+			INSTALL_LOGFILE=./build/install-script-templates.log sh
+	-cat ./build/install-script-templates.log
 
 ./build/shlibcc-wrapper.sh: ./build
-	sh $(GENWRAPPER) shlibcc "$(SHLIB_SRC_REAL_DEST)/lib" > $@
+	sh $(GENWRAPPER) shlibcc "$(SHLIB_SRC_REAL_DEST)/include" > $@
 	chmod 0755 -- $@
 
 ./build/shlibcc-scriptgen.sh: ./build
-	sh $(GENWRAPPER) scriptgen "$(SHLIB_SRC_REAL_DEST)/lib" > $@
+	sh $(GENWRAPPER) scriptgen "$(SHLIB_SRC_REAL_DEST)/include" > $@
 	chmod 0755 -- $@
 
 .PHONY += build-shlibcc-wrapper

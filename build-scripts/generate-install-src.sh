@@ -10,6 +10,9 @@ set -u
 readonly IFS_DEFAULT="${IFS}"
 readonly NEWLINE='
 '
+: ${INSTALL_MAXARGS:=30}
+readonly INSTALL_MAXARGS
+
 
 # @stdout void removes_slashes ( fspath )
 #
@@ -46,44 +49,97 @@ readonly symlink_cp_opts="${4:-}"
 readonly dir_opts="${5:--m 755}"
 
 
+# int qoute_n_args_newline ( num, *argv )
+#
+#  Quotes up to %num args, one per line and returns the number of quoted args.
+#
+#  Note: %num has to be < 256
+#
+quote_n_args_newline() {
+   local num="${1:?}"
+   [ ${num} -gt 0 ] && shift || gen_failscript "invalid %num"
 
-filter_bash_lines() { grep -vE -- "^[^#].*[.]bash([.]depend)?"; }
+   if [ ${num} -gt ${#} ]; then
+      local ret=${#}
+      while [ ${#} -gt 0 ]; do
+         echo -n " \\${NEWLINE}   ${1}"
+         shift
+      done
+      return ${ret}
 
-quote_args() {
+   else
+      local low=$(( ${#} - ${num} ))
+      while [ ${#} -gt ${low} ]; do
+         echo -n " \\${NEWLINE}   ${1}"
+         shift
+      done
+      return ${num}
+   fi
+}
+
+
+# echo_command_with_destdir ( cmd, destdir, *src_list, **INSTALL_MAXARGS )
+#
+echo_command_with_destdir() {
+   local cmd="${1:?}"
+   local destdir="${2:?}"
+   shift 2
+
+   local IFS="${NEWLINE}"
+   set -- ${*?}
+   IFS="${IFS_DEFAULT}"
+
    while [ $# -gt 0 ]; do
-      echo -n " \"${1}\""
-      shift
+      echo
+      echo -n ${cmd} -t "\"${destdir}\"" --
+      if quote_n_args_newline ${INSTALL_MAXARGS} "$@" || ! shift ${?}; then
+         echo
+         gen_failscript "out of bounds"
+      else
+         echo
+      fi
    done
 }
 
-echo_ftype() {
-   echo "echo \"${1?}\" \"${2?}\""
-}
 
-# echo_dir ( dest )
-echo_dir() {
-   echo -n install -d ${dir_opts-} --
-   quote_args "${1?}"
-   echo
-   echo_ftype D "${1?}"
+if [ "${NO_BASH:-n}" != "y" ]; then
+gen_install__handle_item() {
+   case "${name}" in
+      'experimental'|'EXPERIMENTAL'|'no_install')
+         return 1
+      ;;
+   esac
+   if [ -b "${f}" ] || [ -c "${f}" ] || [ -p "${f}" ]; then
+      echo "excluding ${f}: special file" 1>&2
+   elif [ -h "${f}" ]; then
+      symlinks="${symlinks}${NEWLINE}${f}"
+   elif [ -f "${f}" ]; then
+      files="${files}${NEWLINE}${f}"
+   elif [ -d "${f}" ]; then
+      dirs="${dirs}${NEWLINE}${name}"
+   fi
 }
-
-# echo_file ( src, dest )
-echo_file() {
-   echo -n install -T ${file_opts-} --
-   quote_args "${1?}" "${2?}"
-   echo
-   echo_ftype F "${2?}"
+else
+gen_install__handle_item() {
+   case "${name}" in
+      'experimental'|'EXPERIMENTAL'|'no_install')
+         return 1
+      ;;
+      *'.bash'|*'.bash.depend')
+         true
+      ;;
+   esac
+   if [ -b "${f}" ] || [ -c "${f}" ] || [ -p "${f}" ]; then
+      echo "excluding ${f}: special file" 1>&2
+   elif [ -h "${f}" ]; then
+      symlinks="${symlinks}${NEWLINE}${f}"
+   elif [ -f "${f}" ]; then
+      files="${files}${NEWLINE}${f}"
+   elif [ -d "${f}" ]; then
+      dirs="${dirs}${NEWLINE}${name}"
+   fi
 }
-
-# echo_symlink ( src, dest )
-echo_symlink() {
-   echo -n cp -dpr --no-preserve=ownership ${symlink_cp_opts-} --
-   quote_args "${1?}" "${2?}"
-   echo
-   echo_ftype L "${2?}"
-}
-
+fi # NO_BASH
 
 # gen_install ( src_dir, dest_dir )
 #
@@ -92,63 +148,42 @@ gen_install() {
       gen_failscript "gen_install(): bad usage"
    fi
 
-   local files=
-   local dirs=
+   # symlink/file paths
    local symlinks=
-   local f name
+   local files=
+   # dir names
+   local dirs=
 
+   local f name
    for f in "${1}/"*; do
       name="${f##*/}"
-      if [ -b "${f}" ] || [ -c "${f}" ] || [ -p "${f}" ]; then
-         echo "cannot install special file '${f}'" 1>&2
-      elif [ -h "${f}" ]; then
-         symlinks="${symlinks}${NEWLINE}${name}"
-      elif [ -f "${f}" ]; then
-         files="${files}${NEWLINE}${name}"
-      elif [ -d "${f}" ]; then
-         dirs="${dirs}${NEWLINE}${name}"
+      if ! gen_install__handle_item; then
+         echo "excluding ${1}: blocked" 1>&2
+         return 0
       fi
    done
 
    # filter out empty dirs
-   if [ -z "${files}${dirs}${symlinks}" ]; then
+   if [ -z "${dirs}${files}${symlinks}" ]; then
       return 0
    fi
 
+
    echo
    echo "# ----- ${1} -----"
-   echo_dir "${2}"
-
-
-   local OLDIFS="${IFS}"
-   local IFS="${IFS}"
+   echo INSTALL_DIRS "\"${2}\""
 
    if [ -n "${files}" ]; then
-      echo
-      echo "# files"
-      IFS="${NEWLINE}"
-      for name in ${files}; do
-         if [ -n "${name}" ]; then
-            echo_file "${1}/${name}" "${2}/${name}"
-         fi
-      done
-      IFS="${OLDIFS}"
+      echo_command_with_destdir INSTALL_FILES "${2}" "${files}"
    fi
 
    if [ -n "${symlinks}" ]; then
-      echo
-      echo "# symlinks"
-      IFS="${NEWLINE}"
-      for name in ${symlinks}; do
-         if [ -n "${name}" ]; then
-            echo_symlink "${1}/${name}" "${2}/${name}"
-         fi
-      done
-      IFS="${OLDIFS}"
+      echo_command_with_destdir INSTALL_SYMLINKS "${2}" "${symlinks}"
    fi
 
    if [ -n "${dirs}" ]; then
-      IFS="${NEWLINE}"
+      local OLDIFS="${IFS}"
+      local IFS="${NEWLINE}"
       for name in ${dirs}; do
          IFS="${OLDIFS}"
          if [ -n "${name}" ]; then
@@ -159,13 +194,36 @@ gen_install() {
    fi
 }
 
+
+
+REF_ARGV="\"\${@}\""
+
 echo "#!/bin/sh
 set -eu
+readonly DESTROOT=\"\${1:-${2}}\"
+readonly LOGFILE=\"\${INSTALL_LOGFILE-}\"
 
-readonly DESTROOT=\"\${1:-${2}}\""
+die() { echo \"\${1:-died.}\" 1>&2; exit \${2:-2}; }
 
-if [ "${NO_BASH:-n}" = "y" ]; then
-   gen_install "${src_root}" "\${DESTROOT}" | filter_bash_lines
+if [ -n \"\${LOGFILE}\" ]; then
+: > \"\${LOGFILE}\"
+run() {
+   echo \"+ \${*}\" >> \"\${LOGFILE}\"
+   ${REF_ARGV} || die \"command '\$*' returned \$?\" \$?
+}
 else
-   gen_install "${src_root}" "\${DESTROOT}"
+run() { ${REF_ARGV} || die \"command '\$*' returned \$?\" \$?; }
 fi
+
+INSTALL_DIRS() {
+   run install -d ${dir_opts-} -- ${REF_ARGV}
+}
+INSTALL_FILES() {
+   run install ${file_opts-} ${REF_ARGV}
+}
+INSTALL_SYMLINKS() {
+   run cp -dpr --no-preserve=ownership ${symlink_cp_opts-} ${REF_ARGV}
+}
+"
+
+gen_install "${src_root}" "\${DESTROOT}"
