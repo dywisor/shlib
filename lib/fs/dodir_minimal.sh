@@ -1,6 +1,16 @@
 #@section functions
 
-# int dodir_minimal ( dir, **KEEPDIR=n )
+# void dodir_create_keepfile ( dir, **KEEPDIR=n )
+#
+dodir_create_keepfile() {
+   if [ "${KEEPDIR:-n}" = "y" ] && [ ! -e "${1}/.keep" ]; then
+      touch "${1}/.keep" || true
+   fi
+}
+
+# int dodir_minimal (
+#    dir, **KEEPDIR=n, **MKDIR_OPTS="-p", **MKDIR_OPTS_APPEND=
+# )
 #
 #  Ensures that the given directory exists by creating it if necessary.
 #  Also creates a <dir>/.keep file if **KEEPDIR is set to 'y'.
@@ -9,10 +19,16 @@
 #  else 1.
 #
 dodir_minimal() {
-   [ -d "${1:?}" ] || mkdir -p -- "${1}" || [ -d "${1}" ] || return 1
-
-   [ "${KEEPDIR:-n}" != "y" ] || \
-      [ -e "${1}/.keep" ] || touch "${1}/.keep" || true
+   if \
+      [ -d "${1:?}" ] || \
+      mkdir ${MKDIR_OPTS--p} ${MKDIR_OPTS_APPEND-} -- "${1}" 2>/dev/null || \
+      [ -d "${1}" ]
+   then
+      dodir_create_keepfile "${1}"
+      return 0
+   else
+      return 1
+   fi
 }
 
 # int dodir_clean ( *dir, **KEEPDIR=n )
