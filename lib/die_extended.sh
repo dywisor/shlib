@@ -15,12 +15,11 @@
 die__extended() {
    [ "${HAVE_BREAKPOINT_SUPPORT:-n}" != "y" ] || breakpoint die
 
+   local msg header
+
    if [ -z "${F_ON_DIE:-}" ] || ! ${F_ON_DIE} "${1}" "${2}"; then
-      if [ -n "${1}" ]; then
-         eerror "${1}" "died:"
-      else
-         eerror "" "died."
-      fi
+      die_get_msg_and_header "${1-}"
+      eerror "${msg# }" "${header}"
       if [ "${PRINT_FUNCTRACE:-n}" = "y" ] && [ -n "${FUNCNAME-}" ]; then
          print_functrace eerror
       fi
