@@ -4,6 +4,7 @@ function/die
 fs/dodir_minimal
 fs/dosym
 fs/basemounts/defsym
+fs/basemounts/devfs-util
 
 fs/mount/domount
 fs/mount/info

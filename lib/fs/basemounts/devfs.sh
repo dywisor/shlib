@@ -1,3 +1,11 @@
+#@section functions_export
+
+# @extern int devfs_get_misc_dev_minor ( name, **v0 )
+# @extern int devfs_do_blockdev ( dev, major, minor, **X_MKNOD=mknod )
+# @extern int devfs_do_chardev ( dev, major, minor, **X_MKNOD=mknod )
+# @extern int devfs_create_device_mapper_node ( devfs=/dev, **X_MKNOD=mknod )
+
+
 #@section functions
 
 # @private int devfs__write_file ( file, text )
@@ -6,21 +14,6 @@ devfs__write_file() {
    echo "${2-}" > "${1:?}"
 }
 
-# int devfs_do_blockdev ( dev, major, minor, **X_MKNOD=mknod )
-#
-#  Creates a block dev if it doesn't exist.
-#
-devfs_do_blockdev() {
-   [ -b "${1}" ] || ${X_MKNOD:-mknod} b "$@"
-}
-
-# int devfs_do_chardev ( dev, major, minor, **X_MKNOD=mknod )
-#
-#  Creates a char dev if it doesn't exist.
-#
-devfs_do_chardev() {
-   [ -c "${1}" ] || ${X_MKNOD:-mknod} c "$@"
-}
 
 # @private int devfs__configure ( **X_MDEV, **BUSYBOX, **DEVFS_TYPE! )
 #
@@ -71,6 +64,7 @@ devfs_seed() {
       ${AUTODIE-} devfs_do_chardev "${devfs}/console" 5 1  || fail=2
       ${AUTODIE-} devfs_do_chardev "${devfs}/null"    1 3  || fail=2
       ${AUTODIE-} devfs_do_chardev "${devfs}/ttyS0"   4 64 || fail=2
+      ${AUTODIE-} devfs_do_chardev "${devfs}/tty1"    4 1  || fail 2
       ${AUTODIE-} devfs_do_chardev "${devfs}/tty"     5 0  || fail=2
       ${AUTODIE-} devfs_do_chardev "${devfs}/urandom" 1 9  || fail=2
       ${AUTODIE-} devfs_do_chardev "${devfs}/random"  1 8  || fail=2
