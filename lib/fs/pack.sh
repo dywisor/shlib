@@ -189,7 +189,7 @@ dotar_printenv() {
 #  !!! Enables globbing via "set +f"
 #
 dotar() {
-   local name="${1:?}" dest_file="${2-}" v0
+   local name="${1:?}" dest_file="${2-}" v0 must_restore_globbing
 
    # verify that source directory exists -- **DOTAR__SRC_DIR
    if [ ! -d "${DOTAR__SRC_DIR-}" ]; then
@@ -225,7 +225,13 @@ dotar() {
    #
    set -- tar c ./ ${DOTAR_TAROPTS_APPEND-} -f "${dest_file}" ${DOTAR__COMPRESS_OPT-}
 
-   set -f
+   if check_globbing_enabled; then
+      must_restore_globbing=y
+      set -f
+   else
+      must_restore_globbing=
+   fi
+
    if [ -n "${DOTAR_EXCLUDE-}" ]; then
       local IFS="${IFS_NEWLINE}"
       set -- "$@" ${DOTAR_EXCLUDE}
@@ -244,6 +250,7 @@ dotar() {
          einfo "${arg}" "**"
       done
    fi
-   set +f
+
+   [ -z "${must_restore_globbing}" ] || set +f
    return ${rc}
 }

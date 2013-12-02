@@ -1,4 +1,5 @@
 defsym
+globbing
 message
 
 function/die

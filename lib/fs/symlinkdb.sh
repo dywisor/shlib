@@ -46,27 +46,6 @@
 
 #@result_var db_ref
 
-# ~int symlink_db__with_globbing_do ( *cmdv )
-#
-#  Enables globbing and calls *cmdv.
-#  Restores the old noglob behavior afterwards.
-#
-symlink_db__with_globbing_do() {
-   [ $# -gt 0 ] || return 0
-   rc=0
-   case "${-}" in
-      *'f'*)
-         set +f
-         "$@" || rc=$?
-         set -f
-      ;;
-      *)
-         "$@" || rc=$?
-      ;;
-   esac
-   return ${rc}
-}
-
 # int symlink_db_init ( db_root, cat_prefix=, **_SYMLINK_DB! )
 #
 #  Initializes a symlink db at %db_root.
@@ -123,7 +102,7 @@ symlink_db__iter_entries_with_name() {
 symlink_db_iter_entries_with_name() {
    : ${2:?}
    [ -n "${1-}" ] && \
-   symlink_db__with_globbing_do symlink_db__iter_entries_with_name "$@"
+   with_globbing_do symlink_db__iter_entries_with_name "$@"
 }
 
 # @private void symlink_db__cleanup_recursive ( dir )
@@ -173,7 +152,7 @@ symlink_db__cleanup_recursive() {
 #
 symlink_db_cleanup() {
    if symlink_db_exists; then
-      symlink_db__with_globbing_do \
+      with_globbing_do \
          symlink_db__cleanup_recursive "${_SYMLINK_DB}"
    fi
 }
