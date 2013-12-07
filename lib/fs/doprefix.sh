@@ -1,6 +1,6 @@
 #@section functions
 
-# void fs_doprefix ( fspath=, prefix=**FS_PREFIX=, *sub_prefix )
+# void fs_doprefix ( fspath=, prefix=**FS_PREFIX=, *sub_prefix, **v0! )
 #
 #  Applies a prefix to a filesystem path and stores the result in %v0.
 #
@@ -30,6 +30,18 @@ fs_doprefix() {
    [ -n "${fspath}" ] || fspath="${prefix%/}/"
 
    v0="${fspath}"
+}
+
+# void fs_doprefix_if ( fspath=, prefix=, *sub_prefix, v0! )
+#
+#  Applies %prefix to %fspath if %prefix is a string with non-zero length.
+#
+fs_doprefix_if() {
+   if [ -z "${2-}" ]; then
+      v0="${1-}"
+   else
+      fs_doprefix "$@"
+   fi
 }
 
 # void fs_doprefix_echo ( fspath=, prefix=**FS_PREFIX=, *sub_prefix )
