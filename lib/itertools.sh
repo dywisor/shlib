@@ -43,20 +43,39 @@ __itertools_kw_is_not() {
 #  Examples: see the specific iterator functions below.
 #
 generic_iterator() {
+   local item
    local IFS="${1?}"
    shift
    set -- $*
    IFS="${IFS_DEFAULT?}"
-   local item
-   for item; do
-      if [ -z "${item}" ] && [ "${ITER_SKIP_EMPTY:-y}" = "y" ]; then
-         true
-      elif [ "${ITER_UNPACK_ITEM:-n}" = "y" ]; then
-         ${F_ITER:-echo} ${item}   || ${F_ITER_ON_ERROR:-return}
+
+   if [ "${ITER_SKIP_EMPTY:-y}" = "y" ]; then
+      if [ "${ITER_UNPACK_ITEM:-n}" = "y" ]; then
+         for item; do
+            if [ -n "${item}" ]; then
+               ${F_ITER:-echo} ${item} || ${F_ITER_ON_ERROR:-return}
+            fi
+         done
       else
-         ${F_ITER:-echo} "${item}" || ${F_ITER_ON_ERROR:-return}
+         for item; do
+            if [ -n "${item}" ]; then
+               ${F_ITER:-echo} "${item}" || ${F_ITER_ON_ERROR:-return}
+            fi
+         done
       fi
-   done
+
+   elif [ "${ITER_UNPACK_ITEM:-n}" = "y" ]; then
+      for item; do
+         ${F_ITER:-echo} ${item} || ${F_ITER_ON_ERROR:-return}
+      done
+
+   else
+      for item; do
+         ${F_ITER:-echo} "${item}" || ${F_ITER_ON_ERROR:-return}
+      done
+
+   fi
+
    return 0
 }
 # --- end of generic_iterator (...) ---
