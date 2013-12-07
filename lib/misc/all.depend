@@ -1,6 +1,7 @@
 function/export
 
 misc/busybox
+misc/cmdwrapper
 misc/depcheck
 misc/pragma
 misc/qwhich
