@@ -207,6 +207,31 @@ get_fspath() {
    return 0
 }
 
+# int get_relpath ( parent_path, path, **v0! )
+#
+#  Accepts two normalized filesystem paths %parent_path, %path and stores
+#  the path of %path relative to %parent_path in %v0 IFF %path is a subpath.
+#  Stores the empty str otherwise (%path == %parent_path is a subpath, too).
+#
+#  Returns 2 if %path == %parent_path, 1 if no relpath set
+#  and 0 if successful.
+#
+get_relpath() {
+   v0="${2#${1}}"
+   v0="${v0#/}"
+
+   if [ "${v0}" = "${2}" ]; then
+      v0=
+      return 1
+   elif [ -z "${v0}" ]; then
+      v0="."
+      return 2
+   else
+      v0="./${v0#/}"
+      return 0
+   fi
+}
+
 # void fspath_bind_functions ( **HAVE_FSPATH_FUNCTIONS! )
 #
 #  Binds the print_abspath, print_realpath, print_realpath_safe,
