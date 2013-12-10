@@ -58,7 +58,6 @@ cmdwrapper__quote_cmdv() {
       printf "${seq}\"${1}\""
       shift
    done
-   printf "\n"
 }
 
 # @private int cmdwrapper__newline_seq_do ( func, *args )
