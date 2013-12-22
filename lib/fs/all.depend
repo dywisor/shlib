@@ -6,6 +6,7 @@ fs/mount/all
 fs/atomic_file
 fs/atomic_counter
 fs/chmod
+fs/defsym
 fs/dir_empty
 fs/disk
 fs/dodir_minimal
@@ -20,6 +21,7 @@ fs/lockfile
 fs/md_each
 fs/pack
 fs/path
+fs/symlinkdb
 fs/symlink_replace
 fs/tmpdir
 fs/uncompress

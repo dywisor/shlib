@@ -3,6 +3,8 @@ function/export
 misc/busybox
 misc/cmdwrapper
 misc/depcheck
+misc/exclude_list
+misc/newline_list
 misc/pragma
 misc/qwhich
 misc/repeat

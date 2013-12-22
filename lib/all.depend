@@ -20,6 +20,7 @@ defsym
 die_extended
 die
 eval_var
+globbing
 itertools
 integer
 list_has

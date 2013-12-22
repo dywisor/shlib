@@ -3,3 +3,4 @@
 fs/basemounts/basemounts
 fs/basemounts/defsym
 fs/basemounts/devfs
+fs/basemounts/devfs-util
