@@ -1,0 +1,7 @@
+list_has
+
+fs/packlib/exclude
+fs/packlib/vars
+
+function/defined
+function/die

@@ -1,0 +1,7 @@
+die
+
+fs/doprefix
+fs/path
+fs/uncompress
+
+function/die

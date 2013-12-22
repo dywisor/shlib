@@ -1,0 +1,13 @@
+# for dynamic function evaluation
+function/defined
+function/die
+
+# fspath_bind_functions_if_required():
+fs/path
+
+# pack modules
+fs/packlib/core
+fs/packlib/exclude
+fs/packlib/genscript
+fs/packlib/target_setup
+fs/packlib/vars

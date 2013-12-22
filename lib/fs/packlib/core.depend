@@ -1,0 +1,16 @@
+autodie
+defsym
+globbing
+message
+
+fs/dodir_minimal
+
+fs/packlib/exclude
+fs/packlib/genscript
+fs/packlib/target_setup
+fs/packlib/vars
+
+function/die
+
+misc/cmdwrapper
+misc/pragma
