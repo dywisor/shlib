@@ -39,6 +39,7 @@ die__minimal() {
 #  Calls __F_DIE ( message, code ).
 #
 die() {
+   local __MESSAGE_INDENT=
    ${__F_DIE:-die__minimal} "${1-}" "${2:-2}"
 }
 

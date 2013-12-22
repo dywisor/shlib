@@ -5,7 +5,7 @@
 #  Prints <text_colored><text_nocolor> using the specified color.
 #
 __message_colored() {
-   printf -- "\033[${2:?}${1:?}\033[0m${3:+ }${3-}\n"
+   printf -- "${__MESSAGE_INDENT-}\033[${2:?}${1:?}\033[0m${3:+ }${3-}\n"
 }
 
 # void __messagen_colored ( text_colored, color, text_nocolor ):
@@ -13,7 +13,7 @@ __message_colored() {
 #  Like __message_colored(), but doesn't append a trailing newline.
 #
 __messagen_colored() {
-   printf -- "\033[${2:?}${1:?}\033[0m${3:+ }${3-}"
+   printf -- "${__MESSAGE_INDENT-}\033[${2:?}${1:?}\033[0m${3:+ }${3-}"
 }
 
 
@@ -24,13 +24,13 @@ __messagen_colored() {
 #
 #  Prints ${header}${message} to stdout.
 #
-einfo_nocolor()   { printf -- "${2:-[INFO]}${1:+ }${1-}\n"; }
-ewarn_nocolor()   { printf -- "${2:-[WARN]}${1:+ }${1-}\n"; }
-eerror_nocolor()  { printf -- "${2:-[ERROR]}${1:+ }${1-}\n"; }
+einfo_nocolor()   { printf -- "${__MESSAGE_INDENT-}${2:-[INFO]}${1:+ }${1-}\n"; }
+ewarn_nocolor()   { printf -- "${__MESSAGE_INDENT-}${2:-[WARN]}${1:+ }${1-}\n"; }
+eerror_nocolor()  { printf -- "${__MESSAGE_INDENT-}${2:-[ERROR]}${1:+ }${1-}\n"; }
 
-einfon_nocolor()  { printf -- "${2:-[INFO]}${1:+ }${1-}"; }
-ewarnn_nocolor()  { printf -- "${2:-[WARN]}${1:+ }${1-}"; }
-eerrorn_nocolor() { printf -- "${2:-[ERROR]}${1:+ }${1-}"; }
+einfon_nocolor()  { printf -- "${__MESSAGE_INDENT-}${2:-[INFO]}${1:+ }${1-}"; }
+ewarnn_nocolor()  { printf -- "${__MESSAGE_INDENT-}${2:-[WARN]}${1:+ }${1-}"; }
+eerrorn_nocolor() { printf -- "${__MESSAGE_INDENT-}${2:-[ERROR]}${1:+ }${1-}"; }
 
 
 # void {einfo,ewarn,eerror}{,n}_color ( message, header=<*|INFO,WARN,ERROR> )
@@ -68,12 +68,12 @@ message_bind_functions() {
       einfo()   { einfo_color  "$@"; }
       ewarn()   { ewarn_color  "$@" 1>&2; }
       eerror()  { eerror_color "$@" 1>&2; }
-      message() { __message_colored "$*" '1;29m'; }
+      message() { __message_colored "${__MESSAGE_INDENT-}$*" '1;29m'; }
 
       einfon()   { einfon_color  "$@"; }
       ewarnn()   { ewarnn_color  "$@" 1>&2; }
       eerrorn()  { eerrorn_color "$@" 1>&2; }
-      messagen() { __messagen_colored "$*" '1;29m'; }
+      messagen() { __messagen_colored "${__MESSAGE_INDENT-}$*" '1;29m'; }
 
       HAVE_COLORED_MESSAGE_FUNCTIONS=y
    else
@@ -81,12 +81,12 @@ message_bind_functions() {
       einfo()    { einfo_nocolor  "$@"; }
       ewarn()    { ewarn_nocolor  "$@" 1>&2; }
       eerror()   { eerror_nocolor "$@" 1>&2; }
-      message()  { printf -- "${*}\n"; }
+      message()  { printf -- "${__MESSAGE_INDENT-}${*}\n"; }
 
       einfon()   { einfon_nocolor  "$@"; }
       ewarnn()   { ewarnn_nocolor  "$@" 1>&2; }
       eerrorn()  { eerrorn_nocolor "$@" 1>&2; }
-      messagen() { printf -- "${*}"; }
+      messagen() { printf -- "${__MESSAGE_INDENT-}${*}"; }
 
    fi
 
@@ -146,6 +146,30 @@ printvar() {
       fi
       shift
    done
+}
+
+# void message_indent ( **__MESSAGE_INDENT! )
+#
+message_indent() { __MESSAGE_INDENT="${__MESSAGE_INDENT-}  "; }
+
+# void message_outdent ( **__MESSAGE_INDENT )
+#
+message_outdent() {
+   if [ -n "${__MESSAGE_INDENT-}" ]; then
+      __MESSAGE_INDENT="${__MESSAGE_INDENT% }"
+      __MESSAGE_INDENT="${__MESSAGE_INDENT% }"
+      return 0
+   else
+      return 1
+   fi
+}
+
+# ~int message_indent_call ( *cmdv )
+#
+message_indent_call() {
+   local __MESSAGE_INDENT="${__MESSAGE_INDENT-}"
+   message_indent
+   "$@"
 }
 
 # void message_autoset_nocolor ( force_rebind=n, **NO_COLOR! )
