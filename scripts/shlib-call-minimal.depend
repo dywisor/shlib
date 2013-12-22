@@ -1,2 +1,4 @@
-die
-function/defined
+defsym
+scriptinfo
+shlib/shlib-call-util
+#shlib/introspection

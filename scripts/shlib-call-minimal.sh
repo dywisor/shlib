@@ -1,26 +1,30 @@
+#@HEADER
 # call any shlib function as script
 #
 
-# int shlib_call_wrap_v0 ( *cmdv )
-#
-#  Executes *cmdv and prints v0 or FILESIZE to stdout afterwards (if set).
-#  Passes cmdv's return value.
-#
-shlib_call_wrap_v0() {
-   local v0 FILESIZE rc=0
-   "$@" || rc=$?
+#@section __main__
 
-   if [ -z "${v0-}" ]; then
-      # compat "hack" for get_filesize()
-      [ -z "${FILESIZE-}" ] || echo "${FILESIZE}"
-   else
-      echo "${v0}"
-   fi
-   return ${rc}
-}
+SHLIB_CALL_FUNCTION="${SCRIPT_NAME}"
 
-if function_defined "${SCRIPT_NAME}"; then
-   shlib_call_wrap_v0 ${SCRIPT_NAME} "$@"
+if [ "${HAVE_SHLIB_INTROSPECTION:-n}" = "y" ]; then
+   case "${1-}" in
+      "${SHLIB_INSTROSPECTION_MAGIC_EXEC_WORD:?}")
+         shift
+         SHLIB_CALL_FUNCTION="__run__"
+      ;;
+      '--list-functions')
+         shift
+         SHLIB_CALL_FUNCTION="shlib_list_functions"
+      ;;
+      '--list-variables')
+         shift
+         SHLIB_CALL_FUNCTION="shlib_list_variables"
+      ;;
+   esac
+fi
+
+if function_defined "${SHLIB_CALL_FUNCTION}"; then
+   shlib_call_wrap_v0 ${SHLIB_CALL_FUNCTION} "$@"
 else
-   die "no such function: '${SCRIPT_NAME}'"
+   die "no such function: '${SHLIB_CALL_FUNCTION}'"
 fi

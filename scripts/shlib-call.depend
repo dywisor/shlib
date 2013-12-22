@@ -1,7 +1,9 @@
-scriptinfo
 autodie
-die
-readconfig
-function/defined
-message
+defsym
 list_has
+message
+readconfig
+scriptinfo
+
+shlib/shlib-call-util
+shlib/introspection
