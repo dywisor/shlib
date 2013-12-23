@@ -17,10 +17,11 @@ pack_zap_target_vars() {
 #  Also verifies that the respective pack functions exist.
 #
 pack_register_target() {
+   : ${PACK_TARGETS=}
    while [ ${#} -gt 0 ]; do
       if ! function_defined "pack_target_${1}"; then
          function_die "missing pack function for target '${1}'."
-      elif list_has "${1}" ${PACK_TARGETS?}; then
+      elif list_has "${1}" ${PACK_TARGETS}; then
          function_die "pack target '${1}' already registered."
       else
          PACK_TARGETS="${PACK_TARGETS}${PACK_TARGETS:+ }${1}"
