@@ -47,11 +47,11 @@ ${HELP_BODY-}\
 ${HELP_USAGE:-Usage: ${0##*/} [option [option...]]}
 
 where option is:
---quiet        (-q) -- be quiet
---verbose      (-v) -- be verbose
---debug             -- enable debug mode
---describe,
---help         (-h) -- show this message\
+${ARGPARSE_HELP_INDENT-}--quiet        ${ARGPARSE_HELP_SPACE-}(-q) -- be quiet
+${ARGPARSE_HELP_INDENT-}--verbose      ${ARGPARSE_HELP_SPACE-}(-v) -- be verbose
+${ARGPARSE_HELP_INDENT-}--debug        ${ARGPARSE_HELP_SPACE-}     -- enable debug mode
+${ARGPARSE_HELP_INDENT-}--describe,
+${ARGPARSE_HELP_INDENT-}--help         ${ARGPARSE_HELP_SPACE-}(-h) -- show this message\
 ${HELP_OPTIONS-}${HELP_FOOTER-}" | sed '${/^$/d}'
 
    if [ "${EXIT_AFTER_HELP:-y}" = "y" ]; then
