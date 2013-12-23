@@ -177,16 +177,29 @@ argparse_unknown() {
    fi
 }
 
-# void argparse_autodetect ( **F_ARGPARSE... )
+# @private int argparse__get_parse_function (
+#    name, **ARGPARSE_FUNCNAME_PREFIX="argparse_", **v0!
+# )
+#
+#  Sets v0=%ARGPARSE_FUNCNAME_PREFIX%name and returns 0 if a function with
+#  that name is defined, else 1.
+#
+argparse__get_parse_function() {
+   v0="${ARGPARSE_FUNCNAME_PREFIX:-argparse_}${1:?}"
+   function_defined "${v0}"
+}
+
+# void argparse_autodetect ( **F_ARGPARSE..., **ARGPARSE_FUNCNAME_PREFIX= )
 #
 #  Searches for default @argparse_handle functions.
 #
 argparse_autodetect() {
-   ! function_defined argparse_break    || F_ARGPARSE_BREAK=argparse_break
-   ! function_defined argparse_shortopt || F_ARGPARSE_SHORTOPT=argparse_shortopt
-   ! function_defined argparse_longopt  || F_ARGPARSE_LONGOPT=argparse_longopt
-   ! function_defined argparse_arg      || F_ARGPARSE_ARG=argparse_arg
-   ! function_defined argparse_any      || F_ARGPARSE=argparse_any
+   local v0
+   ! argparse__get_parse_function break    || F_ARGPARSE_BREAK="${v0}"
+   ! argparse__get_parse_function shortopt || F_ARGPARSE_SHORTOPT="${v0}"
+   ! argparse__get_parse_function longopt  || F_ARGPARSE_LONGOPT="${v0}"
+   ! argparse__get_parse_function arg      || F_ARGPARSE_ARG="${v0}"
+   ! argparse__get_parse_function any      || F_ARGPARSE="${v0}"
 }
 
 # void argparse_parse_from_file ( file, **F_ARGPARSE... )
