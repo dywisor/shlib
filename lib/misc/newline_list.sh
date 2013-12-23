@@ -13,8 +13,6 @@ newline_list_init() {
 newline_list_join() {
    v0=
    if [ $# -gt 0 ]; then
-      return 1
-   else
       v0="${1}"
       shift
       while [ $# -gt 0 ]; do
@@ -22,6 +20,8 @@ newline_list_join() {
          shift
       done
       return 0
+   else
+      return 1
    fi
 }
 
