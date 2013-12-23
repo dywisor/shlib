@@ -5,10 +5,12 @@
 #  Prints %message to stderr and calls %DIE(code) afterwards.
 #
 
-# @extern void get_fspath ( fspath, **v0! )
+# @extern int get_fspath ( fspath, **v0! )
 #
 #  Stores the realpath of %fspath in %v0 if it is non-empty,
 #  and the abspath otherwise.
+#
+#  Returns 0 if the resulting path is not empty, else 1.
 #
 
 # @extern int vdr_get_record_files (

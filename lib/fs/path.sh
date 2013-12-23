@@ -195,16 +195,23 @@ fspath_bind_implementation() {
    HAVE_FSPATH_FUNCTIONS=y
 }
 
-# void get_fspath ( fspath, **v0! )
+# int get_fspath ( fspath, **v0! )
 #
 #  Stores the realpath of %fspath in %v0 if it is non-empty,
 #  and the abspath otherwise.
 #
+#  Returns 0 if the resulting path is not empty, else 1.
+#
 get_fspath() {
    v0=
    get_realpath "${1?}"
-   [ -n "${v0}" ] || get_abspath "${1?}"
-   return 0
+   if [ -n "${v0}" ]; then
+      return 0
+   else
+      get_abspath "${1?}"
+      [ -n "${v0}" ] || return 1
+      return 0
+   fi
 }
 
 # int get_relpath ( parent_path, path, **v0! )
