@@ -1,0 +1,14 @@
+argparse
+autodie
+defsym
+die
+list_has
+message
+scriptinfo
+
+fs/path
+
+fs/packlib/packscript-bindings
+fs/packlib/targets
+
+function/defined
