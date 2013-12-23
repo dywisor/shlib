@@ -4,6 +4,7 @@ defsym
 die
 list_has
 message
+readconfig
 scriptinfo
 
 fs/path
@@ -12,3 +13,5 @@ fs/packlib/packscript-bindings
 fs/packlib/targets
 
 function/defined
+
+misc/newline_list

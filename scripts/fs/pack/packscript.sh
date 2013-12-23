@@ -9,18 +9,28 @@ PACKSCRIPT_DEFAULT_COMPRESSION_SQUASHFS=gzip
 
 #@section functions
 
-packscript_load_recipe() {
-   local _prev_targets="${PACK_TARGETS-}"
-   veinfo "loading recipe file '${1}'"
-   if . "${1}"; then
-      if [ "${PACK_TARGETS-}" = "${_prev_targets}" ]; then
-         ewarn "recipe '${1##*/}' does declare any targets."
+packscript_load_recipes() {
+   local _prev_targets
+   while [ ${#} -gt 0 ]; do
+      _prev_targets="${PACK_TARGETS-}"
+      veinfo "loading recipe file '${1}'"
+      if . "${1}"; then
+         if [ "${PACK_TARGETS-}" = "${_prev_targets}" ]; then
+            ewarn "recipe '${1##*/}' does not declare any targets."
+         fi
+         veinfo "success"
+         ARG_NUM_RECIPES=$(( ${ARG_NUM_RECIPES:-0} + 1 ))
+      else
+         die "failed to load recipe file '${1}' (rc=${?})." ${?}
       fi
-      veinfo "success"
-      ARG_NUM_RECIPES=$(( ${ARG_NUM_RECIPES:-0} + 1 ))
-   else
-      die "failed to load recipe file '${1}'."
-   fi
+      shift
+   done
+}
+
+# void packscript_load_recipes_from_list ( list_name:=**ARG_RECIPES )
+#
+packscript_load_recipes_from_list() {
+   newline_list_call packscript_load_recipes "${1:-ARG_RECIPES}"
 }
 
 packscript_parse_args() {
@@ -131,7 +141,7 @@ argparse_shortopt() {
    case "${shortopt}" in
       'f')
          argparse_need_file_arg "$@"
-         packscript_load_recipe "${v0}"
+         newline_list_append ARG_RECIPES "${v0}"
       ;;
       'S')
          argparse_need_fs_arg "$@"
@@ -177,7 +187,7 @@ argparse_longopt() {
    case "${longopt}" in
       'recipe')
          argparse_need_file_arg "$@"
-         packscript_load_recipe "${v0}"
+         newline_list_append ARG_RECIPES "${v0}"
       ;;
       'root')
          argparse_need_fs_arg "$@"
@@ -262,7 +272,14 @@ packscript__run_pack_command() {
          PACK_TARGET_IN_SUBSHELL \
          PACKSCRIPT_PROTECT_VARS PACKSCRIPT_AS_LIB
       do
-         eval "local ${v0}=\"\${${v0}-}\"" || die "failed to copy var"
+         case "${v0}" in
+            PACK_TARGETS)
+               true
+            ;;
+            *)
+               eval "local ${v0}=\"\${${v0}-}\"" || die "failed to copy var"
+            ;;
+         esac
       done
       v0=
    fi
@@ -273,11 +290,9 @@ packscript__run_pack_command() {
       eerror "${SCRIPT_NAME}: missing --root <dir> arg"
       return ${EX_USAGE}
    elif [ -z "${ARG_TARGETS-}" ]; then
-      ewarn "no pack targets given (use --target,-t)"
+      ewarn "no pack targets given"
       return ${EX_USAGE}
    fi
-
-   autodie packscript_check_targets
 
    veinfo "setting up packlib"
    # pack_setup ( root_dir, compression, image_dir, pack_command )
@@ -285,6 +300,11 @@ packscript__run_pack_command() {
       "${ARG_COMPRESSION_TAR} ${ARG_COMPRESSION_SQUASHFS}" \
       "${ARG_IMAGE_DIR-}" "${ARG_COMMAND}"
    PACK_OVERWRITE="${ARG_OVERWRITE:?}"
+
+   veinfo "loading recipes"
+   PACKSCRIPT_PRETEND=n
+   packscript_load_recipes_from_list
+   autodie packscript_check_targets
 
    if __debug__; then
       einfo "global pack env:"
@@ -297,6 +317,21 @@ packscript__run_pack_command() {
    pack_run_targets ${ARG_TARGETS}
 }
 
+# @pragma pack_pretend
+#
+#  Returns 0 if not actually packing (e.g. just listing targets),
+#  else 1.
+#
+#  %PACKSCRIPT_PRETEND must be set prior to calling this function.
+#
+# Note: recipes should check for '! __pack_pretend__', which returns
+#       true even if __pack_pretend__ is not defined (so that recipes do
+#       depend on packlib and not this script).
+#
+__pack_pretend__() {
+   [ "${PACKSCRIPT_PRETEND:?}" = "y" ]
+}
+
 
 # int packscript_main ( *args ), raises die()
 #
@@ -306,6 +341,7 @@ packscript_main() {
    local k
 
    local ARG_NUM_RECIPES=0
+   local ARG_RECIPES=
    local ARG_TARGETS=
    local ARG_ROOT_DIR=
    local ARG_IMAGE_DIR=
@@ -314,6 +350,7 @@ packscript_main() {
    local ARG_OVERWRITE=
    local ARG_COMPRESSION_TAR=
    local ARG_COMPRESSION_SQUASHFS=
+   local PACKSCRIPT_PRETEND
 
 ## "protecting" PACK_TARGETS doesn't make much sense as the pack_target_*()
 ## functions exist anyway -- use a subshell for that (if desired)
@@ -336,6 +373,8 @@ packscript_main() {
    # run command
    case "${ARG_COMMAND:?}" in
       'list')
+         PACKSCRIPT_PRETEND=y
+         packscript_load_recipes_from_list
          if [ -n "${PACK_TARGETS-}" ]; then
             einfo "pack targets:"
             message_indent
