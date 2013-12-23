@@ -96,6 +96,7 @@ ex_foreach() {
    fi
    pack_exclude_prefix_foreach "$@"
 }
+pack_bindings__eval_function_alias ex_foreach ex_prefix_foreach
 
 # genscript: none
 
@@ -105,5 +106,8 @@ pack_function_alias zap_target_vars  _FNAME_
 pack_function_alias init_target      _FNAME_ next
 pack_function_alias register_target  _FNAME_
 pack_function_alias declare_target   _FNAME_
+
+init_tarball()  { pack_init_target "$@" as tarball; }
+init_squashfs() { pack_init_target "$@" as squashfs; }
 
 # vars: none
