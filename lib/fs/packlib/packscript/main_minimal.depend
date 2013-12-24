@@ -1,0 +1,13 @@
+argparse
+autodie
+defsym
+die
+list_has
+message
+scriptinfo
+
+fs/path
+
+function/defined
+
+misc/newline_list

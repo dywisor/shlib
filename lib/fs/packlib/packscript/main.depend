@@ -1,0 +1,15 @@
+fs/packlib/packscript/main_minimal
+
+# additional modules for recipes:
+#  (some are redundant)
+fs/packlib/targets
+fs/packlib/packscript/bindings
+
+autodie
+defsym
+die
+list_has
+message
+readconfig
+fs/path
+function/die
