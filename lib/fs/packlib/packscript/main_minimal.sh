@@ -65,8 +65,8 @@ ${I}                               or genscript) [${PACKSCRIPT_DEFAULT_COMMAND}]
 ${I}--printenv                  -- set pack command to 'printenv'
 ${I}--printcmd,
 ${I}--dry-run              (-n) -- set pack command to 'printcmd'
-${I}--genscript                 -- set pack command to 'genscript' (TODO: --outfile, multiple targets)
-${I}--outfile              (-O) -- output file for --genscript (IGNORED)
+${I}--genscript                 -- set pack command to 'genscript'
+${I}--outfile              (-O) -- output file for --genscript
 ${I}--[no-]overwrite            -- [don't] overwrite existing image files
 ${I}--compression <comp>   (-C) -- set compression for all backends
 ${I}                                (gzip, xz, lzo[p], default)
@@ -167,7 +167,7 @@ packscript_argparse_shortopt() {
       'n')
          ARG_COMMAND=printcmd
       ;;
-      '0')
+      'O')
          packscript_argparse_need_fs_arg "$@"
          if [ -e "${v0}" ] && [ ! -f "${v0}" ]; then
             argparse_die "${arg}: ${1} exists, but is not a file."
@@ -346,6 +346,7 @@ __pack_pretend__() {
 # int packscript_main ( *args ), raises die()
 #
 packscript_main() {
+   local rc
    local __MESSAGE_INDENT="${__MESSAGE_INDENT-}"
    [ -n "${AUTODIE-}" ] || local AUTODIE=autodie
    local k
@@ -392,14 +393,31 @@ packscript_main() {
                einfo "${k}" "-"
             done
             message_outdent
-            return 0
+            rc=0
          else
             ewarn "no pack targets available!"
-            return 1
+            rc=1
+         fi
+      ;;
+      'genscript')
+         if [ -n "${ARG_OUTFILE}" ]; then
+            autodie pack_set_genscript_destfile "${ARG_OUTFILE}"
+            autodie pack_genscript_open_fd
+            packscript__run_pack_command
+            rc=${?}
+            autodie pack_genscript_close_fd
+            chmod +x "${PACK_GENSCRIPT_DEST}" || ewarn "chmod failed"
+         else
+            autodie pack_set_genscript_destfile ""
+            packscript__run_pack_command
+            rc=${?}
          fi
       ;;
       *)
          packscript__run_pack_command
+         rc=${?}
       ;;
    esac
+
+   return ${rc}
 }

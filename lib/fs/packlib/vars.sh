@@ -181,3 +181,19 @@ pack_get_destfile() {
       ;;
    esac
 }
+
+# int pack_set_genscript_destfile ( fspath, **PACK_GENSCRIPT_DEST! )
+#
+pack_set_genscript_destfile() {
+   PACK_GENSCRIPT_DEST=
+   local v0
+
+   if [ -z "${1?}" ]; then
+      return 0
+   elif get_fspath "${1}"; then
+      PACK_GENSCRIPT_DEST="${v0}"
+      return 0
+   else
+      return 1
+   fi
+}
