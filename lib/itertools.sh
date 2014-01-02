@@ -186,7 +186,7 @@ fs_iterator() {
    local d
    for d; do
       if [ -d "${d%/}/" ]; then
-         line_iterator "$( find ${d%/}/ )"
+         line_iterator "$( find "${d%/}/" )"
       elif [ -n "${F_ITER_DIR_MISSING-}" ]; then
          ${F_ITER_DIR_MISSING} "${d%/}"
       else
@@ -229,7 +229,7 @@ dir_iterator() {
    while [ $# -gt 0 ]; do
       if [ -n "${1}" ]; then
          if [ "${ITER_ABSPATH:-y}" = "y" ]; then
-            d=$(readlink -f "${1}")
+            d="$(readlink -f "${1}")"
          else
             d="${1}"
          fi
@@ -283,7 +283,6 @@ linelist_has() {
    shift && F_ITER=__itertools_kw_is_not line_iterator "$@" || return 0
    return 1
 }
-
 
 # void generic_list_join (
 #    item_separator, *items,
