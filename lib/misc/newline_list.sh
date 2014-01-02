@@ -1,5 +1,22 @@
 #@section functions
 
+# @private void newline_list__filter_add ( ^func, item, *args, **filter_func, **item, **v0! )
+#
+newline_list__filter_add() {
+   ! ${filter_func:?} "$@" || v0="${v0-}${v0:+${NEWLINE}}${item}"
+}
+
+# @private int newline_list__has_kw ( *values, **kw )
+#
+newline_list__has_kw() {
+   #@varcheck_emptyok kw
+   while [ ${#} -gt 0 ]; do
+      [ "${1}" != "${kw}" ] || return 0
+      shift
+   done
+   return 1
+}
+
 # void newline_list_init ( varname, **$varname! )
 #
 newline_list_init() {
@@ -7,6 +24,11 @@ newline_list_init() {
    eval : "\${${1}=}"
 }
 
+# void newline_list_copy ( src_list, dest_list="v0", **$dest_list! )
+#
+newline_list_copy() {
+   eval ${2:-v0}="\${${1:?}?}"
+}
 
 # void newline_list_join ( *values, **v0! )
 #
@@ -25,28 +47,33 @@ newline_list_join() {
    fi
 }
 
-# void newline_list_add_list ( varname, list )
+# void newline_list_add_list ( varname, list_name )
 #
 newline_list_add_list() {
    : ${1:?}
+   local __newline_list_tmplist
+
    if eval test -z "\${${1}:+NOTEMPTY}"; then
-      eval "${1}=\"${2}\""
+      newline_list_copy "${2:?}" "${1}"
    else
-      eval "${1}=\"${2}${NEWLINE}\${${1}-}\""
+      newline_list_copy "${2:?}" __newline_list_tmplist
+      eval "${1}=\"${__newline_list_tmplist}${NEWLINE}\${${1}-}\""
    fi
 }
 
-# void newline_list_append_list ( varname, list )
+# void newline_list_append_list ( varname, list_name )
 #
 newline_list_append_list() {
    : ${1:?}
+   local __newline_list_tmplist
+
    if eval test -z "\${${1}:+NOTEMPTY}"; then
-      eval "${1}=\"${2}\""
+      newline_list_copy "${2:?}" "${1}"
    else
-      eval "${1}=\"\${${1}}${NEWLINE?}${2}\""
+      newline_list_copy "${2:?}" __newline_list_tmplist
+      eval "${1}=\"\${${1}}${NEWLINE?}${__newline_list_tmplist}\""
    fi
 }
-
 
 # void newline_list_add ( varname, *values )
 #
@@ -56,7 +83,7 @@ newline_list_add() {
    shift
 
    if newline_list_join "$@"; then
-      newline_list_add_list "${varname}" "${v0}"
+      eval "${1}=\"${v0}${NEWLINE}\${${1}-}\""
    else
       eval : "\${${varname}=}"
    fi
@@ -72,7 +99,7 @@ newline_list_append() {
    shift
 
    if newline_list_join "$@"; then
-      newline_list_append_list "${varname}" "${v0}"
+      eval "${varname}=\"\${${varname}}${NEWLINE?}${v0}\""
    else
       eval : "\${${varname}=}"
    fi
@@ -80,6 +107,50 @@ newline_list_append() {
    return 0
 }
 
+# int newline_list_foreach (
+#    varname, ^func, *args, (**item!), (**index!), **F_ITER_ON_ERROR=return
+# )
+#
+newline_list_foreach() {
+   local index
+   local item
+   local my_list
+   local OLDIFS="${IFS}"
+   local func="${2:?}"
+
+   newline_list_copy "${1:?}" my_list
+
+   shift 2 || return
+
+   index=0
+   local IFS="${IFS_NEWLINE?}"
+   for item in ${my_list}; do
+      IFS="${OLDIFS}"
+      ${func} "${item}" "$@" || ${F_ITER_ON_ERROR:-return}
+      index=$(( ${index} + 1 ))
+   done
+   IFS="${OLDIFS}"
+}
+
+# void newline_list_filter_to_v0 ( varname, ^func, *args, **v0! )
+#
+newline_list_filter_to_v0() {
+   v0=
+   local src_list_name="${1:?}"
+   local filter_func="${2:?}"
+   shift 2 || return
+   newline_list_foreach "${src_list_name}" "newline_list__filter_add" "$@"
+}
+
+# void newline_list_filter ( varname, ^func, *args, **$varname! )
+#
+#  Filters %varname and stores the resulting list in %varname.
+#
+newline_list_filter() {
+   local v0
+   newline_list_filter_to_v0 "$@"
+   eval "${1:?}=\"${v0?}\""
+}
 
 # ~int newline_list_call ( func, varname )
 #
@@ -97,4 +168,47 @@ newline_list_call() {
    IFS="${__OLDIFS}"
    unset -v __list __OLDIFS
    ${__func} "$@"
+}
+
+# int newline_list_has ( word, varname )
+#
+newline_list_has() {
+   ##linelist_has $1 $$2
+   local kw="${1?}"
+   newline_list_call newline_list__has_kw "${2:?}"
+}
+
+# int newline_list_get ( varname, index, **v0! )
+#
+newline_list_get() {
+   v0=
+
+   local OLDIFS="${IFS}"
+   local my_list
+   local index="${2:?}"
+   newline_list_copy "${1:?}" my_list
+
+   local IFS="${IFS_NEWLINE}"
+   set -- ${my_list}
+   IFS="${OLDIFS}"
+
+   if [ ${index} -le ${#} ]; then
+      eval "v0=\"\${${index}?}\""
+      return 0
+   else
+      return 1
+   fi
+}
+
+# void newline_list_print ( varname )
+#
+newline_list_print() {
+   local OLDIFS="${IFS}"
+   local my_list
+   newline_list_copy "${1:?}" my_list
+   IFS="${IFS_NEWLINE?}"
+   set -- ${my_list}
+   IFS="${OLDIFS}"
+
+   echo "list<${*}>"
 }
