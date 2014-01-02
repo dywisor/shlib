@@ -352,7 +352,7 @@ packscript_main() {
    local k
 
    local ARG_NUM_RECIPES=0
-   local ARG_RECIPES=
+   local ARG_RECIPES
    local ARG_TARGETS=
    local ARG_ROOT_DIR=
    local ARG_IMAGE_DIR=
@@ -362,6 +362,8 @@ packscript_main() {
    local ARG_COMPRESSION_TAR=
    local ARG_COMPRESSION_SQUASHFS=
    local PACKSCRIPT_PRETEND
+
+   newline_list_init ARG_RECIPES
 
 ## "protecting" PACK_TARGETS doesn't make much sense as the pack_target_*()
 ## functions exist anyway -- use a subshell for that (if desired)
