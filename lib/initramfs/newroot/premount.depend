@@ -2,6 +2,7 @@ misc/pragma
 fs/mount/fstab_iter
 
 initramfs/mount
+initramfs/disk
 initramfs/run
 
 initramfs/newroot/base
