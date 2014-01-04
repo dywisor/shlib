@@ -1,54 +1,119 @@
+#@section const
+MESSAGE_COLOR_GREEN="1;32m"
+MESSAGE_COLOR_YELLOW="1;33m"
+MESSAGE_COLOR_RED="1;31m"
+MESSAGE_COLOR_WHITE="1;29m"
+
+#@section funcdef
+
+# @funcdef message_emitter[<type>] <function name> (
+#    header=<default>, text=, text_append=,
+#    color=, header_nocolor, header_colored,
+#    **__MESSAGE_INDENT=
+# )
+#
+#  Prints a message to stdout/stderr/file/...
+#
+
 #@section functions
 
-# void __message_colored ( text_colored, color, text_nocolor )
-#
-#  Prints <text_colored><text_nocolor> using the specified color.
+# @stdout @message_emitter<colored> __message_colored (
+#    header=<default>, text=, text_append=,
+#    color=, header_nocolor, header_colored,
+#    **__MESSAGE_INDENT=
+# )
 #
 __message_colored() {
-   printf -- "${__MESSAGE_INDENT-}\033[${2:?}${1:?}\033[0m${3:+ }${3-}\n"
+   printf -- "${__MESSAGE_INDENT-}\033[${4:?}%s\033[0m%s${3-}" \
+      "${1:-${6?}}" "${2:+ }${2-}"
 }
 
-# void __messagen_colored ( text_colored, color, text_nocolor ):
+# @stdout @message_emiter<nocolor> __message_nocolor (
+#    header=<default>, text=, text_append=,
+#    color=, header_nocolor, header_colored,
+#    **__MESSAGE_INDENT=
+# )
 #
-#  Like __message_colored(), but doesn't append a trailing newline.
-#
-__messagen_colored() {
-   printf -- "${__MESSAGE_INDENT-}\033[${2:?}${1:?}\033[0m${3:+ }${3-}"
+__message_nocolor() {
+   printf -- "${__MESSAGE_INDENT}%s%s${3-}" \
+      "${1:-${5?}}" "${2:+ }${2-}"
 }
 
 
+## actual message functions
 
-#@section functions
-
-# void {einfo,ewarn,eerror}{,n}_nocolor ( message, header=<INFO,WARN,ERROR> )
+# @stdout void einfo (
+#    message, header="INFO"|"*",
+#    **MESSAGE_COLOR_INFO=<default>, **__F_MESSAGE_EMITTER
+# )
 #
-#  Prints ${header}${message} to stdout.
+einfo() {
+   ${__F_MESSAGE_EMITTER:?} "${2-}" "${1-}" '\n' \
+      "${MESSAGE_COLOR_INFO:-${MESSAGE_COLOR_GREEN}}" '[INFO]' '*'
+}
+
+# @stdout void einfon (
+#    message, header="INFO"|"*",
+#    **MESSAGE_COLOR_INFO=<default>, **__F_MESSAGE_EMITTER
+# )
 #
-einfo_nocolor()   { printf -- "${__MESSAGE_INDENT-}${2:-[INFO]}${1:+ }${1-}\n"; }
-ewarn_nocolor()   { printf -- "${__MESSAGE_INDENT-}${2:-[WARN]}${1:+ }${1-}\n"; }
-eerror_nocolor()  { printf -- "${__MESSAGE_INDENT-}${2:-[ERROR]}${1:+ }${1-}\n"; }
+einfon() {
+   ${__F_MESSAGE_EMITTER:?} "${2-}" "${1-}" '' \
+      "${MESSAGE_COLOR_INFO:-${MESSAGE_COLOR_GREEN}}" '[INFO]' '*'
+}
 
-einfon_nocolor()  { printf -- "${__MESSAGE_INDENT-}${2:-[INFO]}${1:+ }${1-}"; }
-ewarnn_nocolor()  { printf -- "${__MESSAGE_INDENT-}${2:-[WARN]}${1:+ }${1-}"; }
-eerrorn_nocolor() { printf -- "${__MESSAGE_INDENT-}${2:-[ERROR]}${1:+ }${1-}"; }
-
-
-# void {einfo,ewarn,eerror}{,n}_color ( message, header=<*|INFO,WARN,ERROR> )
+# @stderr void ewarn (
+#    message, header="WARN"|"*",
+#    **MESSAGE_COLOR_WARN=<default>, **__F_MESSAGE_EMITTER
+# )
 #
-# Prints ${header}${message} to stdout (colored output).
+ewarn() {
+   1>&2 ${__F_MESSAGE_EMITTER:?} "${2-}" "${1-}" '\n' \
+      "${MESSAGE_COLOR_WARN:-${MESSAGE_COLOR_YELLOW}}" '[WARN]' '*'
+}
+
+# @stderr void ewarnn (
+#    message, header="WARN"|"*",
+#    **MESSAGE_COLOR_WARN=<default>, **__F_MESSAGE_EMITTER
+# )
 #
+ewarnn() {
+   1>&2 ${__F_MESSAGE_EMITTER:?} "${2-}" "${1-}" '' \
+      "${MESSAGE_COLOR_WARN:-${MESSAGE_COLOR_YELLOW}}" '[WARN]' '*'
+}
 
-##einfo_color()  { __message_colored "${2:-[INFO]}"  '1;32m' "${1-}"; }
-##ewarn_color()  { __message_colored "${2:-[WARN]}"  '1;33m' "${1-}"; }
-##eerror_color() { __message_colored "${2:-[ERROR]}" '1;31m' "${1-}"; }
+# @stderr void eerror (
+#    message, header="ERROR"|"*",
+#    **MESSAGE_COLOR_ERROR=<default>, **__F_MESSAGE_EMITTER
+# )
+#
+eerror() {
+   1>&2 ${__F_MESSAGE_EMITTER:?} "${2-}" "${1-}" '\n' \
+      "${MESSAGE_COLOR_ERROR:-${MESSAGE_COLOR_RED}}" '[ERROR]' '*'
+}
 
-einfo_color()   { __message_colored "${2:-*}" '1;32m' "${1-}"; }
-ewarn_color()   { __message_colored "${2:-*}" '1;33m' "${1-}"; }
-eerror_color()  { __message_colored "${2:-*}" '1;31m' "${1-}"; }
+# @stderr void eerrorn (
+#    message, header="ERROR"|"*",
+#    **MESSAGE_COLOR_ERROR=<default>, **__F_MESSAGE_EMITTER
+# )
+#
+eerrorn() {
+   1>&2 ${__F_MESSAGE_EMITTER:?} "${2-}" "${1-}" '\n' \
+      "${MESSAGE_COLOR_ERROR:-${MESSAGE_COLOR_RED}}" '[ERROR]' '*'
+}
 
-einfon_color()  { __messagen_colored "${2:-*}" '1;32m' "${1-}"; }
-ewarnn_color()  { __messagen_colored "${2:-*}" '1;33m' "${1-}"; }
-eerrorn_color() { __messagen_colored "${2:-*}" '1;31m' "${1-}"; }
+# @stdout void message ( text, **__F_MESSAGE_EMITTER )
+#
+message() {
+   ${__F_MESSAGE_EMITTER:?} "${1-}" "" '\n' "${MESSAGE_COLOR_WHITE}" "" ""
+}
+
+# @stdout void messagen ( text, **__F_MESSAGE_EMITTER )
+#
+messagen() {
+   ${__F_MESSAGE_EMITTER:?} "${1-}" "" '' "${MESSAGE_COLOR_WHITE}" "" ""
+}
+
 
 # void message_bind_functions ( **NO_COLOR=n )
 #
@@ -59,35 +124,14 @@ eerrorn_color() { __messagen_colored "${2:-*}" '1;31m' "${1-}"; }
 #
 message_bind_functions() {
    HAVE_MESSAGE_FUNCTIONS=n
-   HAVE_COLORED_MESSAGE_FUNCTIONS=n
    __HAVE_MESSAGE_FUNCTIONS=n
-   unset -f einfo ewarn eerror edebug message
 
    if [ "${NO_COLOR:-n}" != "y" ]; then
-
-      einfo()   { einfo_color  "$@"; }
-      ewarn()   { ewarn_color  "$@" 1>&2; }
-      eerror()  { eerror_color "$@" 1>&2; }
-      message() { __message_colored "${__MESSAGE_INDENT-}$*" '1;29m'; }
-
-      einfon()   { einfon_color  "$@"; }
-      ewarnn()   { ewarnn_color  "$@" 1>&2; }
-      eerrorn()  { eerrorn_color "$@" 1>&2; }
-      messagen() { __messagen_colored "${__MESSAGE_INDENT-}$*" '1;29m'; }
-
+      __F_MESSAGE_EMITTER="__message_colored"
       HAVE_COLORED_MESSAGE_FUNCTIONS=y
    else
-
-      einfo()    { einfo_nocolor  "$@"; }
-      ewarn()    { ewarn_nocolor  "$@" 1>&2; }
-      eerror()   { eerror_nocolor "$@" 1>&2; }
-      message()  { printf -- "${__MESSAGE_INDENT-}${*}\n"; }
-
-      einfon()   { einfon_nocolor  "$@"; }
-      ewarnn()   { ewarnn_nocolor  "$@" 1>&2; }
-      eerrorn()  { eerrorn_nocolor "$@" 1>&2; }
-      messagen() { printf -- "${__MESSAGE_INDENT-}${*}"; }
-
+      __F_MESSAGE_EMITTER="__message_nocolor"
+      HAVE_COLORED_MESSAGE_FUNCTIONS=n
    fi
 
    __HAVE_MESSAGE_FUNCTIONS=y
@@ -220,4 +264,5 @@ message_autoset_nocolor() {
 #
 #  Binds the message functions if %MESSAGE_BIND_FUNCTIONS is set to 'y'.
 #
+: ${__F_MESSAGE_EMITTER:="__message_nocolor"}
 [ "${MESSAGE_BIND_FUNCTIONS:-y}" != "y" ] || message_bind_functions
