@@ -14,10 +14,10 @@
 #  Hint: Passing F_FSTAB_ITER=mount results in mounting all entries.
 #
 fstab_iterator() {
-   F_ITER=__fstab_iterator_item \
-      ITER_UNPACK_ITEM=y \
-      ITER_SKIP_EMPTY=y \
-      ITER_SKIP_COMMENT=n \
+   local F_ITER=__fstab_iterator_item
+   local ITER_UNPACK_ITEM=y
+   local ITER_SKIP_EMPTY=y
+   local ITER_SKIP_COMMENT=n
    file_iterator "${1:-/etc/fstab}"
 }
 
