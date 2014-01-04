@@ -20,12 +20,88 @@ newroot_tmpdir__setperm_user_root() {
    return ${rc}
 }
 
-# @private int newroot_tmpdir__dodir_user ( **tmpdir_user, **tmpdir_owner_id )
+# @private int newroot_tmpdir__dodir_user (
+#    **tmpdir_user, **tmpdir_owner_id, **v0!
+# )
 #
 #  Creates a user tmpdir and sets permissions.
 #
 newroot_tmpdir__dodir_user() {
    newroot_tmpdir_dodir /users/${tmpdir_user:?} newroot_tmpdir__setperm_user
+}
+
+# @private int newroot_tmpdir__handle_user_spec (
+#    **user_spec, **tmpdir_owner_id!, **tmpdir_user!, **v0?!
+#    **NEWROOT_TMPDIR_USER_GID=0, **OLDIFS
+# )
+#
+#  Parses a tmpdir user spec and creates the tmpdir.
+#
+#  See newroot_tmpdir_users() for details.
+#
+newroot_tmpdir__handle_user_spec() {
+   #@VARCHECK OLDIFS
+
+   tmpdir_owner_id=
+   tmpdir_user=
+
+   ##local IFS="${OLDIFS}"
+   local symlink
+   local tmpdir_dup_group=n
+
+   case "${user_spec}" in
+      '')
+         return 0
+      ;;
+      *:)
+         tmpdir_dup_group=y
+      ;;
+   esac
+
+   local IFS=":"
+   set -- ${1}
+   IFS="${OLDIFS}"
+
+   tmpdir_user="${1-}"
+
+   if [ -z "${1-}" ] || [ -z "${2-}" ]; then
+      dolog_error "newroot_tmpdir_users(): invalid user spec: ${user_spec}"
+      return 0
+   elif [ "${3:-_}" != "_" ]; then
+      tmpdir_owner_id="${2}:${3}"
+   elif [ "${tmpdir_dup_group}" = "y" ]; then
+      tmpdir_owner_id="${2}:${2}"
+   else
+      tmpdir_owner_id="${2}:${NEWROOT_TMPDIR_USER_GID:-0}"
+   fi
+
+   dolog_debug +newroot_tmpdir \
+      "user_spec(user='${tmpdir_user-}', owner_id='${tmpdir_owner_id-}', alias='${4:-<none>}')"
+
+   dolog_info +newroot_tmpdir "Creating tmpdir for ${tmpdir_user-}"
+   inonfatal newroot_tmpdir__dodir_user || return
+
+   if [ -n "${4-}" ]; then
+      IFS=","
+      set -- ${4}
+      IFS="${OLDIFS}"
+
+      dolog_info +newroot_tmpdir "Creating tmpdir links ${*} -> ${tmpdir_user-}"
+      while [ ${#} -gt 0 ]; do
+         if [ -n "${1}" ]; then
+            symlink="${NEWROOT_TMPDIR}/${1}"
+            if [ -e "${symlink}" ] || [ -h "${symlink}" ]; then
+               dolog_warn +newroot_tmpdir \
+                  "newroot_tmpdir_users(): cannot create tmpdir alias ${1}->${tmpdir_user}: exists"
+            else
+               inonfatal ln -s "${tmpdir_user}" "${symlink}" || true
+            fi
+         fi
+         shift
+      done
+   fi
+
+   return 0
 }
 
 # void newroot_tmpdir_init (
@@ -96,7 +172,7 @@ newroot_tmpdir_avail() { [ -n "${NEWROOT_TMPDIR-}" ]; }
 #  A user spec is a 2- or 3-tuple containing the user's name, uid and gid,
 #  separated by colon characters:
 #
-#   user_spec ::= <name>:<uid>[:[<gid>]]
+#   user_spec ::= <name>:<uid>[:[<gid>[:<alias name>,...]]]
 #
 #  gid defaults NEWROOT_TMPDIR_USER_GID if the user_spec does not end
 #  with ':', else the uid will be (re-)used as gid.
@@ -117,7 +193,9 @@ newroot_tmpdir_avail() { [ -n "${NEWROOT_TMPDIR-}" ]; }
 #   scripts.
 #
 newroot_tmpdir_users() {
-   local v0 tmpdir_owner_id tmpdir_user fail=0
+   local OLDIFS="${IFS}"
+   local fail=0
+   local v0 tmpdir_owner_id tmpdir_user user_spec
 
    if ! newroot_tmpdir_avail; then
       return 2
@@ -132,30 +210,8 @@ newroot_tmpdir_users() {
          NEWROOT_TMPDIR_USER_ONLY=y || fail=1
    fi
 
-   while [ $# -gt 0 ]; do
-      if [ -n "${1-}" ]; then
-         tmpdir_user="${1%%:*}"
-         v0="${1#*:}"
-
-         case "${v0}" in
-            '')
-               initramfs_die "newroot_tmpdir_users(): bad user spec: ${1}"
-               continue
-            ;;
-            *:?*)
-               tmpdir_owner_id="${v0}"
-            ;;
-            *:)
-               tmpdir_owner_id="${v0}${v0%:}"
-            ;;
-            *)
-               tmpdir_owner_id="${v0}:${NEWROOT_TMPDIR_USER_GID:-0}"
-            ;;
-         esac
-
-         inonfatal newroot_tmpdir__dodir_user || fail=$(( ${fail} + 1 ))
-      fi
-      shift
+   for user_spec; do
+      newroot_tmpdir__handle_user_spec "${1}" || fail=$(( ${fail} + 1 ))
    done
    return ${fail}
 }

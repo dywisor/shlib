@@ -1,3 +1,6 @@
+defsym
+logging
+
 fs/dodir
 fs/mount/info
 
