@@ -20,8 +20,10 @@ initramfs_launch_shell() {
             ${1-} ${shell} --login
          ;;
       esac
-   else
+   elif tty -s; then
       ${1-} ${shell} --login
+   else
+      die "cannot open stdin for initramfs shell"
    fi
 }
 
@@ -57,7 +59,7 @@ initramfs_launch_rescue_shell() {
    einfo "which may be required to continue booting."
 
    initramfs_launch_shell
-   initramfs_try_resume "$@"
+   initramfs_shell_try_resume "$@"
 }
 
 # int initramfs_shell_try_resume ( [message], [code] ), raises die()
