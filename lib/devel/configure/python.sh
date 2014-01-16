@@ -1,3 +1,5 @@
+#@section functions
+
 # void configure_which_python ( version="", **PYTHON! )
 #
 #  Locates python and stores its path in %PYTHON.

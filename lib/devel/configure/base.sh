@@ -1,3 +1,5 @@
+#@section functions
+
 ### message functions
 
 # void configure_{echo,info,warn,error}{,n} ( message, ... )
