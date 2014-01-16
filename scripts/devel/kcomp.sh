@@ -783,6 +783,11 @@ kcomp_main() {
    breakpoint kernel_pack
    einfo_action "Creating tarball"
    autodie kcomp_pack "${KERNEL_DESTDIR}" "${KERNEL_TMPDIR}/${KERNEL_DESTFILE##*/}"
+   case "${KERNEL_DESTFILE}" in
+      */*)
+         autodie dodir_clean "${KERNEL_DESTFILE%/*}"
+      ;;
+   esac
    autodie mv -T -f -- "${KERNEL_TMPDIR}/${KERNEL_DESTFILE##*/}" "${KERNEL_DESTFILE}"
 
    einfo "${KERNEL_DESTFILE} is ready."

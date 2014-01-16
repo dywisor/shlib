@@ -8,6 +8,8 @@ varcheck
 fs/dodir
 fs/tmpdir
 
+function/defined
+
 interact/get_yn
 
 misc/pragma
