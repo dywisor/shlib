@@ -35,7 +35,7 @@ __message_colored() {
 # )
 #
 __message_nocolor() {
-   printf -- "${__MESSAGE_INDENT}%s%s${3-}" \
+   printf -- "${__MESSAGE_INDENT-}%s%s${3-}" \
       "${1:-${5?}}" "${2:+ }${2-}"
 }
 
