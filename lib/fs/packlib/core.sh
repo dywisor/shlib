@@ -126,6 +126,8 @@ dopack__check_destfile_overwrite() {
          return 22
       else
          einfo "dopack: '${PACK_DESTFILE}' will be overwritten."
+         # TODO: remove the bak file when done
+         #  (or simply delete PACK_DESTFILE here instead of moving it)
          mv -vf -- "${PACK_DESTFILE}" "${PACK_DESTFILE}.bak" || return 23
       fi
 

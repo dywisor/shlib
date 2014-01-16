@@ -52,4 +52,7 @@ dodir_clean() {
 # @function_alias keepdir_clean ( *dir )
 #  is KEEPDIR=y dodir_clean ( *dir )
 #
-keepdir_clean() { KEEPDIR=y dodir_clean "$@"; }
+keepdir_clean() {
+   local KEEPDIR=y
+   dodir_clean "$@"
+}

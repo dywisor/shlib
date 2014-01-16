@@ -153,7 +153,7 @@ pack_exclude_dir_abs() {
 
 pack_exclude_image_dir() {
    if [ -n "${PACK_IMAGE_DIR-}" ]; then
-      pack_exclude_list_append abs_dir "${PACK_IMAGE_DIR}"
+      pack_exclude_list_append abs_file "${PACK_IMAGE_DIR}"
    fi
 }
 
