@@ -19,6 +19,6 @@ qwhich() {
 #
 qwhich_single() {
    : ${1:?}
-   v0=$( which "${1}" 1>${DEVNULL} 2>${DEVNULL} )
+   v0="$( which "${1}" 2>${DEVNULL} )"
    [ -n "${v0}" ]
 }
