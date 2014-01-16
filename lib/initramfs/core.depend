@@ -13,3 +13,5 @@ initramfs/misc
 initramfs/mount
 initramfs/run
 initramfs/vars
+
+misc/qwhich

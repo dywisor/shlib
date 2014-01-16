@@ -85,7 +85,7 @@ liram_populate_layout_default() {
       liram_log_nothing_found "etc"
    fi
 
-   # unpack var taball (optional)
+   # unpack var tarball (optional)
    if liram_unpack_optional var; then
       liram_log_tarball_unpacked "var"
    else

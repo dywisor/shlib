@@ -53,6 +53,11 @@ initramfs_vars() {
 
    CP_OPT_NO_TARGET_DIR=
    MV_OPT_NO_TARGET_DIR=
+
+   # lazy-rebind
+   if [ "${HAVE_MESSAGE_FUNCTIONS:-n}" = "y" ]; then
+      message_autoset_nocolor
+   fi
 }
 
 

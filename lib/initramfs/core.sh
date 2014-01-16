@@ -37,6 +37,10 @@
 
 # @extern int dofile()
 
+## functions from misc/qwhich
+
+# @extern int qwhich()
+# @extern int qwhich_single()
 
 ## functions from initramfs/basemounts
 
