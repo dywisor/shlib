@@ -4,3 +4,4 @@ initramfs/newroot/liram/core
 # layouts, provide liram_populate_layout_*()
 initramfs/newroot/liram/layout/default
 initramfs/newroot/liram/layout/tv
+initramfs/newroot/liram/layout/squashed_ro_rootfs
