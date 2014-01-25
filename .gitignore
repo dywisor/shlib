@@ -22,4 +22,5 @@
 /local
 *.local
 /scripts/local
+/scripts/**/local
 /scripts/tmp
