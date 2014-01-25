@@ -3,7 +3,7 @@ set -u
 # load build env and build functions
 with_stdfunc || die
 
-readonly DEFAULT_BUSYBOX_VERSION="1.21.1"
+readonly DEFAULT_BUSYBOX_VERSION="1.22.1"
 
 depcheck mknod fakeroot cpio
 
