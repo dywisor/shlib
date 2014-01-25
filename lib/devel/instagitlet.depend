@@ -1,0 +1,10 @@
+autodie
+defsym
+die
+message
+scriptinfo
+varcheck
+
+fs/dodir_minimal
+
+misc/pragma
