@@ -110,21 +110,26 @@ tmpfs_decrease() {
    tmpfs__resize_m_delta_minmax "$1" "$2" "-${3}"
 }
 
-# int tmpfs_downsize ( mp, current_size_m=<undef>, spare_size_m=30 )
+# int tmpfs_downsize ( mp, current_size_m=<undef>, spare_size_m=30, **v0! )
 #
 #  Resizes a tmpfs to its actual size + some spare space.
 #  Does not resize if the new size would be bigger than the old one,
 #  provided you have passed the current_size_m parameter.
 #
+#  Stores the new size in %v0.
+#
 tmpfs_downsize() {
+   v0=
    local FILESIZE new_size_m
 
    autodie get_filesize "${1:?}"
    new_size_m=$(( ${FILESIZE} + ${3:-30} ))
 
    if [ -z "${2-}" ] || [ ${new_size_m} -lt ${2} ]; then
+      v0="${new_size_m}"
       tmpfs_resize_m "${1}" "${new_size_m}"
    else
+      v0="${2}"
       ${LOGGER} -0 --level=DEBUG \
          "not resizing ${1}, new size would be bigger or equal (${new_size_m} >= ${2-})."
    fi
