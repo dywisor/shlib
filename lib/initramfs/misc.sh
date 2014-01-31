@@ -68,7 +68,11 @@ initramfs_switch_root() {
    fi
 
    local opts=""
-   [ -z "${CONSOLE-}" ] || opts="${opts} -c ${CONSOLE}"
+#   if \
+#      [ -n "${CONSOLE-}" ] && switch_root -h 2>&1 | grep -E -- '^\s+-c[,]?\s+'
+#   then
+#      opts="${opts} -c ${CONSOLE}"
+#   fi
 
    exec switch_root ${opts} "${NEWROOT}" ${CMDLINE_INIT} "$@"
    initramfs_die "switch_root failed"
