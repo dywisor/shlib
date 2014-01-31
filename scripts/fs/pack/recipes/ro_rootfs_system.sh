@@ -17,7 +17,9 @@ pack_target_rootfs() {
 
    #exf /busybox_static
    exf /LIRAM /CHROOT /BUILD /_SETUP_SCRIPTS /portage
-   exf '/*.sh' '/*.bash' '/*.sfs'
+   exf \
+      /_compare_etc.sh /pack.sh /stagemounts.sh \
+      /upgrade.sh /_symstorm_squashed.bash
 
    exd /proc /sys /dev /run
    exd /squashed-rootfs /etc /var
