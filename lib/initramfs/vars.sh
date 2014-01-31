@@ -47,7 +47,7 @@ initramfs_vars() {
 
    : ${PRINT_FUNCTRACE:=y}
 
-   : ${LOGFILE=/init.log}
+   : ${LOGFILE:=${INITRAMFS_LOGFILE-/init.log}}
 
    : ${MOUNTOPTS_APPEND=-n}
 
