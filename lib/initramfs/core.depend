@@ -11,6 +11,8 @@ initramfs/basemounts
 initramfs/disk
 initramfs/misc
 initramfs/mount
+initramfs/net_setup
+initramfs/nfsmount
 initramfs/run
 initramfs/vars
 

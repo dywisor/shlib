@@ -93,6 +93,16 @@
 #  Wrapper functions that call irun ( do_mount()/domount_fs()/do_umount() ).
 #
 
+## functions from initramfs/net_setup
+
+# @extern int initramfs_net_setup()
+
+
+## functions from initramfs/nfsmount
+
+# @extern void initramfs_mount_nfs, raises initramfs_die()
+# @extern int  initramfs_mount_nfs_nonfatal()
+
 
 ## functions from initramfs/run
 
