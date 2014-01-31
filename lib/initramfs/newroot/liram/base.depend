@@ -2,4 +2,5 @@ fs/mount/util
 
 initramfs/disk
 initramfs/mount
+initramfs/nfsmount
 initramfs/run

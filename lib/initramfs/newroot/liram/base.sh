@@ -45,15 +45,42 @@ liram_populate_die() {
    fi
 }
 
+# @private void liram__init_vars (
+#    **LIRAM_DISK!, **LIRAM_DISK_FSTYPE!, **LIRAM_NEED_NET_SETUP!
+# )
+#
+liram__init_vars() {
+   case "${LIRAM_DISK}" in
+      'nfs='*)
+         LIRAM_DISK_FSTYPE="nfs"
+         LIRAM_DISK="${LIRAM_DISK#nfs=}"
+         LIRAM_NEED_NET_SETUP=y
+      ;;
+      *)
+         : ${LIRAM_DISK_FSTYPE:=auto}
+         : ${LIRAM_NEED_NET_SETUP:=n}
+      ;;
+   esac
+}
+
 # void liram_mount_sysdisk ( **LIRAM_DISK, **LIRAM_DISK_FSTYPE=auto )
 #
 #  Mounts the liram sysdisk.
 #
 liram_mount_sysdisk() {
-   imount_disk \
-      "${LIRAM_DISK_MNT_DIR?}" "${LIRAM_DISK:?}" \
-      "ro" "${LIRAM_DISK_FSTYPE:-auto}" && \
-   LIRAM_DISK_MP="${LIRAM_DISK_MNT_DIR}" && F_INITRAMFS_DIE=liram_die
+   case "${LIRAM_DISK_FSTYPE:-auto}" in
+      'nfs')
+         initramfs_mount_nfs "${LIRAM_DISK_MNT_DIR?}" "${LIRAM_DISK}"
+      ;;
+      *)
+         imount_disk \
+            "${LIRAM_DISK_MNT_DIR?}" "${LIRAM_DISK:?}" \
+            "ro" "${LIRAM_DISK_FSTYPE:-auto}"
+      ;;
+   esac || return ${?}
+
+   LIRAM_DISK_MP="${LIRAM_DISK_MNT_DIR}"
+   F_INITRAMFS_DIE=liram_die
 }
 
 # void liram_unmount_sysdisk ( **LIRAM_DISK_MP )
@@ -202,6 +229,10 @@ liram_populate() {
 #  * unmount the liram sysdisk
 #
 liram_init() {
+   irun liram__init_vars
+   if [ "${LIRAM_NEED_NET_SETUP:-n}" = "y" ]; then
+      irun initramfs_net_setup up
+   fi
    irun liram_mount_rootfs
    irun liram_mount_sysdisk
    irun liram_populate
