@@ -39,7 +39,7 @@ initramfs_mount_disk_nonfatal() {
       if [ "${5:-y}" = "y" ]; then
          case "${4-}" in
             ext?)
-               do_fsck || return
+               do_fsck || dolog_warn +fsck "fsck returned ${?}"
             ;;
             # xfs, btrfs, ...?
          esac
