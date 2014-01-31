@@ -1,0 +1,8 @@
+net_setup/logging
+net_setup/interface
+net_setup/config
+
+# dependencies for ifup|ifdown __common, __eth
+#  do not add other backend dependencies here
+#  as some of them depend on _this_ module
+net_setup/backends/iproute2

@@ -1,0 +1,6 @@
+defsym
+logging
+
+fs/dodir_minimal
+
+net_setup/config
