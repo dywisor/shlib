@@ -63,12 +63,19 @@ initramfs_default_start() {
 #    **NEWROOT
 # )
 #
-#  Common initramfs end code, verifies that newroot's init exists, copies
-#  the logfile to newroot, stops the basemounts and executes switch_root
-#  afterwards.
+#  Common initramfs end code, brings down networking (if set up),
+#  verifies that newroot's init exists, copies the logfile to newroot,
+#  stops the basemounts and executes switch_root afterwards.
 #
 initramfs_default_end() {
    : ${CMDLINE_INIT:=/sbin/init}
+
+   if \
+      [ "${INITRAMFS_KEEP_NET:-n}" != "y" ] && \
+      [ "${INITRAMFS_HAVE_NET:-n}" = "y" ]
+   then
+      inonfatal initramfs_net_setup down
+   fi
 
    # double tap!
    #  CMDLINE_INIT will be checked twice when using initramfs_default_end()
