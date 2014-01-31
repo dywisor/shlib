@@ -89,7 +89,7 @@ newroot_tmpdir__handle_user_spec() {
       dolog_info +newroot_tmpdir "Creating tmpdir links ${*} -> ${tmpdir_user-}"
       while [ ${#} -gt 0 ]; do
          if [ -n "${1}" ]; then
-            symlink="${NEWROOT_TMPDIR}/${1}"
+            symlink="${NEWROOT_TMPDIR}/users/${1}"
             if [ -e "${symlink}" ] || [ -h "${symlink}" ]; then
                dolog_warn +newroot_tmpdir \
                   "newroot_tmpdir_users(): cannot create tmpdir alias ${1}->${tmpdir_user}: exists"
