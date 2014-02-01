@@ -125,16 +125,3 @@ net_setup() {
    rm -f -- "${NET_SETUP_CONFIG_ROOT:?}/globals/dns"
    net_ifup_all && net_setup_dns
 }
-
-
-
-
-
-#@section __main__
-
-# example for bridging all interfaces
-#net_setup /tmp/netconfig bridge.br0=use_all,ip=192.168.2.2,gw=192.168.2.1
-
-set -u
-net_setup /tmp/NF ${PAYLOAD-}
-net_ifdown_all
