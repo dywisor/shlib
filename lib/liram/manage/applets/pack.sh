@@ -69,7 +69,7 @@ liram_manage_link_core_images() {
 
    elif [ "${LIRAM_HARDLINK_CORE:-y}" = "y" ]; then
       liram_manage_autodie \
-         with_globbing_do liram_manage_link_core_images__really "$@"
+         with_globbing_do liram_manage_link_core_images__hardlink "$@"
 
    else
       liram_manage_die \
