@@ -7,6 +7,9 @@
 #
 : ${KEEP_VAR_PORTAGE:=n}
 
+# pack /sh?
+: ${PACK_SCRIPTS:=y}
+
 ##fi # !__pack_pretend__
 
 
@@ -60,6 +63,10 @@ pack_target_persistent() {
    ex_prefix_foreach /users/root .config .gconfd .bash_history .distcc
 }
 
+pack_target_scripts() {
+   next /sh name scripts as tarball
+}
+
 
 #@section module_init
 register_target rootfs
@@ -67,5 +74,6 @@ register_target system
 register_target etc
 register_target var
 register_target persistent
+[ "${PACK_SCRIPTS:-y}" != "y" ] || register_target scripts
 #kernel-modules, kernel from @extern
 declare_target var_pkg_db
