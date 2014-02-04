@@ -22,6 +22,9 @@
 # * As tmpfs using the 'kmod' tarball
 # * or as squashfs using the 'kmod' sfs file
 #
+# /sh (optional)
+# * As tmpfs using the 'scripts' tarball
+#
 # ----------------------------------------------------------------------------
 #
 
@@ -37,9 +40,8 @@ liram_populate_layout_squashed_ro_rootfs() {
       liram_info "${LIRAM_LAYOUT}"
       # restrict these variables to what was known
       # at the time writing this module
-      local \
-         TARBALL_SCAN_NAMES="rootfs var etc kmod"
-         SFS_SCAN_NAMES="squashed-rootfs kmod"
+      local TARBALL_SCAN_NAMES="rootfs var etc kmod scripts"
+      local SFS_SCAN_NAMES="squashed-rootfs kmod"
    else
       liram_info "squashed_ro_rootfs layout (inherited)"
    fi
@@ -74,6 +76,14 @@ liram_populate_layout_squashed_ro_rootfs() {
       liram_log_sfs_imported "kmod"
    else
       liram_log_nothing_found "kmod"
+   fi
+
+   # /scripts
+   if liram_get_tarball scripts; then
+      liram_log_tarball_unpacking "scripts"
+      irun liram_unpack_default scripts "${v0:?}"
+   else
+      liram_log_nothing_found "scripts"
    fi
 
    # mount squashfs files
