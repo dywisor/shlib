@@ -58,8 +58,7 @@ while [ ${#} -gt 0 ]; do
          # **LIRAM_MANAGE_X_UPDATE_KERNEL
          SCRIPT_MODE="kernup"
       ;;
-      '--update-core'|'-U') # |-u
-         # **LIRAM_MANAGE_X_UPDATE_CORE
+      '--update-core'|'-U')
          SCRIPT_MODE="update-core"
       ;;
       '--help'|'--usage'|'-h')
@@ -90,7 +89,10 @@ case "${SCRIPT_MODE}" in
       : ${PACK_TARGETS:="${DEFAULT_PACK_TARGETS}"}
       liram_manage_pack_main
    ;;
-   'update-core'|'kernup'|'fixup')
+   'update-core')
+      liram_manage_update_core_main
+   ;;
+   'kernup'|'fixup')
       die "script mode '${SCRIPT_MODE}' is not implemented."
    ;;
    *)
