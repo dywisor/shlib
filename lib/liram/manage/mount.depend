@@ -1,0 +1,20 @@
+autodie
+defsym
+die
+
+liram/manage/die
+liram/manage/logging
+liram/manage/util
+
+fs/dodir_minimal
+fs/disk
+fs/mount/domount
+fs/mount/remount
+fs/mount/info
+
+function/defined
+
+# namespace conflict with initramfs modules
+!initramfs/cmdline/parser/liram
+!initramfs/newroot/liram/base
+!initramfs/newroot/liram/core

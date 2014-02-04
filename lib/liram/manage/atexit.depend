@@ -1,0 +1,7 @@
+atexit
+
+liram/manage/die
+liram/manage/mount
+liram/manage/util
+liram/manage/lock
+liram/manage/logging

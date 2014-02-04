@@ -1,0 +1,14 @@
+autodie
+defsym
+die
+message
+
+liram/manage/atexit
+liram/manage/die
+liram/manage/lock
+liram/manage/logging
+liram/manage/mount
+liram/manage/util
+liram/manage/vars
+
+virtually_yours
