@@ -116,19 +116,31 @@ liram_manage_get_slot() {
    liram_manage_log_info "New slot is ${LIRAM_DEST_SLOT_NAME}"
 }
 
-liram_manage_have_pack_script() {
-   case "${LIRAM_MANAGE_PACK_SCRIPT-}" in
+liram_manage__have_script() {
+   case "${1}" in
       '')
          return 1
       ;;
       /*)
-         [ -x "${LIRAM_MANAGE_PACK_SCRIPT}" ] || return 2
+         [ -x "${1}" ] || return 2
       ;;
       *)
-         qwhich "${LIRAM_MANAGE_PACK_SCRIPT}" || return 3
+         qwhich "${1}" || return 3
       ;;
    esac
    return 0
+}
+
+liram_manage_have_pack_script() {
+   liram_manage__have_script "${LIRAM_MANAGE_PACK_SCRIPT-}"
+}
+
+liram_manage_have_update_core_script() {
+   liram_manage__have_script "${LIRAM_MANAGE_X_UPDATE_CORE-}"
+}
+
+liram_manage_have_update_kernel_script() {
+   liram_manage__have_script "${LIRAM_MANAGE_X_UPDATE_KERNEL-}"
 }
 
 # int liram_manage_call_pack_script (

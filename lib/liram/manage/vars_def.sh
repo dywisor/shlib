@@ -63,11 +63,28 @@
 #  application succeeded or not.
 #
 #
-# LIRAM_MANAGE_PACK_SCRIPT (mandatory)
+# LIRAM_MANAGE_PACK_SCRIPT (mandatory) [--pack]
 #
 #  name of or path to the actual pack script.
 #  Must be compatible with fs/packlib/packscript/main (argparse-wise).
 #
+# LIRAM_MANAGE_X_UPDATE_CORE (mandatory) [--update-core]
+#
+#  name of or path to a script that fetches the core images.
+#  Has to accept one arg, the core image dir (with trailing "/"),
+#  which may be edited in-place.
+#  It's the script's responsibility to back up / restore the core image dir
+#  if that is desired.
+#  Note that existing slots don't get re-linked,
+#  so hardlinked image files might still exist after --update-core.
+#
+#  (Usually a short script that executes "rsync <remote uri> ${1}" etc.)
+#
+# LIRAM_MANAGE_X_UPDATE_KERNEL (mandatory) [--kernup]
+#
+#  name of or path to a script that fetches and deploys kernel images.
+#  Has to accept one arg, the mountpoint of the boot disk.
+#  !!! This script gets full access to the boot disk, be careful.
 #
 #
 # LIRAM_BOOT_SLOT (optional, from LIRAM_ENV or user)
