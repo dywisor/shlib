@@ -123,6 +123,9 @@ liram_manage_pack_main() {
    # update the boot slot
    liram_manage_update_boot_slot "${LIRAM_DEST_SLOT_NAME}" || return
 
+   # unmount the sysdisk
+   liram_manage_unmount_sysdisk || return
+
    # release the pack lock
    liram_manage_unlock_pack || return
 
