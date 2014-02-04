@@ -163,7 +163,7 @@ liram_manage_get_sysdisk() {
 liram_manage_mount_sysdisk() {
    local v0
    [ -n "${LIRAM_DISK_DEV-}" ] || liram_manage_get_sysdisk || return
-   liram_manage_log_info "Mounting liram sysdisk"
+   liram_manage_log_info "Mounting liram sysdisk at ${LIRAM_DISK_MP}"
    liram_manage__mount_disk_writable \
       "${LIRAM_DISK_MOUNT_RESTORE-}" \
       "${LIRAM_DISK_DEV:?}" "${LIRAM_DISK_MP:?}" \
@@ -210,7 +210,7 @@ liram_manage_get_boot() {
 liram_manage_mount_boot() {
    local v0
    [ -n "${LIRAM_BOOTDISK_DEV-}" ] || liram_manage_get_boot || return
-   liram_manage_log_info "Mounting liram boot disk"
+   liram_manage_log_info "Mounting liram boot disk at ${LIRAM_BOOTDISK_MP}"
    liram_manage__mount_disk_writable \
       "${LIRAM_BOOTDISK_MOUNT_RESTORE-}" \
       "${LIRAM_BOOTDISK_DEV:?}" "${LIRAM_BOOTDISK_MP:?}" \
