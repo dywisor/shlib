@@ -1,6 +1,6 @@
 #@section functions
 
-# int get_disk ( disk_identifier )
+# int get_disk ( disk_identifier, **DISK_DEV! )
 #
 #  Tries to resolve the device that is identified by %disk_identifier
 #  and stores its filesystem path (/dev/...) in %DISK_DEV and returns 0
@@ -36,9 +36,6 @@ get_disk() {
    fi
 }
 
-
-#@section functions
-
 # int __waitfor_disk_action ( disk_identifier, **F_WAITFOR_DISK_DEV_SCAN= )
 #
 #  Helper function that is periodically called during waitfor_disk().
@@ -51,9 +48,6 @@ __waitfor_disk_action() {
    fi
    get_disk "${1}"
 }
-
-
-#@section functions
 
 # int waitfor_disk (
 #    disk_identifier,
