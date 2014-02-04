@@ -183,6 +183,11 @@ liram_manage_umount_sysdisk() {
    LIRAM_DISK_MOUNT_RESTORE=
 }
 
+# @function_alias liram_manage_unmount_sysdisk()
+#  renames liram_manage_umount_sysdisk()
+#
+liram_manage_unmount_sysdisk() { liram_manage_umount_sysdisk "$@"; }
+
 
 # void liram_manage_check_boot_vars()
 #
@@ -223,3 +228,8 @@ liram_manage_umount_boot() {
       "${LIRAM_BOOTDISK_MOUNT_RESTORE-}" "${LIRAM_BOOTDISK_MP:?}" && \
    LIRAM_BOOTDISK_MOUNT_RESTORE=
 }
+
+# @function_alias liram_manage_unmount_boot()
+#  renames liram_mange_umount_boot()
+#
+liram_manage_unmount_boot() { liram_manage_umount_boot "$@"; }

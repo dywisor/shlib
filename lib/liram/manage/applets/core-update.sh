@@ -33,7 +33,7 @@ liram_manage_update_core_main() {
       "${LIRAM_CORE_IMAGE_DIR%/}/" || return
 
    # unmount the sysdisk
-   liram_manage_unmount_sysdisk || return
+   liram_manage_umount_sysdisk || return
 
    # release the pack lock
    liram_manage_unlock_pack || return
