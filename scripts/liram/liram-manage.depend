@@ -6,6 +6,7 @@ scriptinfo
 function/defined
 
 liram/manage/atexit
+liram/manage/mount
 liram/manage/vars
 liram/manage/vars_def
 liram/manage/applets/pack
