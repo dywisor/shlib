@@ -1,3 +1,4 @@
+#@HEADER
 # buildenv add-on that provides patch() functions
 # (This module automatically pulls in devel/buildenv/core)
 #
@@ -12,6 +13,8 @@
 # int buildenv_patch_src()          -- [patch_opts], *patch_file
 # int buildenv_patch_work()         -- [patch_opts], *patch_file
 #
+
+#@section functions
 
 # int buildenv_patch_src (
 #    *patch_file, **BUILDENV_PATCH_DRY_RUN="default"

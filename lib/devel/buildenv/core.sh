@@ -1,3 +1,4 @@
+#@HEADER
 # buildenv -- run commands in a build environment,
 # which is basically a restricted view of the current environment,
 # but also includes actions like cd-ing into the build directory before
@@ -19,6 +20,8 @@
 #  and call buildenv_make() or buildenv_run() afterwards.
 #
 #
+
+#@section functions
 
 # int buildenv_run ( *cmdv, **BUILDENV_WORKDIR, **BUILDENV_UNSET_VARS )
 #
