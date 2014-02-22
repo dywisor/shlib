@@ -57,6 +57,15 @@ __double_tap__() {
    "$@"
 }
 
+# void get_official_kernel_releases ( major_version=3 )
+#
+get_official_kernel_releases() {
+   git ls-remote --tags \
+      git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git | \
+   sed -nr -e "s,^.*\s+refs/tags/v(${1:-3}(\.[0-9]+)+(\-rc[0-9]+)?)\$,\1,p" | \
+   sort -n
+}
+
 # void need_stdin, raises __panic__()
 #
 #  Raises __panic__ if no input terminal connected.
@@ -282,8 +291,8 @@ kcomp_get_source() {
       autodie cp -aTL -- "${1}" "${2}"
    else
       case "${1}" in
-         git://*)
-            autodie git clone --depth 1 "${1}" "${2}"
+         git=*|git://*)
+            autodie git clone --depth 1 "${1#git=}" "${2}"
          ;;
          *)
             die "cannot locate source '${1}'"
@@ -303,6 +312,7 @@ kcomp_make_extra_modules() {
 
    local D="${KERNEL_DESTDIR}/"
    local MODULE_DIR="${D}/lib/modules/${KERNEL_RELEASE}"
+   local e_mod
 
    if use acpi_call; then
       einfo_build_modules "acpi_call"
@@ -354,6 +364,10 @@ kcomp_make_extra_modules() {
       NEED_DEPMOD=y
    fi
 
+   for e_mod in ${USER_EXTRA_MODULES}; do
+      autodie kcomo_make_extra_module_${e_mod}
+   done
+
    if [ "${NEED_DEPMOD:-n}" = "y" ]; then
       einfo_action "Running depmod"
       autodie kcomp_run_depmod
@@ -368,6 +382,7 @@ kcomp_make_extra_modules() {
 kcomp_apply_patchsets() {
    einfo_action "Preparing the kernel"
    local HAVE_MODULES_BUILT=n
+   local pset
 
    varcheck ADDON_DIR KSRC KBUILD KERNEL_TMPDIR
    autodie dodir_clean "${ADDON_DIR}"
@@ -378,10 +393,15 @@ kcomp_apply_patchsets() {
    # kcomp_configure (possibly) destroys the user's config, thus
    # kcomp_reinit() will run at the end of this function
    autodie kcomp_configure
-   autodie kcomp_make modules_prepare
+   if kcomp_kernel_with_modules; then
+      autodie kcomp_make modules_prepare
+   fi
 
-   use_call tp_smapi autodie kcomp_patchset_tp_smapi
-   use_call zfs      autodie kcomp_patchset_zfs
+   for pset in tp_smapi zfs ${USER_PATCHSETS-}; do
+      if use ${pset}; then
+         autodie kcomp_patchset_${pset}
+      fi
+   done
 
    # restore config
    autodie kcomp_reinit "${KERNEL_DEFAULT_CONFIG}"
@@ -437,7 +457,7 @@ kcomp_patchset_zfs() {
    autodie rm -r "${SPL_BUILD}" "${ZFS_BUILD}"
    autodie kcomp_make_clean
 
-   einfo "Kernel supports ZFS now ;) ZFS needs userloand support, too!"
+   einfo "Kernel supports ZFS now ;) ZFS needs userland support, too!"
    einfo "Don't forget to enable CONFIG_SPL and CONFIG_ZFS"
 
    ewarn 'BIG FAT WARNING' '!!!'
@@ -576,6 +596,7 @@ setup_debug() {
 #                 once per run
 #
 kcomp_main() {
+   local v0
    setup_debug
 
    if [ "${KCOMP_KEEP_LANG:-n}" != "y" ]; then
@@ -596,15 +617,44 @@ kcomp_main() {
       kcomp_main_set_target "default"
    fi
 
-   readonly TARGET
-   readonly CHECK_UPDATE
+   TARGET_FILENAME="${TARGET##*/}"
+   TARGET_NAME="${TARGET_FILENAME%.conf}"
+   case "${TARGET_NAME}" in
+      *-*-rc*)
+         TARGET_VERSION="${TARGET_NAME#*-}"
+      ;;
+      *-rc*)
+         TARGET_VERSION="${TARGET_NAME}"
+      ;;
+      *-*)
+         TARGET_VERSION="${TARGET_NAME#*-}"
+      ;;
+      *)
+         TARGET_VERSION="${TARGET_NAME}"
+      ;;
+   esac
+
+   if [ -n "${KCOMP_DISTDIR-}" ]; then
+      DISTDIR="${KCOMP_DISTDIR}"
+   else
+      DISTDIR="$(portageq envvar DISTDIR 2>/dev/null)" || true
+      : ${DISTDIR:=/var/cache/kcomp/distfiles}
+   fi
+
+   readonly TARGET TARGET_FILENAME TARGET_NAME TARGET_VERSION
+   readonly CHECK_UPDATE DISTDIR
 
    einfo_action "Running pre-build checks and setup"
+
+   F_PRINTVAR=einfo printvar \
+      TARGET TARGET_NAME TARGET_VERSION CHECK_UPDATE DISTDIR
 
    [ -z "${CHECK_UPDATE}" ] || __panic__
 
    # read config
+   unset -v KERNEL_SRC_VERSION
    . "${TARGET}" -- || die "failed to read config file '${TARGET}'"
+   : ${KERNEL_SRC_VERSION=${TARGET_VERSION}}
    setup_debug
 
    breakpoint setup
@@ -646,8 +696,36 @@ kcomp_main() {
       ;;
       'tar'|'tarball')
          KERNEL_SRC_TYPE=tarball
-         [ -f "${KERNEL_SRC}" ] || \
-            die "kernel source tarball '${KERNEL_SRC}' does not exist."
+
+         if [ -f "${KERNEL_SRC}" ]; then
+            true
+         elif [ -e "${KERNEL_SRC}" ] || [ -h "${KERNEL_SRC}" ]; then
+            # kcomp_init_tarball() would fail for this case,
+            #  but catch it early here
+            die "kernel source ${KERNEL_SRC} is not a tarball."
+
+         elif [ -n "${KERNEL_SRC_URI-}" ]; then
+            true
+
+         elif [ -n "${KERNEL_SRC_VERSION-}" ]; then
+            case "${KERNEL_SRC_VERSION}" in
+               3.*)
+                  KERNEL_SRC_URI="\
+https://www.kernel.org/pub/linux/kernel/v3.x/linux-${KERNEL_SRC_VERSION}.tar.xz"
+               ;;
+               2.6.34.*|2.6.32.*)
+                  KERNEL_SRC_URI="\
+https://www.kernel.org/pub/linux/kernel/v2.6/longterm/\
+v${KERNEL_SRC_VERSION%.*}/linux-${KERNEL_SRC_VERSION}.tar.xz"
+               ;;
+               *)
+                  die "cannot autodetect \$KERNEL_SRC_URI for verion ${KERNEL_SRC_VERSION}."
+               ;;
+            esac
+
+         else
+            die "kernel source tarball \${KERNEL_SRC} does not exist and cannot be fetched."
+         fi
       ;;
       *)
          die "unknown kernel source type '${KERNEL_SRC_TYPE}'!"
@@ -663,15 +741,18 @@ kcomp_main() {
 
    : ${KERNEL_BUILD:="${KERNEL_WORKDIR}/build"}
    : ${KERNEL_DESTDIR:="${KERNEL_WORKDIR}/image"}
+   : ${KERNEL_SRC_URI=}
+   : ${KERNEL_GEN_MAKEFILE:=n}
    KERNEL_TMPDIR="${KERNEL_WORKDIR}/tmp"
    ADDON_DIR="${KERNEL_WORKDIR}/addon"
    autodie dodir_clean "${KERNEL_BUILD}" "${KERNEL_DESTDIR}" "${KERNEL_TMPDIR}"
 
    readonly KERNEL_SRC KERNEL_SRC_TYPE KERNEL_WORKDIR KERNEL_BUILD
    readonly KERNEL_DESTDIR KERNEL_TMPDIR KERNEL_DESTFILE ADDON_DIR
+   readonly KERNEL_SRC_URI KERNEL_SRC_VERSION KERNEL_GEN_MAKEFILE
+
    : ${KERNEL_OVERWRITE_CONFIG:=n}
    : ${KERNEL_DEFAULT_CONFIG=/proc/config.gz}
-
    : ${CONFIG_TARGET:=nconfig}
 
    # --- have config now ---
@@ -682,7 +763,7 @@ kcomp_main() {
    breakpoint kernel_setup
 
    F_PRINTVAR=einfo printvar \
-      KERNEL_SRC KERNEL_SRC_TYPE \
+      KERNEL_SRC KERNEL_SRC_TYPE KERNEL_SRC_URI KERNEL_SRC_VERSION \
       KERNEL_WORKDIR KERNEL_BUILD KERNEL_DESTDIR KERNEL_DESTFILE \
       KERNEL_DEFAULT_CONFIG KERNEL_OVERWRITE_CONFIG
 
@@ -697,8 +778,21 @@ kcomp_main() {
 
    # init:
    case "${KERNEL_SRC_TYPE}" in
-      'default'|'tarball')
+      'default')
          autodie kcomp_init_${KERNEL_SRC_TYPE} \
+            "${KERNEL_SRC}" "${KERNEL_BUILD}" \
+            "${KERNEL_DEFAULT_CONFIG}" "${KERNEL_OVERWRITE_CONFIG}"
+      ;;
+      'tarball')
+         if [ ! -f "${KERNEL_SRC}" ]; then
+            einfo_action "Fetching ${KERNEL_SRC}"
+            varcheck KERNEL_SRC_URI
+            autodie dodir_clean "$(dirname "${KERNEL_SRC}")"
+            autodie wget -O "${KERNEL_SRC}.kcomp_tmp" "${KERNEL_SRC_URI}"
+            autodie mv -vfT -- "${KERNEL_SRC}.kcomp_tmp" "${KERNEL_SRC}"
+         fi
+
+         autodie kcomp_init_tarball \
             "${KERNEL_SRC}" "${KERNEL_BUILD}" \
             "${KERNEL_DEFAULT_CONFIG}" "${KERNEL_OVERWRITE_CONFIG}"
       ;;
@@ -770,7 +864,7 @@ kcomp_main() {
       autodie kcomp_build
    fi
 
-   # install:
+   # install to temporary location:
    breakpoint kernel_install
    einfo_action "Installing into ${KERNEL_DESTDIR}"
    autodie kcomp_install "${KERNEL_DESTDIR}"
@@ -778,6 +872,14 @@ kcomp_main() {
    # compile/install extra modules
    breakpoint kernel_addons
    autodie kcomp_make_extra_modules
+
+   # generate makefile
+   if yesno "${KERNEL_GEN_MAKEFILE}"; then
+      einfo_action "Generating install Makefile"
+      breakpoint kernel_gen_makefile
+      kcomp_gen_install_makefile > "${KERNEL_DESTDIR}/Makefile" || \
+         die "failed to generate install Makefile (${?})" ${?}
+   fi
 
    # pack:
    breakpoint kernel_pack

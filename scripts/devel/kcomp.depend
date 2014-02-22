@@ -11,6 +11,7 @@ fs/tmpdir
 function/defined
 
 interact/get_yn
+strutil/yesno
 
 misc/pragma
 misc/qwhich
