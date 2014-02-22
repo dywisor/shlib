@@ -1,3 +1,4 @@
+#@HEADER
 # HIGHLY EXPERIMENTAL
 # - standard (non-cross) kernel compilation seems to work ok so far
 # -- tested with kcomp_init_default()
@@ -53,6 +54,8 @@
 #
 # ----------------------------------------------------------------------------
 
+#@section functions
+
 # @extern void buildenv_prepare()   -- workdir, srcdir
 # @extern int buildenv_make()       -- *argv
 # @extern int buildenv_run()        -- *cmdv
@@ -60,6 +63,17 @@
 # @extern int buildenv_patch_work() -- [patch_opts], *patch_file
 # @extern int buildenv_prepare_do() -- workdir, srcdir, cmd, *argv
 # @extern int buildenv_printrun()   -- *cmdv
+
+#@private @stdout void kcomp__prefix_words ( prefix, *words )
+#
+kcomp__prefix_words() {
+   [ ${#} -gt 1 ] || return 1
+   local prefix="${1?}"; shift
+
+   echo -n "${prefix}${1}"
+   while [ ${#} -gt 1 ] && shift; do echo -n " ${prefix}${1}"; done
+   echo
+}
 
 # int kcomp_prepare_build_dir (
 #   kernel_build_dir=<kernel_src_dir>,
@@ -578,6 +592,89 @@ kcomp__do_install() {
    done
 }
 
+# @stdout int kcomp_gen_install_makefile()
+#
+kcomp_gen_install_makefile() {
+   kcomp_get_version 1>&2
+   local KREL="${KERNEL_RELEASE%+}"
+
+   local t="$(printf "\t")"
+   local ktargets="kernel"
+   local install_targets uninstall_targets
+
+   local have_mod
+   if kcomp_kernel_with_modules 1>&2; then
+      have_mod=y
+      ktargets="${ktargets} modules"
+   else
+      have_mod=n
+   fi
+
+   install_targets="$(kcomp__prefix_words install- ${ktargets})"
+   uninstall_targets="$(kcomp__prefix_words uninstall- ${ktargets})"
+
+   printf "%s" "\
+# *** generated Makefile ***
+DESTDIR     :=
+BOOTDIR     := \$(DESTDIR)/boot
+MODULES_DIR := \$(DESTDIR)/lib/modules
+KERNEL_NAME := ${KERNEL_BASENAME}
+# needs to be set to "" when using busybox
+CP_OPT_NO_OWNERSHIP := --no-preserve=ownership
+
+default:
+
+.PHONY: default install uninstall \\
+${t}kernelversion kernelrelease version \\
+${t}${install_targets} \\
+${t}${uninstall_targets}
+
+
+install: ${install_targets}
+
+uninstall: ${uninstall_targets}
+
+
+kernelversion:
+${t}@echo ${KERNEL_VERSION}
+
+kernelrelease:
+${t}@echo ${KERNEL_RELEASE}
+
+version:
+${t}@echo ${KVER}
+
+install-kernel:
+${t}install -m 0755 -d \$(BOOTDIR)
+${t}install -m 0644 \$(CURDIR)/boot/${KERNEL_BASENAME}-${KREL} \\
+${t}${t}\$(BOOTDIR)/\$(KERNEL_NAME)-${KERNEL_RELEASE}
+${t}install -m 0644 \$(CURDIR)/boot/config-${KREL} \\
+${t}${t}\$(BOOTDIR)/config-${KERNEL_RELEASE}
+
+uninstall-kernel:
+${t}-rm \$(BOOTDIR)/\$(KERNEL_NAME)-${KERNEL_RELEASE}
+${t}-rm \$(BOOTDIR)/config-${KERNEL_RELEASE}
+"
+
+   # [un]install-modules targets
+   if [ "${have_mod}" = "y" ]; then
+      printf "%s" "\
+
+install-modules:
+${t}install -m 0755 \$(MODULES_DIR)
+${t}cp -aH \$(CP_OPT_NO_OWNERSHIP) \\
+${t}${t}\$(CURDIR)/lib/modules/${KERNEL_RELEASE}/ \\
+${t}${t}\$(MODULES_DIR)/${KERNEL_RELEASE}/
+${t}rm -f \$(MODULES_DIR)/${KERNEL_RELEASE}/build
+${t}rm -f \$(MODULES_DIR)/${KERNEL_RELEASE}/source
+
+
+uninstall-modules:
+${t}-rm -r \$(MODULES_DIR)/${KERNEL_RELEASE}
+"
+   fi
+}
+
 # int kcomp__prepare_do ( *cmdv )
 #
 #  Runs cmdv in kcomp's build environment.
@@ -618,7 +715,7 @@ kcomp__make_quiet() {
 #  Checks whether the configured kernel uses modules or not.
 #
 kcomp__kernel_with_modules() {
-   ewarn "kcomo__kernel_with_modules()" "DEPRECATED"
+   ewarn "kcomp__kernel_with_modules()" "DEPRECATED"
    kcomp_config_has MODULES
 }
 
