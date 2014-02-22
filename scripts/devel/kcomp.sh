@@ -66,6 +66,18 @@ get_official_kernel_releases() {
    sort -n
 }
 
+# void http_fetch_file ( local_destfile, remote_uri )
+#
+http_fetch_file() {
+   case "${1}" in
+      */*) autodie dodir_clean "${1%/*}" ;;
+   esac
+   rm -vf -- "${1}.kcomp_tmp"
+   autodie wget -O "${1}.kcomp_tmp" "${2}"
+   autodie mv -vfT -- "${1}.kcomp_tmp" "${1}"
+}
+
+
 # void need_stdin, raises __panic__()
 #
 #  Raises __panic__ if no input terminal connected.
@@ -787,9 +799,7 @@ v${KERNEL_SRC_VERSION%.*}/linux-${KERNEL_SRC_VERSION}.tar.xz"
          if [ ! -f "${KERNEL_SRC}" ]; then
             einfo_action "Fetching ${KERNEL_SRC}"
             varcheck KERNEL_SRC_URI
-            autodie dodir_clean "$(dirname "${KERNEL_SRC}")"
-            autodie wget -O "${KERNEL_SRC}.kcomp_tmp" "${KERNEL_SRC_URI}"
-            autodie mv -vfT -- "${KERNEL_SRC}.kcomp_tmp" "${KERNEL_SRC}"
+            http_fetch_file "${KERNEL_SRC}" "${KERNEL_SRC_URI}"
          fi
 
          autodie kcomp_init_tarball \
