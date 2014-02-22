@@ -5,6 +5,7 @@ fs/mount/all
 
 fs/atomic_file
 fs/atomic_counter
+fs/chdir
 fs/chmod
 fs/defsym
 fs/dir_empty
