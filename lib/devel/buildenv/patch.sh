@@ -58,7 +58,8 @@ buildenv_patch_work() {
 #
 #  * "stepwise", "check-during":
 #
-#    for each path: try whether a patch and apply it, else return non-zero
+#    for each path: try whether a patch can be applied and immediately apply
+#                   it, else return non-zero
 #
 #  * "n", "no", "never":
 #
@@ -74,7 +75,7 @@ buildenv_patch_work() {
 #
 #  * "auto", also: "default"
 #
-#    Use "ony" if "check-before" return success, else try "check-during".
+#    Use "no" if "only" succeeds, else try "check-during".
 #
 #    This costs more time than any of the above methods, but tries to apply
 #    patches as safe as possible.
