@@ -24,5 +24,5 @@ eval_scriptinfo() {
    SCRIPT_NAME="${SCRIPT_FILENAME%.*}"
 }
 
-# @section module_init
+# @section module_init_vars
 eval_scriptinfo
