@@ -5,3 +5,4 @@ initramfs/newroot/liram/core
 initramfs/newroot/liram/layout/default
 initramfs/newroot/liram/layout/tv
 initramfs/newroot/liram/layout/squashed_ro_rootfs
+initramfs/newroot/liram/layout/stage3
