@@ -4,6 +4,8 @@ fs/mount/fstab_iter
 itertools
 
 initramfs/run
+initramfs/mount
 initramfs/newroot/base
+initramfs/newroot/chroot
 initramfs/newroot/premount
 initramfs/newroot/tmpdir

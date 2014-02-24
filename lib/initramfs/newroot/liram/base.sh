@@ -203,6 +203,10 @@ liram_populate_helper() {
 #
 liram_populate() {
    : ${LIRAM_LAYOUT:=default}
+   if [ -c /dev/kmsg ]; then
+      echo "liram: layout=${LIRAM_LAYOUT}" > /dev/kmsg
+   fi
+
    local LIRAM_POPULATE_FUNCTION=liram_populate_layout_${LIRAM_LAYOUT}
 
    # initialize variables
@@ -230,6 +234,10 @@ liram_populate() {
 #
 liram_init() {
    irun liram__init_vars
+   if [ -c /dev/kmsg ]; then
+      echo "liram: initializing real root as tmpfs" > /dev/kmsg
+   fi
+
    if [ "${LIRAM_NEED_NET_SETUP:-n}" = "y" ]; then
       irun initramfs_net_setup up
    fi

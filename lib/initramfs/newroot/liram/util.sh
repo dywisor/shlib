@@ -1,3 +1,8 @@
+#@section NULL
+#TODO/FIXME:
+# * liram_get_tarball() should log (or liram_get_tarball_verbose())
+# * duplicate/missing tarball unpacking/unpacked log messages
+
 #@section functions_export
 
 ## functions from initramfs/newroot/liram/logging
@@ -85,8 +90,10 @@ liram_scan_files() {
 #
 liram_unpack_name() {
    local v0
-   inonfatal liram_get_tarball "${1:?}" && \
-      inonfatal newroot_unpack_tarball "${v0:?}" "${2-}"
+   inonfatal liram_get_tarball "${1:?}" || return
+   liram_log_tarball_unpacking "${1}"
+   inonfatal newroot_unpack_tarball "${v0:?}" "${2-}" || return
+   liram_log_tarball_unpacked "${1}"
 }
 
 # int liram_unpack_replace_name ( name, dest="", backup="", delete_backup="" )
@@ -147,9 +154,7 @@ liram_unpack_default() {
    if [ -n "${2-}" ]; then
       inonfatal newroot_unpack_tarball "${2}" "${dest}"
    else
-      local v0
-      inonfatal liram_get_tarball "${1:?}" && \
-      inonfatal newroot_unpack_tarball "${v0:?}" "${dest}"
+      inonfatal liram_unpack_name "${1:?}" "${dest}"
    fi
 }
 
@@ -217,13 +222,16 @@ liram_unpack_optional() {
    if [ -n "${2-}" ]; then
       v0="${2}"
    elif ! inonfatal liram_get_tarball "${1:?}"; then
+      liram_log_nothing_found "${1}"
       return 0
    fi
 
    if [ "x${3-B}" != "x${3-A}" ]; then
       irun liram_unpack_default "${1:?}" "${v0:?}"
    else
-      irun newroot_unpack_tarball "${v0:?}" "${3}"
+      liram_log_tarball_unpacking "${1:-${v0-}}"
+      irun newroot_unpack_tarball "${v0:?}" "${3}" || return
+      liram_log_tarball_unpacked "${1:-${v0-}}"
    fi
 }
 
@@ -249,4 +257,5 @@ liram_unpack_etc() {
    else
       irun newroot_replace_etc "${v0}"
    fi
+   liram_log_tarball_unpacked "etc"
 }

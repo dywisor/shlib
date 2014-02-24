@@ -3,8 +3,11 @@
 # @extern int  newroot_setup_dirs        ( *file=<default> )
 # @extern int  newroot_setup_mountpoints ( fstab_file=<default> )
 # @extern int  newroot_setup_premount    ( file=<default>, **CMDLINE_FSCK )
-# @extern int newroot_setup_tmpdir       ( file=<default> )
+# @extern int  newroot_setup_tmpdir      ( file=<default> )
 # @extern void newroot_setup_all()
+# @extern void newroot_setup_initramfs_run_hook ( name )
+# @extern void newroot_setup_chroot_run_hook    ( name )
+# @extern void newroot_setup_run_hook           ( name )
 
 #@section module_init
 : ${NEWROOT_CONFIG_DIR?}

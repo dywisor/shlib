@@ -1,0 +1,5 @@
+initramfs/newroot/base
+initramfs/mount
+initramfs/run
+
+fs/basemounts/defsym

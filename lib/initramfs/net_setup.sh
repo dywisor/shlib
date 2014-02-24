@@ -14,7 +14,7 @@ initramfs_net_setup() {
             dolog_warn "networking is already configured."
             return 0
          else
-            conf="${CMDLINE_NET_CONFIG:-${INITRAMFS_NET_CONFIG}}"
+            conf="${CMDLINE_NET_CONFIG:-${INITRAMFS_NET_CONFIG-}}"
             if [ -n "${conf}" ] && [ "${conf}" != "null" ]; then
                net_setup /tmp/initramfs_netconfig.$$ "${conf}" && \
                   INITRAMFS_HAVE_NET=y

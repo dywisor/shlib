@@ -126,6 +126,41 @@ newroot_setup_tmpdir() {
    return ${failcount}
 }
 
+# void newroot_setup_initramfs_run_hook (
+#    name, **NEWROOT, **NEWROOT_CONFIG_DIR
+# )
+#
+newroot_setup_initramfs_run_hook() {
+   dolog_debug_function_call "newroot_setup_initramfs_run_hook" "$@"
+   local hook="${NEWROOT}/${NEWROOT_CONFIG_DIR}/scripts/${1}"
+   [ -x "${hook}" ] || return 0
+   dolog_info "exec hook ${hook}"
+   irun "${hook}" "${NEWROOT}"
+}
+
+# void newroot_setup_chroot_run_hook (
+#    name, **NEWROOT, **NEWROOT_CONFIG_DIR
+# )
+#
+newroot_setup_chroot_run_hook() {
+   dolog_debug_function_call "newroot_setup_chroot_run_hook" "$@"
+   local hook="/${NEWROOT_CONFIG_DIR#/}/scripts/${1}.chroot"
+   [ -x "${NEWROOT}${hook}" ] || return 0
+   dolog_info "chroot-exec hook ${hook} in ${NEWROOT}"
+   newroot_chroot "${hook}" "/" || die "failed to execute hook ${1} in chroot"
+}
+
+# void newroot_setup_run_hook ( name, ... )
+#
+#  Runs newroot_setup_initramfs_run_hook(name,...) followed by
+#  newroot_setup_chroot_run_hook(name,...).
+#
+newroot_setup_run_hook() {
+   dolog_debug_function_call "newroot_setup_run_hook" "$@"
+   newroot_setup_initramfs_run_hook "$@"
+   newroot_setup_chroot_run_hook "$@"
+}
+
 # void newroot_setup_all(), raises die()
 #
 #  Calls all/most of the newroot_setup functions (without args,
