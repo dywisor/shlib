@@ -4,9 +4,11 @@
 #
 # FIXME: split patchsets / external modules creation from this script
 
-# vars
+#@section const
 
 readonly CONFDIR=/etc/shlib/kcomp
+
+#@section module_init_vars
 
 HELP_DESCRIPTION="linux kernel compilation"
 
@@ -20,8 +22,8 @@ HELP_OPTIONS="
 --nconfig           -- set CONFIG_TARGET to nconfig
 --oldconfig         -- set CONFIG_TARGET to oldconfig
 --makepatch    (-m) -- start a shell for creating patches after cleaning up
---dist <file>       -- instead of compiling: package source tarball [TODO]
-                        Note that this doesn't make any sense unless KERNEL_SRC_TYPE=tarball
+--dist <file>       -- instead of compiling: package source tarball
+                        Note that this requires KERNEL_SRC_TYPE=tarball
 
 --with-<patch-set>  -- enable a specific patch set,
  * aufs         -- TODO
@@ -32,18 +34,19 @@ HELP_OPTIONS="
 --with-<extra-modules> -- enable compilation of special modules,
  * acpi-call,
  * acpi_call    -- acpi_call (required by tpacpi-bat, for example)
- * vbox,
  * virtualbox   -- virtualbox modules
 
  --with-all     -- enable all patch sets and extra modules
 
 --without-* can be used to remove features at runtime.
 
-Note: unknown --with-* options will be ignored.
+Note: unknown --with-* options are ignored.
 "
 
 HELP_USAGE="Usage: ${SCRIPT_FILENAME} <target> [<tarball>]"
 
+
+#@section functions
 
 # void __panic__, raises die()
 #
@@ -76,7 +79,6 @@ http_fetch_file() {
    autodie wget -O "${1}.kcomp_tmp" "${2}"
    autodie mv -vfT -- "${1}.kcomp_tmp" "${1}"
 }
-
 
 # void need_stdin, raises __panic__()
 #
@@ -252,7 +254,7 @@ kcomp_main_run_makepatch_shell() {
          einfo
       fi
 
-      bash
+      exec bash
    ) || rc=${?}
    if [ ${rc} -eq 0 ]; then
       return 0
@@ -376,7 +378,7 @@ kcomp_make_extra_modules() {
       NEED_DEPMOD=y
    fi
 
-   for e_mod in ${USER_EXTRA_MODULES}; do
+   for e_mod in ${USER_EXTRA_MODULES-}; do
       autodie kcomo_make_extra_module_${e_mod}
    done
 
@@ -560,10 +562,10 @@ argparse_longopt() {
       'oldconfig')
          CMDLINE_CONFIG_TARGET=oldconfig
       ;;
-#      'dist')
-#         argparse_need_arg
-#         CMDLINE_KERNEL_DISTFILE="${1}"
-#      ;;
+      'dist')
+         argparse_need_arg "$@"
+         CMDLINE_KERNEL_DISTFILE="${1}"
+      ;;
       'with-'*)
          CMDLINE_USE="${CMDLINE_USE-} ${longopt#with-}"
       ;;
@@ -619,6 +621,7 @@ kcomp_main() {
 
    local TARGET= CHECK_UPDATE=
 
+   unset -v CMDLINE_KERNEL_DISTFILE
    if [ -n "$*" ]; then
       argparse_autodetect
       argparse_parse "$@"
@@ -669,6 +672,12 @@ kcomp_main() {
    : ${KERNEL_SRC_VERSION=${TARGET_VERSION}}
    setup_debug
 
+   if [ -n "${CMDLINE_KERNEL_DISTFILE-}" ]; then
+      KERNEL_SRC_DISTFILE="${CMDLINE_KERNEL_DISTFILE-}"
+   else
+      : ${KERNEL_SRC_DISTFILE=}
+   fi
+
    breakpoint setup
 
    ##__verbose__ || BUILDENV_PATCH_OPTS="${BUILDENV_PATCH_OPTS-}${BUILDENV_PATCH_OPTS:+ }--quiet"
@@ -680,16 +689,19 @@ kcomp_main() {
       die "vbox USE flag does no longer exist."
    fi
 
-   varcheck KERNEL_SRC KERNEL_SRC_TYPE KERNEL_DESTFILE
+   varcheck KERNEL_SRC KERNEL_SRC_TYPE
 
-   if [ -e "${KERNEL_DESTFILE}" ]; then
-      if [ ! -f "${KERNEL_DESTFILE}" ]; then
-         die "kernel destfile '${KERNEL_DESTFILE}' exists, but is not a file."
-      else
-         this_needs_force \
-            "kernel destfile '${KERNEL_DESTFILE} exists" \
-            " and will be overwritten later on (--force)" \
-            ", use --force."
+   if [ -z "${KERNEL_SRC_DISTFILE}" ]; then
+      varcheck KERNEL_DESTFILE
+      if [ -e "${KERNEL_DESTFILE}" ]; then
+         if [ ! -f "${KERNEL_DESTFILE}" ]; then
+            die "kernel destfile '${KERNEL_DESTFILE}' exists, but is not a file."
+         else
+            this_needs_force \
+               "kernel destfile '${KERNEL_DESTFILE} exists" \
+               " and will be overwritten later on (--force)" \
+               ", use --force."
+         fi
       fi
    fi
 
@@ -731,7 +743,7 @@ https://www.kernel.org/pub/linux/kernel/v2.6/longterm/\
 v${KERNEL_SRC_VERSION%.*}/linux-${KERNEL_SRC_VERSION}.tar.xz"
                ;;
                *)
-                  die "cannot autodetect \$KERNEL_SRC_URI for verion ${KERNEL_SRC_VERSION}."
+                  die "cannot autodetect \$KERNEL_SRC_URI for version ${KERNEL_SRC_VERSION}."
                ;;
             esac
 
@@ -744,6 +756,17 @@ v${KERNEL_SRC_VERSION%.*}/linux-${KERNEL_SRC_VERSION}.tar.xz"
       ;;
    esac
 
+   if [ -n "${KERNEL_SRC_DISTFILE}" ]; then
+      case "${KERNEL_SRC_TYPE}" in
+         tarball)
+            true
+         ;;
+         *)
+            die "kernel src type '${KERNEL_SRC_TYPE}' does not support --dist."
+         ;;
+      esac
+   fi
+
    if [ -z "${KERNEL_WORKDIR-}" ]; then
       autodie get_tmpdir "kcomp"
       KERNEL_WORKDIR="${T}"
@@ -755,6 +778,7 @@ v${KERNEL_SRC_VERSION%.*}/linux-${KERNEL_SRC_VERSION}.tar.xz"
    : ${KERNEL_DESTDIR:="${KERNEL_WORKDIR}/image"}
    : ${KERNEL_SRC_URI=}
    : ${KERNEL_GEN_MAKEFILE:=n}
+   : ${KERNEL_SRC_DIST_WITH_CONFIG:=n}
    KERNEL_TMPDIR="${KERNEL_WORKDIR}/tmp"
    ADDON_DIR="${KERNEL_WORKDIR}/addon"
    autodie dodir_clean "${KERNEL_BUILD}" "${KERNEL_DESTDIR}" "${KERNEL_TMPDIR}"
@@ -762,10 +786,12 @@ v${KERNEL_SRC_VERSION%.*}/linux-${KERNEL_SRC_VERSION}.tar.xz"
    readonly KERNEL_SRC KERNEL_SRC_TYPE KERNEL_WORKDIR KERNEL_BUILD
    readonly KERNEL_DESTDIR KERNEL_TMPDIR KERNEL_DESTFILE ADDON_DIR
    readonly KERNEL_SRC_URI KERNEL_SRC_VERSION KERNEL_GEN_MAKEFILE
+   readonly KERNEL_SRC_DISTFILE KERNEL_SRC_DIST_WITH_CONFIG
 
    : ${KERNEL_OVERWRITE_CONFIG:=n}
    : ${KERNEL_DEFAULT_CONFIG=/proc/config.gz}
    : ${CONFIG_TARGET:=nconfig}
+   : ${KERNEL_BASENAME:=linux}
 
    # --- have config now ---
 
@@ -785,7 +811,8 @@ v${KERNEL_SRC_VERSION%.*}/linux-${KERNEL_SRC_VERSION}.tar.xz"
       KERNEL_BASENAME KERNEL_INSTALL_TARGETS \
       KERNEL_TARGET KERNEL_REAL_TARGET \
       KERNEL_APPEND_DTB \
-      BUILDENV_PATCH_OPTS
+      BUILDENV_PATCH_OPTS \
+      KERNEL_SRC_DISTFILE KERNEL_SRC_DIST_WITH_CONFIG
 
 
    # init:
@@ -844,25 +871,52 @@ v${KERNEL_SRC_VERSION%.*}/linux-${KERNEL_SRC_VERSION}.tar.xz"
    fi
 
    # configure:
-   breakpoint kernel_configure
-   kcomp_main_run_configure
+   if \
+      [ -z "${KERNEL_SRC_DISTFILE}" ] || yesno "${KERNEL_SRC_DIST_WITH_CONFIG}"
+   then
+      breakpoint kernel_configure
+      kcomp_main_run_configure
 
-   # catch CONFIG_MODVERSIONS
-   if kcomp_kernel_with_modversions; then
-      ewarn \
-         "Kernel has CONFIG_MODVERSIONS enabled. This is known to fail ('module exec format error', ...)." \
-         "CONFIG_WARN"
+      # catch CONFIG_MODVERSIONS
+      if kcomp_kernel_with_modversions; then
+         ewarn \
+            "Kernel has CONFIG_MODVERSIONS enabled. This is known to fail ('module exec format error', ...)." \
+            "CONFIG_WARN"
 
-      if __interactive__; then
-         if get_yn "Run config again?"; then
-            kcomp_main_run_configure
-            if kcomp_kernel_with_modversions; then
-               ewarn "CONFIG_MODVERSIONS is still enabled." "CONFIG_WARN"
+         if __interactive__; then
+            if get_yn "Run config again?"; then
+               kcomp_main_run_configure
+               if kcomp_kernel_with_modversions; then
+                  ewarn "CONFIG_MODVERSIONS is still enabled." "CONFIG_WARN"
+               fi
             fi
+         else
+            this_needs_force "CONFIG_MODVERSIONS is enabled."
          fi
-      else
-         this_needs_force "CONFIG_MODVERSIONS is enabled."
       fi
+   fi
+
+   # pack src and exit?
+   if [ -n "${KERNEL_SRC_DISTFILE}" ]; then
+      einfo_action "Preparing kernel source for packing"
+      breakpoint kernel_pack_src
+
+      [ "${KSRC:?}" = "${KBUILD}" ] || die "\$KSRC != \$KBUILD, cannot operate"
+
+      # "make clean" could conflict with USE=zfs
+      autodie kcomp_make_clean
+
+      if yesno "${KERNEL_SRC_DIST_WITH_CONFIG}"; then
+         einfo "Creating a backup copy of the config file: kcomp-defconfig"
+         autodie cp -f -- "${KSRC}/.config" "${KSRC}/kcomp-defconfig"
+      else
+         einfo "Removing config file"
+         [ ! -f "${KSRC}/.config" ] || autodie rm -- "${KSRC}/.config"
+      fi
+
+      einfo_action "Packing kernel source"
+      autodie tar ca -C "${KSRC}/" ./ -f "${KERNEL_SRC_DISTFILE}"
+      exit ${EX_OK}
    fi
 
    # compile:
@@ -907,7 +961,5 @@ v${KERNEL_SRC_VERSION%.*}/linux-${KERNEL_SRC_VERSION}.tar.xz"
    # END;
 }
 
-
-# @implicit int main ( *argv )
-#
+#@section __main__
 kcomp_main "$@"
