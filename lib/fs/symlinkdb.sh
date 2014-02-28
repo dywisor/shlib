@@ -375,7 +375,7 @@ symlink_db_create_new_symlink() {
    if ! symlink_db_write_new_entry "${1}" "${2}" "${4}"; then
       return 3
 
-   elif [ -e "${link}" ]; then
+   elif [ -e "${4}" ]; then
       # another process created %link, don't claim it
       symlink_db_purge_entry_by_ref
       db_ref=
