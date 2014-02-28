@@ -72,14 +72,14 @@ breakpoint() {
    else
       ${LOGGER} -0 --level=DEBUG --facility=breakpoint "${breakpoint}"
 
-      message "\n*** BREAKPOINT '${breakpoint}' ***\n"
+      message "${NEWLINE}*** BREAKPOINT '${breakpoint}' ***${NEWLINE}"
       if [ ${last_rc} -ne 0 ]; then
          eerror "last return code was ${last_rc}\n"
       else
          einfo "last return code was 0\n"
       fi
       einfo "Starting a shell (${SHELL:-/bin/sh}) ..."
-      einfo "The script will die if this shell exits with a non-zero code\n"
+      einfo "The script will die if this shell exits with a non-zero code${NEWLINE}"
 
       ${SHELL:-/bin/sh} || breakpoint__die "shell returned ${?}."
    fi

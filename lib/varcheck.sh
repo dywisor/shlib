@@ -59,7 +59,7 @@ varcheck() {
          fi
 
          for varcheck_varname in ${varcheck_unset}; do
-            varcheck_msg="${varcheck_msg}\n ${varcheck_varname}"
+            varcheck_msg="${varcheck_msg}${NEWLINE} ${varcheck_varname}"
          done
 
          die "${varcheck_msg}"
