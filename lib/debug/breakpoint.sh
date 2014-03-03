@@ -74,9 +74,9 @@ breakpoint() {
 
       message "${NEWLINE}*** BREAKPOINT '${breakpoint}' ***${NEWLINE}"
       if [ ${last_rc} -ne 0 ]; then
-         eerror "last return code was ${last_rc}\n"
+         eerror "last return code was ${last_rc}${NEWLINE}"
       else
-         einfo "last return code was 0\n"
+         einfo "last return code was 0${NEWLINE}"
       fi
       einfo "Starting a shell (${SHELL:-/bin/sh}) ..."
       einfo "The script will die if this shell exits with a non-zero code${NEWLINE}"
