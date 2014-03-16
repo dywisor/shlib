@@ -40,12 +40,8 @@ liram_populate_layout_squashed_ro_rootfs() {
 
    # restrict these variables to what was known
    # at the time writing this module
-   local TARBALL_SCAN_NAMES="rootfs kmod scripts"
+   local TARBALL_SCAN_NAMES="rootfs kmod scripts var etc"
    local SFS_SCAN_NAMES="squashed-rootfs kmod"
-
-   if [ "${is_hybrid}" = "n" ]; then
-      TARBALL_SCAN_NAMES="${TARBALL_SCAN_NAMES} var etc"
-   fi
 
    if [ "${LIRAM_LAYOUT:?}" = "squashed_ro_rootfs" ]; then
       liram_info "${LIRAM_LAYOUT}"
