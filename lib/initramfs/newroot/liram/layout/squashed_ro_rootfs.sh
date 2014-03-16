@@ -12,10 +12,10 @@
 # * Mounts the 'squashed-rootfs' squashfs file at /squashed-rootfs
 #   after copying it into %NEWROOT
 #
-# /etc (mandatory)
+# /etc (mandatory) [non-hybrid only]
 # * As tmpfs using the 'etc' tarball
 #
-# /var (mandatory)
+# /var (mandatory) [non-hybrid only]
 # * As tmpfs using the 'var' tarball
 #
 # /kernel-modules (optional)
@@ -36,12 +36,19 @@ liram_populate_layout_squashed_ro_rootfs() {
    local kmod_sfs=
    local sroot_sfs=
 
+   local is_hybrid="${LIRAM_LAYOUT_HYBRID:-n}"
+
+   # restrict these variables to what was known
+   # at the time writing this module
+   local TARBALL_SCAN_NAMES="rootfs kmod scripts"
+   local SFS_SCAN_NAMES="squashed-rootfs kmod"
+
+   if [ "${is_hybrid}" = "n" ]; then
+      TARBALL_SCAN_NAMES="${TARBALL_SCAN_NAMES} var etc"
+   fi
+
    if [ "${LIRAM_LAYOUT:?}" = "squashed_ro_rootfs" ]; then
       liram_info "${LIRAM_LAYOUT}"
-      # restrict these variables to what was known
-      # at the time writing this module
-      local TARBALL_SCAN_NAMES="rootfs var etc kmod scripts"
-      local SFS_SCAN_NAMES="squashed-rootfs kmod"
    else
       liram_info "squashed_ro_rootfs layout (inherited)"
    fi
@@ -61,11 +68,12 @@ liram_populate_layout_squashed_ro_rootfs() {
    sroot_sfs="${v0:?}"
    liram_log_sfs_imported "squashed-rootfs"
 
-   # unpack etc, var
-   for p in etc var; do
-      liram_log_tarball_unpacking "${p}"
-      irun liram_unpack_default "${p}"
-   done
+   if [ "${is_hybrid}" = "n" ]; then
+      # unpack etc, var
+      for p in etc var; do
+         irun liram_unpack_default "${p}"
+      done
+   fi
 
    # /kernel-modules #1
    if liram_get_tarball kmod; then
@@ -110,6 +118,11 @@ liram_populate_layout_squashed_ro_rootfs() {
       liram_die "squashfs container is missing."
    fi
 
+   # run pre-setup hook [hybrid mode only]
+   if [ "${is_hybrid}" != "n" ]; then
+      newroot_setup_run_hook newroot-pre-setup
+   fi
+
    # newroot setup (dirs and mounts)
    inonfatal newroot_setup_all
 
@@ -119,6 +132,11 @@ liram_populate_layout_squashed_ro_rootfs() {
 
    # write liram env
    inonfatal liram_write_env
+
+   # run post-populate hook [hybrid mode only]
+   if [ "${is_hybrid}" != "n" ]; then
+      newroot_setup_run_hook liram-post-populate
+   fi
 
    # don't pass the last inonfatal return value
    return 0
