@@ -151,5 +151,5 @@ liram_manage_have_update_kernel_script() {
 liram_manage_call_pack_script() {
    "${LIRAM_MANAGE_PACK_SCRIPT:?}" \
       -t xz -s gzip --no-overwrite --root / \
-      --image-dir "${LIRAM_DEST_SLOT_WORKDIR}" ${PACK_SCRIPT_ARGS} "$@"
+      --image-dir "${LIRAM_DEST_SLOT_WORKDIR}" ${PACK_SCRIPT_ARGS-} "$@"
 }

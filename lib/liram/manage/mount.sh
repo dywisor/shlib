@@ -115,26 +115,26 @@ liram_manage__mount_disk_writable() {
 liram_manage__restore_mount_state() {
    case "${1?}" in
       '')
-         liram_manage_log_warn "restore-mount: no mount state set for ${mp}"
+         liram_manage_log_warn "restore-mount: no mount state set for ${2}"
          return 0
       ;;
       'liram_manage_keep_mount')
-         liram_manage_log_info "restore-mount: keeping ${mp} as-is."
+         liram_manage_log_info "restore-mount: keeping ${2} as-is."
          return 0
       ;;
       'remount_ro')
-         liram_manage_log_info "restore-mount: remounting ${mp} readonly"
+         liram_manage_log_info "restore-mount: remounting ${2} readonly"
          liram_manage_autodie "${1}" "${2}"
          return ${?}
       ;;
       'do_umount')
-         liram_manage_log_info "restore-mount: unmounting ${mp}"
+         liram_manage_log_info "restore-mount: unmounting ${2}"
          liram_manage_autodie "${1}" "${2}"
          return ${?}
       ;;
       *)
          liram_manage_log_warn \
-            "restore-mount: unknown mount state '${1}' for ${mp}"
+            "restore-mount: unknown mount state '${1}' for ${2}"
          liram_manage_autodie "${1}" "${2}"
          return ${?}
       ;;
