@@ -15,6 +15,7 @@ hardware_policy_run_hdparm() {
 # int hardware_policy_disk_set_apm ( value, **dev )
 #
 hardware_policy_disk_set_apm() {
+   veinfo "${dev}: set disk apm to ${1}"
    hardware_policy_dont_keep "${1}" || return 0
    hardware_policy_run_hdparm -B "${1}" "${dev}"
 }
@@ -22,6 +23,7 @@ hardware_policy_disk_set_apm() {
 # int hardware_policy_disk_set_spindown ( value, **dev )
 #
 hardware_policy_disk_set_spindown() {
+   veinfo "${dev}: set spindown to ${1}"
    hardware_policy_dont_keep "${1}" || return 0
    hardware_policy_run_hdparm -S "${1}" "${dev}"
 }
@@ -29,6 +31,7 @@ hardware_policy_disk_set_spindown() {
 # int hardware_policy_disk_set_scheduler ( value, **dev )
 #
 hardware_policy_disk_set_scheduler() {
+   veinfo "${dev}: set scheduler to ${1}"
    hardware_policy_dont_keep "${1}" || return 0
    dofile_if "/sys/block/${dev##*/}/queue/scheduler" "${1}"
 }
@@ -36,6 +39,7 @@ hardware_policy_disk_set_scheduler() {
 # int hardware_policy_disk_set_ncq ( value, **dev )
 #
 hardware_policy_disk_set_ncq() {
+   veinfo "${dev}: set ncq to ${1}"
    hardware_policy_dont_keep "${1}" || return 0
    local val
 
@@ -59,7 +63,10 @@ hardware_policy_disk_do_apply() {
    if yesno "${no_wakeup:-n}"; then
       case "${dev##*/}" in
          [sh]d*)
-            disk_is_active "${dev}" || return 0
+            if ! disk_is_active "${dev}"; then
+               veinfo "not applying disk policy for device ${dev}: disk not active."
+               return 0
+            fi
          ;;
       esac
    fi
@@ -98,6 +105,7 @@ hardware_policy_disk_set_from_file() {
             # setting apm causes a significant loss of performance
             # for some ssds (e.g. Crucial M4)
 
+            veinfo "applying @all policy to ${dev}"
             #last_resort="..."
             skip_pwr_if_ssd=y
             hardware_policy_disk_do_apply
@@ -106,6 +114,7 @@ hardware_policy_disk_set_from_file() {
          *)
             # accept wildcards in %disk_id
             if fnmatch_any "${disk_id}" "$@"; then
+               veinfo "applying disk-specific policy to ${dev}"
                skip_pwr_if_ssd=n
                hardware_policy_disk_do_apply
                break
