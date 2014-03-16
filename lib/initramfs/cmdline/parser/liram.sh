@@ -40,6 +40,19 @@ __cmdline_parser_liram_opts() {
       'novdr')
          LIRAM_LAYOUT_TV_WITH_VDR=n
       ;;
+      'hybrid')
+         # normalize yesno value
+         if [ -z "${v}" ] || word_is_yes "${v}"; then
+            LIRAM_LAYOUT_HYBRID=y
+         elif word_is_no "${v}"; then
+            LIRAM_LAYOUT_HYBRID=n
+         else
+            LIRAM_LAYOUT_HYBRID="${v}"
+         fi
+      ;;
+      'nohybrid')
+         LIRAM_LAYOUT_HYBRID=n
+      ;;
       *)
          ${LOGGER} --level=WARN --facility=cmdline.liram "unknown option '${1}'"
       ;;
@@ -65,6 +78,9 @@ cmdline_parser_liram() {
       ;;
       liram_layout)
          __cmdline_parser_liram_opts "layout=${value}"
+      ;;
+      liram_hybrid)
+         __cmdline_parser_liram_opts "hybrid=${value}"
       ;;
 
       # default return
