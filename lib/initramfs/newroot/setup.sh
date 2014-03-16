@@ -133,9 +133,24 @@ newroot_setup_tmpdir() {
 newroot_setup_initramfs_run_hook() {
    dolog_debug_function_call "newroot_setup_initramfs_run_hook" "$@"
    local hook="${NEWROOT}/${NEWROOT_CONFIG_DIR}/scripts/${1}"
-   [ -x "${hook}" ] || return 0
-   dolog_info "exec hook ${hook}"
-   irun "${hook}" "${NEWROOT}"
+
+   if [ -f "${hook}.subshell" ]; then
+      hook="${hook}.subshell"
+      dolog_info "subshell-exec hook ${hook}"
+      (
+         readonly INITRAMFS_SUBSHELL=y
+         readonly NEWROOT
+         readonly NEWROOT_CONFIG="${NEWROOT}/${NEWROOT_CONFIG_DIR#/}"
+
+         set -- "${NEWROOT}"
+         set +f +e -u +x
+         . "${hook}" "$@"
+      ) || initramfs_die "failed to execute hook ${hook} (in a subshell)."
+
+   elif [ -x "${hook}" ]; then
+      dolog_info "exec hook ${hook}"
+      irun "${hook}" "${NEWROOT}"
+   fi
 }
 
 # void newroot_setup_chroot_run_hook (
