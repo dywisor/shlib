@@ -4,3 +4,5 @@ initramfs/disk
 initramfs/mount
 initramfs/nfsmount
 initramfs/run
+
+initramfs/newroot/liram/errmsg

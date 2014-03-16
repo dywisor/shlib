@@ -47,9 +47,15 @@ liram_populate_die() {
 
 # @private void liram__init_vars (
 #    **LIRAM_DISK!, **LIRAM_DISK_FSTYPE!, **LIRAM_NEED_NET_SETUP!
-# )
+# ), raises liram_die()
 #
 liram__init_vars() {
+   if [ -z "${LIRAM_DISK-}" ]; then
+      liram_errmsg_liram_disk_not_set
+      liram_die "cannot operate without liram sysdisk."
+      return 150
+   fi
+
    case "${LIRAM_DISK}" in
       'nfs='*)
          LIRAM_DISK_FSTYPE="nfs"
