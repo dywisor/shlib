@@ -46,7 +46,8 @@ liram_populate_die() {
 }
 
 # @private void liram__init_vars (
-#    **LIRAM_DISK!, **LIRAM_DISK_FSTYPE!, **LIRAM_NEED_NET_SETUP!
+#    **LIRAM_DISK!, **LIRAM_DISK_FSTYPE!, **LIRAM_NEED_NET_SETUP!,
+#    **LIRAM_LAYOUT:="default"!
 # ), raises liram_die()
 #
 liram__init_vars() {
@@ -67,6 +68,8 @@ liram__init_vars() {
          : ${LIRAM_NEED_NET_SETUP:=n}
       ;;
    esac
+
+   : ${LIRAM_LAYOUT:=default}
 }
 
 # void liram_mount_sysdisk ( **LIRAM_DISK, **LIRAM_DISK_FSTYPE=auto )
@@ -208,6 +211,7 @@ liram_populate_helper() {
 #  liram_populate_inherit(<LIRAM_LAYOUT>), which populates NEWROOT.
 #
 liram_populate() {
+   # already set by liram__init_vars()
    : ${LIRAM_LAYOUT:=default}
    if [ -c /dev/kmsg ]; then
       echo "liram: layout=${LIRAM_LAYOUT}" > /dev/kmsg
@@ -247,7 +251,13 @@ liram_init() {
    if [ "${LIRAM_NEED_NET_SETUP:-n}" = "y" ]; then
       irun initramfs_net_setup up
    fi
-   irun liram_mount_rootfs
+
+   if function_defined "liram_init_layout_${LIRAM_LAYOUT}"; then
+      irun "liram_init_layout_${LIRAM_LAYOUT}"
+   else
+      irun liram_mount_rootfs
+   fi
+
    irun liram_mount_sysdisk
    irun liram_populate
    irun liram_unmount_sysdisk
