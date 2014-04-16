@@ -661,7 +661,7 @@ ${t}-rm \$(BOOTDIR)/config-${KERNEL_RELEASE}
       printf "%s" "\
 
 install-modules:
-${t}install -m 0755 \$(MODULES_DIR)
+${t}install -m 0755 -d \$(MODULES_DIR)
 ${t}cp -aH \$(CP_OPT_NO_OWNERSHIP) \\
 ${t}${t}\$(CURDIR)/lib/modules/${KERNEL_RELEASE}/ \\
 ${t}${t}\$(MODULES_DIR)/${KERNEL_RELEASE}/

@@ -50,10 +50,10 @@ revrev() { rev | "$@" | rev; }
 revcut() { rev | cut "$@" | rev; }
 
 # @function_alias str_upper() renames tr()
-str_upper() { tr [:lower:] [:upper:] "$@"; }
+str_upper() { tr '[:lower:]' '[:upper:]' "$@"; }
 
 # @function_alias str_lower() renames tr()
-str_lower() { tr [:upper:] [:lower:] "$@"; }
+str_lower() { tr '[:upper:]' '[:lower:]' "$@"; }
 
 
 # void str_remove_trailing_chars ( str, chars, **v0! )
