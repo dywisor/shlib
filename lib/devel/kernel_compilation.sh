@@ -85,38 +85,49 @@ kcomp__prefix_words() {
 #  or generated via make defconfig.
 #
 kcomp_prepare_build_dir() {
-   local kbuild="${1:-${__KCOMP_KSRC:?}}" initial_config="${2-/proc/config.gz}"
+   local kbuild="${1:-${__KCOMP_KSRC:?}}" initial_config="${2:-@default}"
 
    if dodir "${kbuild}" && touch "${kbuild}"; then
-      __KCOMP_KBUILD=$(readlink -f "${kbuild}")
+      __KCOMP_KBUILD="$(readlink -f "${kbuild}")"
       __KCOMP_CONFIG="${__KCOMP_KBUILD}/.config"
 
 #      if [ "${__KCOMP_KBUILD}" = "${__KCOMP_KSRC}" ]; then
 #         local BUILDENV_MAKE_OUT_OF_TREE=n
 #      fi
 
-      if [ -n "${initial_config}" ]; then
-         [ "${initial_config}" != "@default" ] || initial_config="/proc/config.gz"
+      if [ ! -e "${__KCOMP_CONFIG}" ] || [ "${3:-n}" = "y" ]; then
 
-         if [ ! -e "${__KCOMP_CONFIG}" ] || [ "${3:-n}" = "y" ]; then
-            if compress_supports "${initial_config}"; then
-               dolog_info -0 "Importing config file ${initial_config} (compressed file)"
-               do_uncompress "${initial_config}" > "${__KCOMP_CONFIG}" || __KCOMP_CONFIG=
+         # prepare %initial_config
+         if [ "${initial_config:-X}" = "@default" ]; then
+            # /proc/config.gz if target arch == host arch, else defconfig
+            if [ -z "${ARCH-}" ] || [ "${ARCH}" = "$(arch)" ]; then
+               initial_config="/proc/config.gz"
             else
-               dolog_info -0 "Importing config file ${initial_config}"
-               cp ${CP_OPT_NO_TARGET_DIR-} -L -- \
-                  "${initial_config}" "${__KCOMP_CONFIG}" || __KCOMP_CONFIG=
+               initial_config="@defconfig"
             fi
          fi
-      elif [ ! -e "${__KCOMP_CONFIG}" ]; then
-         dolog_info -0 "Creating default config"
-         kcomp__make -j1 defconfig || __KCOMP_CONFIG=
-      fi
+         #@varcheck initial_config
 
-      if [ -z "${__KCOMP_CONFIG}" ]; then
-         dolog_error -0 "Could not create initial config"
-         unset -v __KCOMP_CONFIG
-         return 3
+         if [ "${initial_config}" = "@defconfig" ]; then
+            dolog_info -0 "Creating default config"
+            kcomp__make -j1 defconfig || __KCOMP_CONFIG=
+
+         elif compress_supports "${initial_config}"; then
+            dolog_info -0 "Importing config file ${initial_config} (compressed file)"
+            do_uncompress "${initial_config}" > "${__KCOMP_CONFIG}" || __KCOMP_CONFIG=
+
+         else
+            dolog_info -0 "Importing config file ${initial_config}"
+            cp ${CP_OPT_NO_TARGET_DIR-} -L -- \
+               "${initial_config}" "${__KCOMP_CONFIG}" || __KCOMP_CONFIG=
+         fi
+
+
+         if [ -z "${__KCOMP_CONFIG}" ]; then
+            dolog_error -0 "Could not create initial config"
+            unset -v __KCOMP_CONFIG
+            return 3
+         fi
       fi
    else
       dolog_error -0 "Cannot create build directory ${kbuild}"
@@ -149,14 +160,14 @@ kcomp_init_default() {
    fi
 }
 
-# int kcomp_reinit ( config_file, overwrite=y )
+# int kcomp_reinit ( config_file=, overwrite=y )
 #
 #
 #  Reinitializes the kernel build dir. This will overwrite the current
 #  config file if overwrite is 'y'.
 #
 kcomp_reinit() {
-   kcomp_init_default "${KSRC}" "${KBUILD}" "${1:?}" "${2:-y}"
+   kcomp_init_default "${KSRC}" "${KBUILD}" "${1?}" "${2:-y}"
 }
 
 # int kcomp_init_tarball (
