@@ -1,4 +1,7 @@
+defsym
+
 function/defined
+function/wrapper
 
 fs/mount/util
 

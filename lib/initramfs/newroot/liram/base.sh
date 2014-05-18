@@ -11,6 +11,7 @@
 #  modified at runtime.
 #
 readonly LIRAM_DISK_MNT_DIR="/mnt/liram_sysdisk"
+readonly INITRAMFS_LIRAM_LAYOUTS_DIR="/liram/layouts"
 
 
 #@section functions
@@ -45,12 +46,149 @@ liram_populate_die() {
    fi
 }
 
+# int liram_fetch_uri__http ( src, dest )
+#
+liram_fetch_uri__http() {
+   inonfatal wget -O "${2:?}" "${1:?}"
+}
+
+# int liram_fetch_uri__rsync ( src, dest )
+#
+liram_fetch_uri__rsync() {
+   inonfatal rsync -- "${1}" "${2}"
+}
+
+# int liarm_fetch_uri__file ( src, dest )
+#
+liram_fetch_uri__file() {
+   inonfatal cp -- "${1}" "${2}"
+}
+
+# int liram_parse_uri ( uri, **uri!, **uri_type!, **uri_secure! )
+#
+liram_parse_uri() {
+   uri=
+   uri_type=
+   uri_secure=n
+
+   case "${1?}" in
+      '')
+         uri_type=none
+         uri_secure=y
+      ;;
+
+      'http://'?*)
+         uri_type=http
+         uri="${1}"
+      ;;
+
+      'rsync://'?*)
+         uri_type=rsync
+         uri="${1}"
+      ;;
+
+      'file:///'?*)
+         uri_type=builtin-file
+         uri_secure=n
+         uri="${1#file://}"
+      ;;
+
+      'file://./'?*)
+         uri_type=file
+         uri="${LIRAM_DISK_MNT_DIR}/${1#file://./}"
+      ;;
+
+      'file:///'*|'file://./'*)
+         true
+      ;;
+
+      'file://'?*)
+         uri_type=builtin-file
+         uri_secure=y
+         uri="${INITRAMFS_LIRAM_LAYOUTS_DIR}/${1#file://}"
+      ;;
+
+      *'://'*|*'::'|'::'*)
+         true
+      ;;
+
+      ?*'::'?*)
+         uri_type=rsync
+         uri="${1}"
+      ;;
+
+      /*)
+         # file, relative to initramfs /
+         uri_type=builtin-file
+         uri_secure=n
+         uri="${1}"
+      ;;
+
+      ./?*)
+         # file, relative to liram sysdisk (LIRAM_DISK_MNT_DIR)
+         uri_type=file
+         uri="${LIRAM_DISK_MNT_DIR}/${1#./}"
+      ;;
+
+      *)
+         #@varcheck 1
+         # file relative to initramfs layouts dir
+         uri_type=builtin-file
+         uri_secure=y
+         uri="${INITRAMFS_LIRAM_LAYOUTS_DIR}/${1}"
+      ;;
+   esac
+
+
+   case "${uri_type}" in
+      '')
+         ${LOGGER} --level=ERROR "cannot parse uri '${1}'"
+         return 2
+      ;;
+      'builtin-file')
+         case "${uri}" in
+            "/mnt/"*|\
+            "${LIRAM_DISK_MNT_DIR%/}/"*|\
+            "${NEWROOT%/}/"*)
+               # note that $NEWROOT/ uris are not supported as LAYOUT_URI
+               uri_secure=n
+               uri_type=file
+            ;;
+         esac
+      ;;
+   esac
+
+   return 0
+}
+
+
+# void liram_parse_uri_check_insecure ( uri, **uri!, **uri_type! )
+#
+liram_parse_uri_check_insecure() {
+   local uri_secure
+
+   irun liram_parse_uri "${1?}"
+
+   if [ "${uri_secure:?}" != "y" ]; then
+      if [ "${LIRAM_INSECURE:-y}" != "y" ]; then
+         liram_die "insecure uri of type ${uri_type-X} is not allowed: ${uri}"
+      else
+         ${LOGGER} --level=INFO "uri ${uri} is insecure."
+      fi
+   fi
+
+   return 0
+}
+
+
 # @private void liram__init_vars (
 #    **LIRAM_DISK!, **LIRAM_DISK_FSTYPE!, **LIRAM_NEED_NET_SETUP!,
 #    **LIRAM_LAYOUT:="default"!
 # ), raises liram_die()
 #
 liram__init_vars() {
+   local uri uri_type
+
    if [ -z "${LIRAM_DISK-}" ]; then
       liram_errmsg_liram_disk_not_set
       liram_die "cannot operate without liram sysdisk."
@@ -70,6 +208,41 @@ liram__init_vars() {
    esac
 
    : ${LIRAM_LAYOUT:=default}
+
+   LIRAM_LAYOUT_URI_CMDLINE="${LIRAM_LAYOUT_URI-}"
+   irun liram_parse_uri_check_insecure "${LIRAM_LAYOUT_URI_CMDLINE}"
+
+   LIRAM_LAYOUT_URI="${uri?}"
+   LIRAM_LAYOUT_URI_TYPE="${uri_type?}"
+   #LIRAM_LAYOUT_FILE=
+
+   case "${LIRAM_LAYOUT_URI_TYPE}" in
+      none)
+         LIRAM_LAYOUT_FILE=
+      ;;
+
+      builtin-file)
+         LIRAM_LAYOUT_FILE="${LIRAM_LAYOUT_URI}"
+
+         if [ ! -f "${LIRAM_LAYOUT_FILE}" ]; then
+            liram_die \
+               "builtin recipe file '${LIRAM_LAYOUT_FILE}' does not exist."
+         fi
+      ;;
+
+      file)
+         LIRAM_LAYOUT_FILE="/tmp/liram_layout.sh"
+
+         inonfatal rm -f -- "${LIRAM_LAYOUT_FILE}"
+      ;;
+
+      *)
+         LIRAM_NEED_NET_SETUP=y
+         LIRAM_LAYOUT_FILE="/tmp/liram_layout.sh"
+
+         inonfatal rm -f -- "${LIRAM_LAYOUT_FILE}"
+      ;;
+   esac
 }
 
 # void liram_mount_sysdisk ( **LIRAM_DISK, **LIRAM_DISK_FSTYPE=auto )
@@ -77,18 +250,23 @@ liram__init_vars() {
 #  Mounts the liram sysdisk.
 #
 liram_mount_sysdisk() {
-   case "${LIRAM_DISK_FSTYPE:-auto}" in
-      'nfs')
-         initramfs_mount_nfs "${LIRAM_DISK_MNT_DIR?}" "${LIRAM_DISK}"
-      ;;
-      *)
-         imount_disk \
-            "${LIRAM_DISK_MNT_DIR?}" "${LIRAM_DISK:?}" \
-            "ro" "${LIRAM_DISK_FSTYPE:-auto}"
-      ;;
-   esac || return ${?}
+   if [ -n "${LIRAM_DISK_MP-}" ]; then
+      ${LOGGER} --level=INFO "liram sysdisk is already mounted."
 
-   LIRAM_DISK_MP="${LIRAM_DISK_MNT_DIR}"
+   else
+      case "${LIRAM_DISK_FSTYPE:-auto}" in
+         'nfs')
+            initramfs_mount_nfs "${LIRAM_DISK_MNT_DIR?}" "${LIRAM_DISK}"
+         ;;
+         *)
+            imount_disk \
+               "${LIRAM_DISK_MNT_DIR?}" "${LIRAM_DISK:?}" \
+               "ro" "${LIRAM_DISK_FSTYPE:-auto}"
+         ;;
+      esac || return ${?}
+
+      LIRAM_DISK_MP="${LIRAM_DISK_MNT_DIR}"
+   fi
    F_INITRAMFS_DIE=liram_die
 }
 
@@ -232,6 +410,75 @@ liram_populate() {
    liram_populate__inherit "${LIRAM_LAYOUT}"
 }
 
+# void liram__fetch_layout (
+#    **LIRAM_LAYOUT_URI_TYPE, **LIRAM_LAYOUT_URI, **LIRAM_LAYOUT_FILE
+# )
+#
+liram__fetch_layout() {
+   local tmpfile
+
+   tmpfile="${LIRAM_LAYOUT_FILE}.fetch_tmp"
+
+   irun rm -f "${tmpfile}"
+
+   irun liram_fetch_uri__${LIRAM_LAYOUT_URI_TYPE:?} \
+      "${LIRAM_LAYOUT_URI}" "${tmpfile}"
+
+   if [ -f "${tmpfile}" ] && [ ! -h "${tmpfile}" ]; then
+      irun mv -f -- "${tmpfile}" "${LIRAM_LAYOUT_FILE}"
+   else
+      liram_die "expected to get a layout file, got garbage."
+   fi
+}
+
+# void liram__inject_layout ( **LIRAM_LAYOUT_FILE, **LIRAM_LAYOUT )
+#
+#  Loads a layout file.
+#
+liram__inject_layout() {
+   local func
+
+   if [ ! -f "${LIRAM_LAYOUT_FILE}" ]; then
+      liram_die "layout file ${LIRAM_LAYOUT_FILE} is missing (not a file)."
+      return
+   fi
+
+   for func in \
+      init_layout do_layout \
+      "liram_init_layout_${LIRAM_LAYOUT}" \
+      "liram_populate_layout_${LIRAM_LAYOUT}"
+   do
+      if function_defined "${func}"; then
+         ${LOGGER} --level=WARN "unregistering function ${func}()"
+         unset -f "${func}" || ${LOGGER} --level=ERROR "unset -f failed."
+      fi
+   done
+
+   ${LOGGER} --level=INFO "loading layout file ${LIRAM_LAYOUT_FILE}"
+   if . "${LIRAM_LAYOUT_FILE}"; then
+      func="liram_init_layout_${LIRAM_LAYOUT}"
+      if function_defined "${func}"; then
+         true
+      elif function_defined init_layout; then
+         irun function_alias init_layout "${func}"
+      fi
+
+      func="liram_populate_layout_${LIRAM_LAYOUT}"
+      if function_defined "${func}"; then
+         true
+      elif function_defined do_layout; then
+         irun function_alias do_layout "${func}"
+      else
+         liram_die \
+            "layout file ${LIRAM_LAYOUT_FILE} does not provide a populate function."
+      fi
+
+   else
+      liram_die "failed to load layout file ${LIRAM_LAYOUT_FILE}."
+   fi
+}
+
+
 # void liram_init(), raises *die()
 #
 #  Initializes NEWROOT as tmpfs.
@@ -243,6 +490,11 @@ liram_populate() {
 #  * unmount the liram sysdisk
 #
 liram_init() {
+   if [ -n "${LIRAM_DISK_MP-}" ]; then
+      ${LOGGER} --level=WARN "forcefully resetting \$LIRAM_DISK_MP."
+      irun liram_unmount_sysdisk
+   fi
+
    irun liram__init_vars
    if [ -c /dev/kmsg ]; then
       echo "liram: initializing real root as tmpfs" > /dev/kmsg
@@ -251,6 +503,26 @@ liram_init() {
    if [ "${LIRAM_NEED_NET_SETUP:-n}" = "y" ]; then
       irun initramfs_net_setup up
    fi
+
+   case "${LIRAM_LAYOUT_URI_TYPE}" in
+      'none')
+         true
+      ;;
+      'builtin-file')
+         irun liram__inject_layout
+      ;;
+      'file')
+         # need sysdisk
+         irun liram_mount_sysdisk
+         irun liram__fetch_layout
+         irun liram__inject_layout
+      ;;
+      *)
+         irun liram__fetch_layout
+         irun liram__inject_layout
+      ;;
+   esac
+
 
    if function_defined "liram_init_layout_${LIRAM_LAYOUT}"; then
       irun "liram_init_layout_${LIRAM_LAYOUT}"

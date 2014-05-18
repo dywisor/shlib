@@ -25,6 +25,16 @@ __cmdline_parser_liram_opts() {
       'layout')
          LIRAM_LAYOUT="${v}"
       ;;
+      'layout_uri')
+         LIRAM_LAYOUT_URI="${v}"
+      ;;
+      'layout_file')
+         if [ -n "${v}" ]; then
+            LIRAM_LAYOUT_URI="file://${v}"
+         else
+            LIRAM_LAYOUT_URI=
+         fi
+      ;;
       'home_size')
          LIRAM_HOME_TMPFS_SIZE="${v}"
       ;;
@@ -52,6 +62,32 @@ __cmdline_parser_liram_opts() {
       ;;
       'nohybrid')
          LIRAM_LAYOUT_HYBRID=n
+      ;;
+      'secure')
+         # there is no 'secure' mode
+         #  However, certain actions are known to be really insecure
+         #  (e.g. loading/executing code from disk/nfs, ...),
+         #  which can be prevented by setting LIRAM_INSECURE=n.
+         #
+         #  The interpretation of this variable is mostly up
+         #  to the liram layout being loaded, but also affects the
+         #  decision whether a specific layout file can be loaded.
+         #
+         #  A value of "n" is sticky
+         #  (cannot be changed by further cmdline args).
+         #
+         LIRAM_INSECURE=n
+      ;;
+      'insecure')
+         if [ -z "${v}" ] || word_is_yes "${v}"; then
+            if [ "${LIRAM_INSECURE:-X}" = "n" ]; then
+               ${LOGGER} --level=WARN --facility=cmdline.liram "ignoring ${real_arg}"
+            else
+               : ${LIRAM_INSECURE:=y}
+            fi
+         else
+            LIRAM_INSECURE=n
+         fi
       ;;
       *)
          ${LOGGER} --level=WARN --facility=cmdline.liram "unknown option '${1}'"
