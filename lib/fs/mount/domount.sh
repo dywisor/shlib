@@ -108,9 +108,9 @@ domount2() {
       do_mount "${mp}"
       return ${?}
 
-   elif [ -n "$*" ]; then
+   elif shift && [ -n "$*" ]; then
       domount__logger DEBUG "mounting ${mp} from argv"
-      shift && do_mount "$@" "${mp}"
+      do_mount "$@" "${mp}"
       return ${?}
 
    else
