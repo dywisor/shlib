@@ -1,0 +1,7 @@
+defsym
+fs/zram/base
+fs/zram/mkfs
+
+fs/mount/domount
+
+function/defined

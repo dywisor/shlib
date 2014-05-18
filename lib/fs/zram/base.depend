@@ -1,0 +1,10 @@
+defsym
+integer
+
+die
+
+fs/mount/info
+fs/mount/domount
+
+fs/zram/defsym
+fs/zram/logging
