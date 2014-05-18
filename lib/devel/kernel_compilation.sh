@@ -290,6 +290,11 @@ kcomp_get_kver() {
 #     * KERNEL_TARGET=zImage
 #     * KERNEL_TARGET=uImage
 #     * KERNEL_APPEND_DTB=arch/arm/boot/kirkwood-dreamplug.dtb
+#     * KERNEL_UIMAGE_NAME         (defaults to KERNEL_BASENAME-KERNEL_RELEASE)
+#     * KERNEL_UIMAGE_COMPRESSION  (defaults to none)
+#     * KERNEL_UIMAGE_LOAD_ADDRESS (defaults to 0x00008000)
+#     * KERNEL_UIMAGE_ENTRY_POINT  (defaults to 0x00008000)
+#
 #
 #     plus the usual ARCH / CROSS_COMPILE variables.
 #
@@ -328,18 +333,60 @@ kcomp_build() {
          fi
       fi
 
-      if [ -n "${KERNEL_REAL_TARGET-}" ]; then
-         if buildenv_make ${KERNEL_REAL_TARGET}; then
-            __KCOMP_KERNEL_IMAGE="${__KCOMP_KBUILD}/arch/${ARCH:?}/boot/${KERNEL_REAL_TARGET}"
+      if [ -z "${KERNEL_REAL_TARGET-}" ]; then
+         true
 
-            [ -e "${__KCOMP_KERNEL_IMAGE}" ] || \
-               dolog_warn -0 "${__KCOMP_KERNEL_IMAGE} is missing."
-         else
-            dolog_error -0 "Failed to build kernel target '${KERNEL_REAL_TARGET}'."
-            unset -v __KCOMP_KERNEL_IMAGE
-            return 10
-         fi
+      elif {
+         local real_image
+         real_image="${__KCOMP_KBUILD}/arch/${ARCH:?}/boot/${KERNEL_REAL_TARGET}"
+
+         case "${KERNEL_REAL_TARGET}" in
+            uImage)
+               dolog_info "Building ${KERNEL_REAL_TARGET} (non-standard target)"
+
+               if [ -z "${KERNEL_UIMAGE_NAME-}" ]; then
+                  local KVER KERNEL_RELEASE KERNEL_VERSION
+                  kcomp_get_version
+                  [ -n "${KERNEL_RELEASE-}" ] || \
+                     die "failed to get \$KERNEL_RELEASE!"
+
+                  #: ${KERNEL_BASENAME:=linux}
+
+                  KERNEL_UIMAGE_NAME="${KERNEL_BASENAME:-linux}-${KERNEL_RELEASE}"
+               fi
+
+               : ${KERNEL_UIMAGE_COMPRESSION:=none}
+               : ${KERNEL_UIMAGE_LOAD_ADDRESS:=0x00008000}
+               : ${KERNEL_UIMAGE_ENTRY_POINT:=0x00008000}
+
+               ${X_MKIMAGE_UBOOT:-mkimage} \
+                  -A "${ARCH}" -O linux -T kernel \
+                  -C "${KERNEL_UIMAGE_COMPRESSION}" \
+                  -a "${KERNEL_UIMAGE_LOAD_ADDRESS}" \
+                  -e "${KERNEL_UIMAGE_ENTRY_POINT}" \
+                  -n "${KERNEL_UIMAGE_NAME}" \
+                  -d "${__KCOMP_KERNEL_IMAGE}" \
+                  "${real_image}"
+            ;;
+
+            *)
+               dolog_info "Building ${KERNEL_REAL_TARGET}"
+               buildenv_make ${KERNEL_REAL_TARGET}
+            ;;
+         esac
+      }; then
+         __KCOMP_KERNEL_IMAGE="${real_image}"
+
+         [ -e "${__KCOMP_KERNEL_IMAGE}" ] || \
+            dolog_warn -0 "${__KCOMP_KERNEL_IMAGE} is missing."
+
+      else
+         dolog_error -0 \
+            "Failed to build kernel target '${KERNEL_REAL_TARGET:?}'."
+         unset -v __KCOMP_KERNEL_IMAGE
+         return 10
       fi
+
 
       return 0
    else
