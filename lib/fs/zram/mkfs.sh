@@ -11,7 +11,7 @@
 zram_disk_mkfs_ext4() {
    local features
 
-   features="dir_index,extents,filetype,^has_journal,sparse_super,^uinit_bg"
+   features="dir_index,extents,filetype,^has_journal,sparse_super,^uninit_bg"
 
 
    1>>${DEVNULL} ${AUTODIE_NONFATAL-} ${X_MKFS_EXT4:?} \
