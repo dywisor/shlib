@@ -37,6 +37,7 @@ initramfs_default_start() {
 
    else
       irun initramfs_rootdelay
+      irun initramfs_zram_autoswap
 
       if [ "x${INIT_NEWROOT=y}" = "xy" ]; then
          case "${NEWROOT_TYPE=disk}" in

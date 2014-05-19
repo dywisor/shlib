@@ -31,6 +31,10 @@ cmdline_parser_core() {
       doshell)
          CMDLINE_WANT_SHELL=y
       ;;
+      zram_swap)
+         CMDLINE_WANT_ZRAM_SWAP=y
+         CMDLINE_ZRAM_SWAP_SIZE="${value}"
+      ;;
       *)
          return 1
       ;;

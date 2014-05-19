@@ -8,3 +8,5 @@ initramfs/newroot/base
 initramfs/newroot/mount
 
 initramfs/newroot/liram/layouts
+
+initramfs/zram
