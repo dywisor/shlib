@@ -105,10 +105,11 @@ zram_init() {
    if [ -n "${3-}" ]; then
       init_func="zram_init__${3}"
 
-      function_defined "${init_func}" || \
+      if ! function_defined "${init_func}"; then
          function_die "setup function ${init_func}() is missing."
-      # @on-die-continue
-      return 127
+         # @on-die-continue
+         return 127
+      fi
    fi
 
 
