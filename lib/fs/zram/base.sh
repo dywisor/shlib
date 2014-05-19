@@ -191,7 +191,8 @@ zram_init_any() {
 zram_ident_is_free() {
    local istate=
    {
-      read -r istate < "/sys/block/zram${1:?}" && [ ${istate:--1} -eq 0 ]
+      read -r istate < "/sys/block/zram${1:?}/initstate" && \
+      [ ${istate:--1} -eq 0 ]
    } 1>>${DEVNULL} 2>>${DEVNULL}
 }
 
