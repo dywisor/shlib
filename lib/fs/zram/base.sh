@@ -60,8 +60,8 @@ zram_init_vars() {
    #@varcheck 1
 
    ZRAM_NAME="zram${1#zram}"
-   ZRAM_DEV="/sys/block/${ZRAM_NAME}"
-   ZRAM_BLOCK="/dev/${ZRAM_NAME}"
+   ZRAM_BLOCK="/sys/block/${ZRAM_NAME}"
+   ZRAM_DEV="/dev/${ZRAM_NAME}"
    ZRAM_SIZE_M=
 
    if [ ! -e "${ZRAM_BLOCK}" ]; then

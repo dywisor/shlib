@@ -3,7 +3,7 @@
 # @logger zram_log ( <var args>, **ZRAM_DEV= )
 #
 zram_log() {
-   ${LOGGER} +zram.${ZRAM_DEV:-main} "${@}"
+   ${LOGGER} +zram.${ZRAM_NAME:-main} "${@}"
 }
 
 # @logger INFO zram_log_info ( <var args>, **ZRAM_DEV= )
