@@ -1,4 +1,4 @@
 initramfs/run
 
 fs/zram/autoswap
-#fs/zram/disk
+fs/zram/disk
