@@ -1,7 +1,8 @@
 defsym
 integer
+globbing
 
-die
+function/die
 
 fs/mount/info
 fs/mount/domount

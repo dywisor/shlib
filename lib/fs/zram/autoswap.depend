@@ -1,0 +1,7 @@
+defsym
+integer
+
+fs/zram/base
+fs/zram/swap
+
+function/die

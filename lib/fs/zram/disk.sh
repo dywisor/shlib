@@ -1,22 +1,20 @@
 #@section functions
 
-# int zram_disk_init ( ident, size_m, *mkfs_args, **ZRAM_! )
-#
-zram_disk_init() {
-   zram_init "${1?}" "${2:?}" && \
-   shift 2 && \
-   zram_disk_mkfs "${@}"
-}
-
-# int zram_disk_setup (
-#    ident, size_m, mp, fstype:=auto, mount_opts=, mode=, owner=
+# int zram_disk (
+#    ident, size_m, mp, mount_opts=, fstype:=auto, mode=, owner=
 # )
 #
 #  Note that you cannot pass any mkfs options when using this function.
 #
-zram_disk_setup() {
-   zram_disk_init "${1?}" "${2:?}" "${4:-auto}" && \
-   zram_disk_mount "${3:?}" "${5-}" "${4:-auto}" "${6-}" "${7-}"
+zram_disk() {
+   zram_init "${1?}" "${2:?}" disk "${5:-auto}" && \
+   zram_disk_mount "${3:?}" "${4-}" "${5:-auto}" "${6-}" "${7-}"
+}
+
+# int zram_init__disk ( *mkfs_args, **ZRAM_ )
+#
+zram_init__disk() {
+   zram_disk_mkfs "${@}"
 }
 
 
