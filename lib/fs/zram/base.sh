@@ -248,29 +248,29 @@ zram_reinit() {
 # int zram_set_size ( size_m, **ZRAM_NAME, **ZRAM_BLOCK, **ZRAM_SIZE_M! )
 #
 zram_set_size() {
-   #@varcheck 2
+   #@varcheck 1
    ZRAM_SIZE_M=
 
    local size_b v0
 
-   if [ ${2} -eq 0 ]; then
+   if [ ${1} -eq 0 ]; then
       ${AUTODIE_NONFATAL-} zram__write_sysfs reset 1 && ZRAM_SIZE_M=0
 
    else
-      size_b=$(( ${2} * ${ZRAM_BYTES_TO_MBYTES_FACTOR} ))
+      size_b=$(( ${1} * ${ZRAM_BYTES_TO_MBYTES_FACTOR} ))
 
       if [ ${size_b} -gt 0 ]; then
-         zram_log_info "Setting size to ${2} mbytes (${size_b})"
+         zram_log_info "Setting size to ${1} mbytes (${size_b})"
          ${AUTODIE_NONFATAL-} zram__write_sysfs disksize ${size_b} && \
-         ZRAM_SIZE_M="${2}"
+         ZRAM_SIZE_M="${1}"
 
-      elif is_negative ${2}; then
+      elif is_negative ${1}; then
          function_die "bad usage."
 
       else
          # how much RAM you got?
          function_die \
-            "overflow: ${2} * ${ZRAM_BYTES_TO_MBYTES_FACTOR} != ${size_b}"
+            "overflow: ${1} * ${ZRAM_BYTES_TO_MBYTES_FACTOR} != ${size_b}"
       fi
    fi
 }
