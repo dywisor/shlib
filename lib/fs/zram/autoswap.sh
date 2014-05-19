@@ -96,13 +96,14 @@ zram_calculate_autoswap() {
 # )
 #
 zram_calculate_autoswap__recursive() {
+   # BROKEN
    if [ ${3} -eq 1 ]; then
       zram_num_swaps=1
       if [ ${1} -ge ${2} ]; then
-         zram_swap_size_m=${2}
+         zram_swap_size_m=${1}
          return 0
       else
-         zram_swap_size_m=${1}
+         zram_swap_size_m=${2}
          return 10
       fi
    elif [ ${3} -le 0 ]; then
