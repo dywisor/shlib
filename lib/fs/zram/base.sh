@@ -308,7 +308,7 @@ zram__find_and_init_any() {
 
       ident="${iter#/sys/block/zram}"
 
-      if is_natural "${ident}" && zram_sysdev_is_free "${itter}"; then
+      if is_natural "${ident}" && zram_sysdev_is_free "${iter}"; then
 
          if zram_init "${ident}" "${@}"; then
             # update ZRAM__NEXT_FREE_DEV

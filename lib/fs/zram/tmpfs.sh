@@ -21,6 +21,7 @@ zram_tmpfs__from_vars() {
 #  See zram_dotmpfs() for details.
 #
 zram_tmpfs() {
+   #@debug [ -n "${1-}" ] || function_die "missing <mp> arg." "zram_tmpfs"
    local mp="${1:?}"
    shift && zram_dotmpfs "${mp}" "" "${@}"
 }
@@ -74,6 +75,9 @@ zram_tmpfs() {
 ##
 zram_dotmpfs() {
    #@varcheck_emptyok IFS_DEFAULT
+   #@debug [ -n "${1-}"    ] || function_die "missing <mp> arg."   "zram_dotmpfs"
+   #@debug [ -n "${2+SET}" ] || function_die "missing <name> arg." "zram_dotmpfs"
+   #@debug [ -n "${3+SET}" ] || function_die "missing <opts> arg." "zram_dotmpfs"
    : ${1:?} ${2?} ${3?}
    zram_zap_vars
    local size_m mp mount_opts fstype mode owner fsname

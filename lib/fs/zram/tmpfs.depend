@@ -1,3 +1,5 @@
 defsym
 fs/zram/base
 fs/zram/disk
+
+function/die
