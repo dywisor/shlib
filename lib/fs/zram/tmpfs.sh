@@ -149,10 +149,6 @@ zram_tmpfs_parse_opts_unpacked() {
 
    local uid= gid= rorw_arg= atime_arg= k v
 
-   local IFS=","
-   set -- ${1-}
-   IFS="${IFS_DEFAULT}"
-
    # parse options
    #
    # * rw implies a default %mode of 1777 (else %mode is kept)
