@@ -1,6 +1,6 @@
 #@section functions
 
-# int zram_swap (
+# @zram_init_any zram_swap (
 #    num_swaps=1, size_m=**ZRAM_SWAP_DEFAULT_SIZE, swapon="y",
 #    **ZRAM_!, **v0!
 # )
@@ -52,14 +52,18 @@ zram_swap() {
 }
 
 
-# int zram_init__swap ( **ZRAM_NAME, **ZRAM_DEV )
+# @zram_type_init zram_init__swap ( **ZRAM_NAME, **ZRAM_DEV )
+#
+#  Runs mkswap %ZRAM_DEV.
 #
 zram_init__swap() {
    ${AUTODIE_NONFATAL-} ${X_MKSWAP:?} \
-      -L "${ZRAM_NAME}" "${ZRAM_DEV:?}" 1>>${DEVNULL}
+      -L "${ZRAM_FS_NAME}" "${ZRAM_DEV:?}" 1>>${DEVNULL}
 }
 
 # int zram_swapon ( priority=default, **ZRAM_DEV )
+#
+#  Activates a zram swap device.
 #
 zram_swapon() {
    local prio
@@ -86,6 +90,8 @@ zram_swapon() {
 }
 
 # int zram_swapoff ( **ZRAM_DEV )
+#
+#  Deactivates a zram swap device.
 #
 zram_swapoff() {
    ${AUTODIE_NONFATAL-} ${X_SWAPOFF:?} "${ZRAM_DEV:?}"

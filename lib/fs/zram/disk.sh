@@ -1,24 +1,59 @@
 #@section functions
 
-# int zram_disk (
-#    ident, size_m, mp, mount_opts=, fstype:=auto, mode=, owner=
+# @private::protected int zram_disk__from_vars (
+#    *mkfs_args,
+#    **size_m, **mp, **mount_opts, **fstype, **mode, **owner,
+#    **ZRAM_!
 # )
 #
-#  Note that you cannot pass any mkfs options when using this function.
+#  Internal wrapper for zram_init_any() + zram_disk_mount().
 #
-zram_disk() {
-   zram_init "${1?}" "${2:?}" disk "${5:-auto}" && \
-   zram_disk_mount "${3:?}" "${4-}" "${5:-auto}" "${6-}" "${7-}"
+zram_disk__from_vars() {
+   zram_init_any "${size_m?}" disk "${fstype?}" "${@}" && \
+   zram_disk_mount \
+      "${mp?}" "${mount_opts?}" "${fstype?}" "${mode?}" "${owner?}"
 }
 
-# int zram_init__disk ( *mkfs_args, **ZRAM_ )
+# @zram_init_any zram_disk (
+#    size_m, mp, mount_opts=rw,noatime, fstype:=auto, mode=, owner=,
+#    *mkfs_args, **ZRAM_!
+# )
+#
+#  Initializes a zram disk device of the given size,
+#  creates a filesystem of type %fstype with args %mkfs_args for it
+#  and mounts it at %mp with the given %mount_opts.
+#
+#  Optionally adjusts permissions/ownership of the mountpoint (after mounting),
+#  which requires a writable mount ("ro" not in %mount_opts).
+#
+zram_disk() {
+   local size_m mp mount_opts fstype mode owner
+
+   size_m="${1:?}"
+   mp="${2:?}"
+   mount_opts="${3:-rw,noatime}"
+   fstype="${4:-auto}"
+   mode="${5-}"
+   owner="${6-}"
+
+   if [ ${#} -gt 6 ]; then
+      shift 6 && zram_disk__from_vars "${@}"
+   else
+      zram_disk__from_vars
+   fi
+}
+
+# @zram_type_init zram_init__disk ( fstype:=<default>, *mkfs_args, **ZRAM_ )
+#
+#  Creates a filesystem. See zram_disk_mkfs() for details.
 #
 zram_init__disk() {
    zram_disk_mkfs "${@}"
 }
 
-
 # int zram_disk_umount ( **ZRAM_DEV )
+#
+#  Unmounts %ZRAM_DEV, assuming that it was mounted as disk.
 #
 zram_disk_umount() {
    zram_log_info "Unmounting ${ZRAM_DEV}"
@@ -26,6 +61,11 @@ zram_disk_umount() {
 }
 
 # zram_disk_mount ( mp, opts=, fstype=auto, mode=, owner=, **ZRAM_DEV )
+#
+#  Mounts %ZRAM_DEV at the given mountpoint, with the given %fstype and %opts.
+#
+#  Optionally sets permissions/ownership after mounting, which requires
+#  a non-readonly mount.
 #
 zram_disk_mount() {
    zram_log_info "Mounting ${ZRAM_DEV} at ${1:-%UNSET%}"
@@ -44,8 +84,17 @@ zram_disk_mount() {
    return 0
 }
 
-# int zram_disk_mkfs ( fstype:=ext4, *args )
+# int zram_disk_mkfs ( fstype:=ext4, *args, **ZRAM_DEV, **ZRAM_FS_NAME )
 #  @calls zram_disk_mkfs_%fstype ( *args )
+#
+#  Creates a filesystem for %ZRAM_DEV by calling the fstype-specific
+#  mkfs function zram_disk_mkfs_%fstype(*args).
+#
+#  %ZRAM_FS_NAME should be used as filesytem name (label) if applicable.
+#
+#  %fstype defaults to ext4 if empty or set to "auto".
+#
+#  Returns: success (true/false)
 #
 zram_disk_mkfs() {
    local fstype="${1:-ext4}"
@@ -53,6 +102,7 @@ zram_disk_mkfs() {
 
    case "${fstype}" in
       ext4|auto)
+         #@debug function_defined zram_disk_mkfs_ext4 || function_die
          zram_log_info "Creating ext4 filesystem on ${ZRAM_DEV:?}"
          ${AUTODIE_NONFATAL-} zram_disk_mkfs_ext4 "${@}"
       ;;

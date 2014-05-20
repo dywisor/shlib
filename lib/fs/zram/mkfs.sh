@@ -1,7 +1,8 @@
 #@section functions
 
 # @funcdef zram_mkfs <fstype> int zram_disk_mkfs_<fstype> (
-#    <args>, **ZRAM_NAME, **ZRAM_DEV, **ZRAM_BLOCK, **ZRAM_SIZE_M
+#    <args>,
+#    **ZRAM_FS_NAME, **ZRAM_NAME, **ZRAM_DEV, **ZRAM_BLOCK, **ZRAM_SIZE_M
 # )
 
 # @zram_mkfs ext4 zram_disk_mkfs_ext4()
@@ -15,7 +16,7 @@ zram_disk_mkfs_ext4() {
 
 
    1>>${DEVNULL} ${AUTODIE_NONFATAL-} ${X_MKFS_EXT4:?} \
-      -m 0 -E nodiscard -L "${ZRAM_NAME:?}" -O "${features}" "${ZRAM_DEV:?}"
+      -m 0 -E nodiscard -L "${ZRAM_FS_NAME:?}" -O "${features}" "${ZRAM_DEV:?}"
 }
 
 # @zram_mkfs ext2 zram_disk_mkfs_ext2()
@@ -29,5 +30,5 @@ zram_disk_mkfs_ext2() {
 
 
    1>>${DEVNULL} ${AUTODIE_NONFATAL-} ${X_MKFS_EXT2:?} \
-      -m 0 -L "${ZRAM_NAME:?}" -O "${features}" "${ZRAM_DEV:?}"
+      -m 0 -L "${ZRAM_FS_NAME:?}" -O "${features}" "${ZRAM_DEV:?}"
 }

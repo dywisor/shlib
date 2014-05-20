@@ -1,0 +1,3 @@
+defsym
+fs/zram/base
+fs/zram/disk

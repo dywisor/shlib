@@ -1,4 +1,7 @@
+logging
+
 fs/zram/base
 fs/zram/swap
 fs/zram/autoswap
 fs/zram/disk
+fs/zram/tmpfs
