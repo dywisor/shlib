@@ -66,8 +66,8 @@ net_setup_init_config_dir() {
    if ! net_setup_config__wipe_dir "config dir" "${confdir}"; then
       return 4
    elif ${AUTODIE_NONFATAL-} dodir_clean "${confdir}"; then
-      net_setup_config_write type "${1}"
-      return 0
+      net_setup_config_write type     "${1}" && \
+      net_setup_config_write initstate 0
    else
       net_setup_config_log ERROR "failed to create config dir ${confdir}"
       return 5

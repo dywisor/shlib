@@ -41,6 +41,7 @@ bridge_add_slaves() {
 
    net_setup_log_info "${iface}: adding bridge interfaces ${slaves}"
    for dev in ${slaves}; do
+      net_ifup "${dev}" && \
       brctl__cmd addif "${iface}" "${dev}" || return 1
    done
 }
@@ -81,7 +82,6 @@ bridge_del_slaves() {
 
 net_ifup__bridge() {
    local dev slaves
-   check_is_bridge || brctl__cmd addbr "${iface}" || return 1
 
    for dev in "${confdir}/slaves/"*; do
       if [ -e "${dev}" ] || [ -h "${dev}" ]; then
@@ -89,11 +89,14 @@ net_ifup__bridge() {
       fi
    done
 
-   bridge_add_slaves ${slaves} && net_ifup__common
+   check_is_bridge || brctl__cmd addbr "${iface}" || return 1
+   net_iface_up && bridge_add_slaves ${slaves} && net_ifup__common
 }
 
 net_ifdown__bridge() {
    check_is_bridge || return 2
+   # @keep-going
    bridge_del_slaves y
+   net_iface_down "${iface}"
    brctl__cmd delbr "${iface}"
 }

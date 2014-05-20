@@ -67,7 +67,7 @@ net_ifdown() {
 #
 net_ifup__iface() {
    local ret=0
-   local iface iftype confdir
+   local iface iftype confdir istate
 
    iface="${1}"
 
@@ -93,13 +93,30 @@ net_ifup__iface() {
       net_setup_log_error "failed to get type for interface ${iface}."
       ret=5
 
+   elif ! read -r istate < "${confdir}/initstate"; then
+      net_setup_log_error "failed to get init state for interface ${iface}."
+      ret=6
+
+   elif ! [ ${istate} -ge 0 2>/dev/null ]; then
+      net_setup_log_error "invalid init state for interface ${iface}."
+      ret=7
+
+   elif [ ${istate} -gt 0 ]; then
+      net_setup_log_debug "interface ${iface} already configured."
+      #ret=0
+
    elif ! function_defined net_ifup__${iftype}; then
       net_setup_log_error \
          "cannot set up interface ${iface}: unsupported type ${iftype}"
-      ret=6
+      ret=8
 
    elif net_ifup__${iftype}; then
-      true
+      if ! echo 1 > "${confdir}/initstate"; then
+         net_setup_log_error \
+            "failed to write init state for interface ${iface}"
+         ret=9
+      fi
+      #else ret=0
 
    else
       ret=${?}
