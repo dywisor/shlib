@@ -29,6 +29,9 @@ __cmdline_parse_mux() {
          return 0
       fi
    done
-   # nobody cared about arg, call argparse_unknown()
-   argparse_unknown
+
+   if __debug__; then
+      # nobody cared about arg, call argparse_unknown()
+      argparse_unknown
+   fi
 }
