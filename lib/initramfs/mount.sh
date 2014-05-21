@@ -36,6 +36,25 @@ imount_fs() {
    irun domount_fs "$@"
 }
 
+# void iremount_ro ( *mountpoints )
+#
+#  Alias to irun remount_ro ( *mountpoints ).
+#
+## @NEED_UPDATE_CORE
+##
+iremount_ro() {
+   irun remount_ro "$@"
+}
+
+# void iremount_rw ( *mountpoints )
+#
+#  Alias to irun remount_rw ( *mountpoints ).
+#
+## @NEED_UPDATE_CORE
+##
+iremount_rw() {
+   irun remount_rw "$@"
+}
 
 #@section module_init_vars
 # @implicit void main ( **F_DOMOUNT_MP! )

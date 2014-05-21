@@ -1,2 +1,3 @@
 fs/mount/domount
+fs/mount/remount
 initramfs/run
