@@ -110,7 +110,7 @@ sfs_container_init() {
    SFS_CONTAINER="${1:?}"
    SFS_CONTAINER_NAME="${2:-sfs_container}"
    SFS_CONTAINER_SIZE="${3:-0}"
-   SFS_CONTAINER_SPARE_SIZE="${4:-50}"
+   SFS_CONTAINER_SPARE_SIZE="${4:-5}"
    SFS_CONTAINER_MOUNT_OPTS="${5:-mode=0711}"
 
    if sfs_container__isdir; then
