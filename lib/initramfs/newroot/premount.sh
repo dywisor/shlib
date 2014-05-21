@@ -33,6 +33,7 @@ __newroot_premount_fstab() {
    # don't mount $newroot_mp twice
    if disk_mounted "" "${newroot_mp}"; then
       ewarn "${newroot_mp} already mounted."
+      mounted=1
       return 0
    fi
 
