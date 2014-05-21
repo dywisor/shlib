@@ -1,4 +1,5 @@
 initramfs/mount
+initramfs/zram
 
 initramfs/newroot/liram/base
 initramfs/newroot/liram/logging

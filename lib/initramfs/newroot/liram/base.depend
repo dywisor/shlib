@@ -9,5 +9,6 @@ initramfs/disk
 initramfs/mount
 initramfs/nfsmount
 initramfs/run
+initramfs/zram
 
 initramfs/newroot/liram/errmsg

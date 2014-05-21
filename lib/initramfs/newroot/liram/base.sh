@@ -286,15 +286,29 @@ liram_unmount_sysdisk() {
 liram_umount_sysdisk() { liram_unmount_sysdisk "$@"; }
 
 # void liram_mount_rootfs (
-#    **NEWROOT, **LIRAMFS_NAME=liramfs, **LIRAM_ROOTFS_SIZE
+#    **NEWROOT, **LIRAMFS_NAME=liramfs, **LIRAM_ROOTFS_SIZE,
+#    **LIRAM_ROOTFS_TYPE=tmpfs, **LIRAM_ROOTFS_ZRAM_FSTYPE=auto
 # )
 #
-#  Mounts NEWROOT as tmpfs.
+#  Mounts NEWROOT as %LIRAM_ROOTFS_TYPE.
 #
 liram_mount_rootfs() {
-   imount_fs \
-      "${NEWROOT:?}" "${LIRAMFS_NAME=liramfs}" \
-      "mode=0755,size=${LIRAM_ROOTFS_SIZE:?}m" "tmpfs"
+   case "${LIRAM_ROOTFS_TYPE-}" in
+      ''|'tmpfs')
+         imount_fs \
+            "${NEWROOT:?}" "${LIRAMFS_NAME:=liramfs}" \
+            "mode=0755,size=${LIRAM_ROOTFS_SIZE:?}m" "tmpfs"
+      ;;
+      'zram')
+         initramfs_zram_dotmpfs \
+            "${NEWROOT:?}" "${LIRAMFS_NAME:=liramfs}" \
+            "mode=0755,size=${LIRAM_ROOTFS_SIZE:?}m" \
+            "${LIRAM_ROOTFS_ZRAM_FSTYPE:-auto}"
+      ;;
+      *)
+         liram_die "unknown LIRAM_ROOTFS_TYPE '${LIRAM_ROOTFS_TYPE-}'."
+      ;;
+   esac
 }
 
 # int liram_getslot (

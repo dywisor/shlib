@@ -32,7 +32,7 @@ liram_setup_subtrees() {
       [ -f "${1}" ] || return 0
    fi
 
-   ## file format: <mountpoint> <size_m> [<name> [<mount_opts>]]
+   ## file format: <mountpoint> <size_m> [<name> [<mount_opts> [<type>]]]
    ## Surprisingly, this is also what liram_mount_subtree() expects.
    ##
    F_ITER=liram_mount_subtree \

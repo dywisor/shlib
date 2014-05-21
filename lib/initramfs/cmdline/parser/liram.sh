@@ -22,6 +22,10 @@ __cmdline_parser_liram_opts() {
       'size'|'rootfs_size')
          LIRAM_ROOTFS_SIZE="${v}"
       ;;
+      'zram')
+         LIRAM_ROOTFS_TYPE="${k}"
+         LIRAM_ROOTFS_ZRAM_FSTYPE="${v:-auto}"
+      ;;
       'layout')
          LIRAM_LAYOUT="${v}"
       ;;
@@ -91,6 +95,7 @@ __cmdline_parser_liram_opts() {
       ;;
       *)
          ${LOGGER} --level=WARN --facility=cmdline.liram "unknown option '${1}'"
+         LIRAM_CMDLINE_ARGS="${LIRAM_CMDLINE_ARGS-} ${1}"
       ;;
    esac
 }
