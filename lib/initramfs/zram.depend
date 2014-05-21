@@ -1,5 +1,9 @@
+logging
+
 initramfs/run
 
 fs/zram/autoswap
 fs/zram/disk
 fs/zram/tmpfs
+
+fs/mount/tmpfs
