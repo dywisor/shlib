@@ -16,7 +16,7 @@ initramfs_net_setup() {
          else
             conf="${CMDLINE_NET_CONFIG:-${INITRAMFS_NET_CONFIG-}}"
             if [ -n "${conf}" ] && [ "${conf}" != "null" ]; then
-               net_setup /tmp/initramfs_netconfig.$$ "${conf}" && \
+               net_setup /tmp/initramfs_netconfig.$$ ${conf} && \
                   INITRAMFS_HAVE_NET=y
             else
                initramfs_die "no network config available."
