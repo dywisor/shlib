@@ -88,7 +88,7 @@ sfs_container_avail() {
 }
 
 # void sfs_container_init (
-#    mp, name="sfs_container", size_m=0, spare_size=50, mount_opts="mode=0711",
+#    mp, name="sfs_container", size_m=0, spare_size=5, mount_opts="mode=0711",
 #    **SFS_CONTAINER!, **SFS_CONTAINER_NAME!, **SFS_CONTAINER_SIZE!,
 #    **SFS_CONTAINER_SPARE_SIZE!, **SFS_CONTAINER_MOUNT_OPTS!
 # ), raises die()
