@@ -75,3 +75,18 @@ mountpoint_in_fstab() {
       return 1
    fi
 }
+
+# int dev_in_fstab ( dev, **FSTAB_FILE=/etc/fstab )
+#
+#  Returns 0 if the given device/fs appears in %FSTAB_FILE, else 1.
+#  Returns 2 if %dev was empty.
+#
+dev_in_fstab() {
+   if [ -z "${1-}" ]; then
+      return 2
+   elif grep -q -- "^${1}[[:blank:]]" "${FSTAB_FILE:-/etc/fstab}"; then
+      return 0
+   else
+      return 1
+   fi
+}
