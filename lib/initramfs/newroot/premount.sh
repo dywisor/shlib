@@ -92,6 +92,12 @@ __newroot_premount_fstab() {
    esac
 
    case "${fs}" in
+      /dev/*)
+         imount_disk \
+            "${newroot_mp}" "${fs}" "${opts}" "${fstype}" \
+            "${NEWROOT_PREMOUNT_FSCK:-y}" && \
+         mounted=1
+      ;;
       /*)
          local fs_file
          # this looks like a file
@@ -139,6 +145,20 @@ newroot_premount() {
 #
 newroot_premount_essential() { irun newroot_premount "$@"; }
 
+# int newroot_premount_squashed_usr ( **NEWROOT )
+#
+#  FIXME doc
+#
+newroot_premount_squashed_usr() {
+   local sfs_file
+   sfs_file="${NEWROOT}/usr.sfs"
+
+   [ -f "${sfs_file}" ] || return 4
+
+   # aufs not supported so far (because of cmdline options/parser)
+   irun dosquashfs "${sfs_file}" "${NEWROOT}/usr"
+}
+
 # void newroot_premount_all (
 #    **CMDLINE_PREMOUNT=,
 #    **CMDLINE_NO_USR=n,
@@ -150,6 +170,11 @@ newroot_premount_essential() { irun newroot_premount "$@"; }
 #
 newroot_premount_all() {
    local NEWROOT_PREMOUNT_FSCK="${CMDLINE_FSCK:-y}"
+   local have_usr=n
+
+   if [ "${CMDLINE_SQUASHED_USR:-n}" = "y" ]; then
+      inonfatal newroot_premount_squashed_usr && have_usr=y
+   fi
 
    if [ -n "${CMDLINE_PREMOUNT-}" ]; then
       set -- ${CMDLINE_PREMOUNT}
@@ -157,7 +182,7 @@ newroot_premount_all() {
          [ -z "${1-}" ] || newroot_premount_essential "${1}"
          shift
       done
-   elif [ "${CMDLINE_NO_USR:-n}" != "y" ]; then
+   elif [ "${have_usr:-X}" != "y" ] && [ "${CMDLINE_NO_USR:-n}" != "y" ]; then
       newroot_premount /usr || ${LOGGER} -0 --level=INFO "/usr is not separate"
    fi
    return 0

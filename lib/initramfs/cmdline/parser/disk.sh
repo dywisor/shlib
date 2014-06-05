@@ -51,7 +51,10 @@ cmdline_parser_disk() {
          F_ITER=__cmdline_parser_disk_premount list_iterator "${value}"
       ;;
       no_usr)
-         CMDLINE_NO_USER=y
+         CMDLINE_NO_USR=y
+      ;;
+      squashed_usr)
+         CMDLINE_SQUASHED_USR=y
       ;;
 
       # fsck

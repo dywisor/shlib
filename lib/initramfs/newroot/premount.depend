@@ -1,6 +1,9 @@
 misc/pragma
 fs/mount/fstab_iter
 
+fs/mount/dosquashfs
+fs/mount/aufs
+
 initramfs/mount
 initramfs/disk
 initramfs/run
