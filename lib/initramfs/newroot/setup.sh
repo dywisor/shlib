@@ -187,4 +187,7 @@ newroot_setup_all() {
    irun newroot_setup_mountpoints
    irun newroot_setup_dirs
    irun newroot_setup_tmpdir
+
+   # EXPERIMENTAL: run "setup" hook
+   newroot_setup_run_hook setup
 }
