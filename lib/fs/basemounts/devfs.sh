@@ -53,23 +53,49 @@ devfs_set_hotplug_agent() {
    fi
 }
 
-
-# int devfs_seed ( devfs=/dev, **AUTODIE=, **AUTODIE_NONFATAL= )
+#@nodes console, null, ttyS0, tty1, tty, urandom, random, zero, kmsg
+# int devfs_seed (
+#    devfs=/dev,
+#    **DEVFS_<node>_MODE=, **DEVFS_<node>_OWNER=, **TTY_GID:=0,
+#    **AUTODIE=, **AUTODIE_NONFATAL=
+# )
 #
 devfs_seed() {
-   local devfs="${1:-/dev}"
-   local fail=0
+   local devfs fail tty_owner
+   devfs="${1:-/dev}"
+   fail=0
+   # %TTY_GID should be set be defsym or $$others
+   tty_owner="0:${TTY_GID:-0}"
 
    if ${AUTODIE-} dodir_clean "${devfs}"; then
-      ${AUTODIE-} devfs_do_chardev "${devfs}/console" 5 1  || fail=2
-      ${AUTODIE-} devfs_do_chardev "${devfs}/null"    1 3  || fail=2
-      ${AUTODIE-} devfs_do_chardev "${devfs}/ttyS0"   4 64 || fail=2
-      ${AUTODIE-} devfs_do_chardev "${devfs}/tty1"    4 1  || fail 2
-      ${AUTODIE-} devfs_do_chardev "${devfs}/tty"     5 0  || fail=2
-      ${AUTODIE-} devfs_do_chardev "${devfs}/urandom" 1 9  || fail=2
-      ${AUTODIE-} devfs_do_chardev "${devfs}/random"  1 8  || fail=2
-      ${AUTODIE-} devfs_do_chardev "${devfs}/zero"    1 5  || fail=2
-      ${AUTODIE-} devfs_do_chardev "${devfs}/kmsg"    1 11 || fail=2
+
+      ${AUTODIE-} devfs_do_chardev "${devfs}/console" 5 1  \
+         ${DEVFS_CONSOLE_MODE:-0620} ${DEVFS_CONSOLE_OWNER:--} || fail=2
+
+      ${AUTODIE-} devfs_do_chardev "${devfs}/null"    1 3  \
+         ${DEVFS_NULL_MODE:-0666}    ${DEVFS_NULL_OWNER:--}    || fail=2
+
+      ${AUTODIE-} devfs_do_chardev "${devfs}/ttyS0"   4 64 \
+         ${DEVFS_TTYS0_MODE:-0660}   ${DEVFS_TTYS0_OWNER:-${tty_owner}} || fail=2
+
+      ${AUTODIE-} devfs_do_chardev "${devfs}/tty1"    4 1  \
+         ${DEVFS_TTY1_MODE:-0620}    ${DEVFS_TTY1_OWNER:-${tty_owner}} || fail=2
+
+      ${AUTODIE-} devfs_do_chardev "${devfs}/tty"     5 0  \
+         ${DEVFS_TTY_MODE:-0666}     ${DEVFS_TTY_OWNER:-${tty_owner}} || fail=2
+
+      ${AUTODIE-} devfs_do_chardev "${devfs}/urandom" 1 9  \
+         ${DEVFS_URANDOM_MODE:-0666} ${DEVFS_URANDOM_OWNER:--} || fail=2
+
+      ${AUTODIE-} devfs_do_chardev "${devfs}/random"  1 8  \
+         ${DEVFS_RANDOM_MODE:-0666}  ${DEVFS_RANDOM_OWNER:--} || fail=2
+
+      ${AUTODIE-} devfs_do_chardev "${devfs}/zero"    1 5  \
+         ${DEVFS_ZERO_MODE:-0666}    ${DEVFS_ZERO_OWNER:--} || fail=2
+
+      ${AUTODIE-} devfs_do_chardev "${devfs}/kmsg"    1 11 \
+         ${DEVFS_KMSG_MODE:-0644}   ${DEVFS_KMSG_OWNER:--} || fail=2
+
 
       ${AUTODIE-} dosym /proc/self/fd   "${devfs}/fd"      || fail=3
       ${AUTODIE-} dosym /proc/self/fd/0 "${devfs}/stdin"   || fail=3

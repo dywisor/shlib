@@ -10,3 +10,5 @@
 : ${SYSFS_OPTS:=rw,nosuid,nodev,noexec,relatime}
 
 : ${MDADM_SCAN_OPTS=--no-degraded}
+
+: ${DEVFS_TTY_GID:=5}

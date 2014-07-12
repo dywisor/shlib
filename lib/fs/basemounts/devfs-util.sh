@@ -70,26 +70,44 @@ devfs_get_misc_dev_minor() {
    [ -n "${v0}" ]
 }
 
-# int devfs_do_blockdev ( dev, major, minor, **X_MKNOD=mknod, **MKNOD_OPTS= )
+# int devfs_do_blockdev (
+#    dev, major, minor, mode=, owner=,
+#    **X_MKNOD=mknod, **MKNOD_OPTS=
+# )
 #
 #  Creates a block dev if it doesn't exist.
 #
 devfs_do_blockdev() {
    if [ ! -b "${1}" ]; then
       rm -f -- "${1}"
-      ${X_MKNOD:-mknod} ${MKNOD_OPTS-} "${1}" b "${2}" "${3}"
+      ${X_MKNOD:-mknod} ${MKNOD_OPTS-} "${1}" b "${2}" "${3}" && \
+      devfs_setperm "${1}" "${4-}" "${5-}"
    fi
 }
 
-# int devfs_do_chardev ( dev, major, minor, **X_MKNOD=mknod, **MKNOD_OPTS= )
+# int devfs_do_chardev (
+#    dev, major, minor, mode=, owner=,
+#    **X_MKNOD=mknod, **MKNOD_OPTS=
+# )
 #
 #  Creates a char dev if it doesn't exist.
 #
 devfs_do_chardev() {
    if [ ! -c "${1}" ]; then
       rm -f -- "${1}"
-      ${X_MKNOD:-mknod} ${MKNOD_OPTS-} "${1}" c "${2}" "${3}"
+      ${X_MKNOD:-mknod} ${MKNOD_OPTS-} "${1}" c "${2}" "${3}" && \
+      devfs_setperm "${1}" "${4-}" "${5-}"
    fi
+}
+
+# int devfs_setperm ( dev, mode="-", owner="-", **X_CHMOD=chmod, **X_CHOWN=chown )
+#
+devfs_setperm() {
+   #@varcheck 1
+   local setperm_retcode=0
+   [ "${2:--}" = "-" ] || ${X_CHMOD:-chmod} "${2}" "${1}" || setperm_retcode=${?}
+   [ "${3:--}" = "-" ] || ${X_CHOWN:-chown} "${3}" "${1}" || setperm_retcode=${?}
+   return ${setperm_retcode}
 }
 
 # int devfs_create_device_mapper_node (
