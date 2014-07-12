@@ -44,7 +44,6 @@ liram_populate_layout_stage3() {
    irun liram_scan_files
 
    # unpack stage3, stage3-overlay
-   liram_log_tarball_unpacking "stage3"
    irun liram_unpack_name stage3 /
    liram_unpack_optional stage3-overlay "" /
 
