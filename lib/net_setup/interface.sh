@@ -1,17 +1,69 @@
 #@section functions
 
-net_setup_set_iface_backend() {
-   if list_has "${1:?}" ${NET_SETUP_IFACE_BACKENDS?}; then
-      __NET_SETUP_IFACE_BACKEND="${1}"
+# int net_setup__check_backend_supported ( backend_type, name, backends )
+#
+net_setup__check_backend_supported() {
+   if list_has "${2:?}" ${3?}; then
       return 0
    else
-      net_setup_log_error "unknown/unsupported net iface backend '${1-}'"
+      net_setup_log_error \
+         "unknown/unsupported net ${1:-%UNDEF%} backend '${2-}'"
       return 1
    fi
 }
 
+
+net_setup_set_iface_backend() {
+   net_setup__check_backend_supported iface \
+      "${1:?}" "${NET_SETUP_IFACE_BACKENDS?}" && \
+   __NET_SETUP_IFACE_BACKEND="${1}"
+}
+
+net_setup_set_dhcp_backend() {
+   net_setup__check_backend_supported dhcp \
+      "${1:?}" "${NET_SETUP_DHCP_BACKENDS?}" && \
+   __NET_SETUP_DHCP_BACKEND="${1}"
+}
+
+net_setup_set_dhcp6_backend() {
+   net_setup__check_backend_supported dhcp \
+      "${1:?}" "${NET_SETUP_DHCP6_BACKENDS?}" && \
+   __NET_SETUP_DHCP_BACKEND="${1}"
+}
+
 net_setup_set_default_iface_backend() {
    net_setup_set_iface_backend iproute2
+}
+
+net_setup_set_default_dhcp_backend() {
+   net_setup_set_dhcp_backend udhcpc
+}
+
+net_setup_set_default_dhcp6_backend() {
+   net_setup_set_dhcp_backend udhcpc6
+}
+
+# int net_iface_dodhcp ( **iface )
+#
+net_iface_dodhcp() {
+   net_setup_log_info "Running dhcp for interface ${iface}"
+
+   if ${__NET_SETUP_DHCP_BACKEND:?}_dodhcp "$@"; then
+      return 0
+   else
+      net_setup_log_error \
+         "failed to get an address via dhcp for interface ${iface}"
+      return 1
+   fi
+}
+
+# int net_iface_dodhcp6 ( **iface )
+#
+net_iface_dodhcp6() {
+   net_setup_log_info "Running dhcp6 for interface ${iface}"
+
+   net_setup_log_error "dhcp6 is not implemented."
+   return 1
 }
 
 

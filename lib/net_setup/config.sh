@@ -126,11 +126,29 @@ net_setup_config_get_devices() {
    [ -n "${v0}" ]
 }
 
-net_setup_config_read_entry() {
+net_setup_config_read_entry_emptyok() {
    #@VARCHECK confdir 1
    v0=
    [ -f "${confdir}/${1}" ] && read -r v0 < "${confdir}/${1}" || return 1
-   [ -n "${v0}" ]
+}
+
+net_setup_config_read_entry() {
+   net_setup_config_read_entry_emptyok "${1:?}" && [ -n "${v0}" ]
+}
+
+net_setup_config_read_bool_entry() {
+   local v0
+
+   if ! net_setup_config_read_entry_emptyok "${1:?}"; then
+      [ "${3:-n}" = "y" ] || return 1
+      return 0
+
+   elif [ "${v0:-${2:-y}}" = "y" ]; then
+      return 0
+
+   else
+      return 1
+   fi
 }
 
 net_setup_config_read_global_entry() {

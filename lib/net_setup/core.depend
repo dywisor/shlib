@@ -11,3 +11,4 @@ net_setup/logging
 
 net_setup/backends/bridge
 net_setup/backends/iproute2
+net_setup/backends/udhcpc

@@ -7,7 +7,8 @@
 
 # @section module_init_vars
 : ${__NET_SETUP_IFACE_BACKEND:=iproute2}
-
+: ${__NET_SETUP_DHCP_BACKEND:=udhcpc}
+: ${__NET_SETUP_DHCP6_BACKEND:=}
 
 #@section functions
 

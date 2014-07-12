@@ -85,7 +85,7 @@ net_ifup__iface() {
          ret=3
       fi
 
-   elif [ -f "${confdir}/ignore" ]; then
+   elif net_setup_config_read_bool_entry ignore; then
       net_setup_log --level=WARN "interface ${iface} is ignored."
       #ret=0
 
@@ -142,7 +142,7 @@ net_ifdown__iface() {
          net_ifdown__common
       fi
 
-   elif [ -f "${confdir}/ignore" ]; then
+   elif net_setup_config_read_bool_entry ignore; then
       net_setup_log --level=WARN "interface ${iface} is ignored."
       #ret=0
 
@@ -173,32 +173,52 @@ net_ifdown__iface() {
 # @net_ifup common net_ifup__common()
 #
 net_ifup__common() {
-   local v0 line have_any
+   local v0 line have_ipv4 have_ipv6
 
    net_iface_flush_addr
 
+   have_ipv4=n
+   have_ipv6=n
+
+   # get ipv4 addr via dhcp
+   if net_setup_config_read_bool_entry ipv4_dhcp; then
+      net_iface_dodhcp && have_ipv4=y || ret=2
+   fi
+
+   # add configured ipv4 addresses
    if [ -f "${confdir}/ipv4_addr" ]; then
-      have_any=n
       while read -r line; do
-         net_iface_add_ipv4_addr ${line} && have_any=y || ret=2
+         net_iface_add_ipv4_addr ${line} && have_ipv4=y || ret=2
       done < "${confdir}/ipv4_addr"
-
-      if [ "${have_any}" = "y" ] && net_setup_config_read_entry ipv4_gw; then
-         net_iface_set_ipv4_gw ${v0} || ret=2
-      fi
    fi
 
+   # set ipv4 gateway if configured and at least one ipv4 addr available
+   if [ "${have_ipv4}" = "y" ] && net_setup_config_read_entry ipv4_gw; then
+      net_iface_set_ipv4_gw ${v0} || ret=2
+   fi
+
+
+   # same for ipv6
+
+   # dhcp ipv6 addr
+   if net_setup_config_read_bool_entry ipv6_dhcp; then
+      net_iface_dodhcp6 && have_ipv6=y || ret=2
+   fi
+
+   # custom ipv6 addr
    if [ -f "${confdir}/ipv6_addr" ]; then
-      have_any=n
       while read -r line; do
-         net_iface_add_ipv6_addr ${line} && have_any=y || ret=2
+         net_iface_add_ipv6_addr ${line} && have_ipv6=y || ret=2
       done < "${confdir}/ipv6_addr"
-
-      if [ "${have_any}" = "y" ] && net_setup_config_read_entry ipv6_gw; then
-         net_iface_set_ipv6_gw ${v0} || ret=2
-      fi
    fi
 
+   # ipv6 gateway
+   if [ "${have_ipv6}" = "y" ] && net_setup_config_read_entry ipv6_gw; then
+      net_iface_set_ipv6_gw ${v0} || ret=2
+   fi
+
+
+   # dns
    if [ -f "${confdir}/dns" ]; then
       while read -r line; do
          net_setup_config_globals_append dns "${line}"

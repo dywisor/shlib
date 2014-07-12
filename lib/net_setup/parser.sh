@@ -44,12 +44,21 @@ net_setup_parser__parse_common_opt() {
          fi
       ;;
 
+      dhcp)
+         net_setup_parser_debug "${iface}/ipv4_dhcp: ${2:-y}"
+         net_setup_config_write ipv4_dhcp "${2:-y}"
+      ;;
+
       ip|addr)
          if [ -n "${2+SET}" ]; then
             case "${2}" in
                '')
                   net_setup_parser_debug "${iface}/ipv4_addr: remove"
                   net_setup_config_write ipv4_addr ""
+               ;;
+               'auto'|'dhcp')
+                  net_setup_parser_debug "${iface}/ipv4_dhcp: y"
+                  net_setup_config_write ipv4_dhcp y
                ;;
                [0-9]*.?*.?*.?*/?*)
                   net_setup_parser_debug "${iface}/ipv4_addr: add ${2}"
@@ -80,12 +89,22 @@ net_setup_parser__parse_common_opt() {
          fi
       ;;
 
+
+      dhcp6)
+         net_setup_parser_debug "${iface}/ipv6_dhcp: ${2:-y}"
+         net_setup_config_write ipv6_dhcp "${2:-y}"
+      ;;
+
       ip6|addr6)
          if [ -n "${2+SET}" ]; then
             case "${2}" in
                '')
                   net_setup_parser_debug "${iface}/ipv6_addr: remove"
                   net_setup_config_write ipv6_addr ""
+               ;;
+               'auto'|'dhcp'|'dhcp6')
+                  net_setup_parser_debug "${iface}/ipv6_dhcp: y"
+                  net_setup_config_write ipv6_dhcp y
                ;;
                *)
                   net_setup_parser_debug "${iface}/ipv6_addr: add ${2}"
