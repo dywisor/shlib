@@ -1,17 +1,22 @@
 #@HEADER
+# int liram_populate_layout_stage()
+# int liram_populate_layout_squashed_stage()
 # int liram_populate_layout_stage3()
 # int liram_populate_layout_squashed_stage3()
+# int liram_populate_layout_stage4()
+# int liram_populate_layout_squashed_stage4()
 #
 # ----------------------------------------------------------------------------
 #
-#  Populates %NEWROOT with a stage3/4 tarball:
+#  Populates %NEWROOT with a stage{,3,4} tarball:
 #
 # / (mandatory)
-# * As tmpfs using the "stage3" tarball [stage3]
-# * As <sfs,tmpfs> union using the "stage3" squashfs file [squashed_stage3]
+# * As tmpfs using the "stage"/"stage3"/"stage4" tarball [stage]
+# * As <sfs,tmpfs> union using the "$stage$" squashfs file [squashed_stage]
 #
 # / (optional)
-# * overwrites / with the contents of the "stage3-overlay" tarball
+# * extends the rootfs union with the "$stage$-overlay" squashfs file [squashed_stage]
+# * or overwrites / with the contents of the "$stage$-overlay" tarball [ALL]
 #
 # /etc (optional)
 # * Replaces the /etc directory from the rootfs tarball with the contents of
@@ -40,54 +45,102 @@
 #
 
 #@section functions
+#
+# int liram_populate_layout_stage()
+# int liram_populate_layout_squashed_stage()
 # int liram_populate_layout_stage3()
 # int liram_populate_layout_squashed_stage3()
-# int liram_populate_layout__stage3_common()
+# int liram_populate_layout_stage4()
+# int liram_populate_layout_squashed_stage4()
+#
+# int liram_layout_stage__populate(<stage name>)
+# int liram_layout_squashed_stage__populate(<stage name>)
+# int liram_layout_stage__common_populate(<stage name>)
 #
 
+liram_populate_layout_stage() {
+   liram_layout_stage__populate stage
+}
+
+liram_populate_layout_squashed_stage() {
+   liram_layout_squashed_stage__populate stage
+}
+
 liram_populate_layout_stage3() {
-   local v0 TARBALL_SCAN_NAMES SFS_SCAN_NAMES
+   liram_layout_stage__populate stage3
+}
 
-   liram_info "stage3 layout"
+liram_populate_layout_squashed_stage3() {
+   liram_layout_squashed_stage__populate stage3
+}
 
-   TARBALL_SCAN_NAMES="stage3"
+liram_populate_layout_stage4() {
+   liram_layout_stage__populate stage4
+}
+
+liram_populate_layout_squashed_stage4() {
+   liram_layout_squashed_stage__populate stage4
+}
+
+
+
+
+liram_layout_stage__populate() {
+   local v0 TARBALL_SCAN_NAMES SFS_SCAN_NAMES stage_name
+   stage_name="${1:?}"
+
+   liram_info "${stage_name} layout"
+
+   TARBALL_SCAN_NAMES="${stage_name} ${stage_name}-overlay"
    SFS_SCAN_NAMES=
 
    # scan for rootfs file
    irun liram_scan_files
 
-   # unpack stage3
-   irun liram_unpack_name stage3 /
+   # unpack stage file
+   irun liram_unpack_name "${stage_name}" /
+
+   # stage-overlay
+   liram_unpack_optional "${stage_name}-overlay" "" /
 
    # call common populate function
-   irun liram_populate_layout__stage3_common
+   irun liram_layout_stage__common_populate "${stage_name}"
 }
 
-liram_populate_layout_squashed_stage3() {
-   local v0 TARBALL_SCAN_NAMES SFS_SCAN_NAMES
+liram_layout_squashed_stage__populate() {
+   local v0 TARBALL_SCAN_NAMES SFS_SCAN_NAMES stage_name
+   stage_name="${1:?}"
+
    # @vars
    # init_sfs_root    : _temporary_ initramfs directory for union base mounts
    #                    * sfs-file-container (./container)
-   #                    * sfs-loop-mnt       (./loop)
+   #                    * stage-sfs-mnt      (./loop/rootfs)
    #                    * memory-mnt         (./mem -- move-mount from /newroot)
    #
    # newroot_sfs_root : final directory for union base mounts
    #
-   local sfs_file init_sfs_root newroot_sfs_root can_cleanup iter
+   local init_sfs_root newroot_sfs_root can_cleanup iter
+   local stage_sfs overlay_sfs
 
-   liram_info "squashed-stage3 layout"
-   TARBALL_SCAN_NAMES=
-   SFS_SCAN_NAMES="stage3"
+   liram_info "squashed-${stage_name} layout"
+   TARBALL_SCAN_NAMES="${stage_name}-overlay"
+   SFS_SCAN_NAMES="${stage_name} ${stage_name}-overlay"
 
-   # scan for rootfs file
+   # scan for stage{,-overlay} files
    irun liram_scan_files
 
    init_sfs_root="/rootfs_union_root"
    newroot_sfs_root="${NEWROOT:?}/.${init_sfs_root#/}"
 
    # filecheck
-   liram_get_squashfs stage3 && sfs_file="${v0:?}" || \
-      liram_die "stage3.sfs squashfs file is missing!"
+   liram_get_squashfs "${stage_name}" && stage_sfs="${v0:?}" || \
+      liram_die "${stage_name}.sfs squashfs file is missing!"
+
+   if liram_get_squashfs "${stage_name}-overlay"; then
+      overlay_sfs="${v0:?}"
+   else
+      overlay_sfs=
+   fi
 
    # sanity check
    can_cleanup=y
@@ -103,33 +156,43 @@ liram_populate_layout_squashed_stage3() {
 
    # init sfs container
    irun sfs_container_init     "${init_sfs_root}/container"
-   # import stage file ("soft-"renaming stage3->stage)
-   irun sfs_container_import   "${sfs_file}" "stage"
+
+   # import stage file
+   irun sfs_container_import   "${stage_sfs}" "stage"
+   # import overlay file
+   if [ -n "${overlay_sfs}" ]; then
+      irun sfs_container_import   "${overlay_sfs}" "overlay"
+   fi
+
    # remount sfs container readonly && downsize
    irun sfs_container_finalize
-   # mount stage file at <initramfs sfs root>/loop
-   irun sfs_container_mount    "stage" "${init_sfs_root}/loop"
+
+   # mount stage file at <initramfs sfs root>/loop/rootfs
+   irun sfs_container_mount    "stage" "${init_sfs_root}/loop/rootfs"
+   # mount overlay at <initramfs sfs root>/loop/overlay
+   if [ -n "${overlay_sfs}" ]; then
+      irun sfs_container_mount "overlay" "${init_sfs_root}/loop/overlay"
+   fi
+
    # mark sfs container as unusable
    SFS_CONTAINER=
+
 
    # mount-move should-be-empty %NEWROOT to <initramfs sfs root>/mem
    irun mkdir -p -- "${init_sfs_root}/mem"
    imount --move "${NEWROOT}" "${init_sfs_root}/mem"
 
-   # mount union<mem,loop> at %NEWROOT
-   imount -t aufs \
-      -o "br:${init_sfs_root}/mem=rw:${init_sfs_root}/loop=rr" \
-      aufs_rootfs "${NEWROOT}"
+   # mount union<mem,loop/rootfs> at %NEWROOT
+   iter="${init_sfs_root}/loop/rootfs=rr"
+   [ -z "${overlay_sfs}" ] || iter="${init_sfs_root}/loop/overlay=rr:${iter}"
+   iter="${init_sfs_root}/mem=rw:${iter}"
 
-## or
-##   irun aufs_union "${NEWROOT}" \
-##      "${init_sfs_root}/mem" \
-##      "${init_sfs_root}/loop" \
-##      "" \
-##      "aufs_rootfs"
+   imount -t aufs -o "br:${iter}" aufs_rootfs "${NEWROOT}"
 
-   # mount-move <initramfs sfs root>/{container,loop,mem} to <newroot sfs root>
-   for iter in container loop mem; do
+
+   # mount-move <initramfs sfs root>/{container,loop/rootfs,mem}
+   #  to <newroot sfs root>
+   for iter in container loop/rootfs ${overlay_sfs:+loop/overlay} mem; do
       irun mkdir -p -- "${newroot_sfs_root}/${iter}"
       imount --move "${init_sfs_root}/${iter}" "${newroot_sfs_root}/${iter}"
    done
@@ -141,24 +204,26 @@ liram_populate_layout_squashed_stage3() {
    # ... done !
 
 
+   # stage-overlay tarball (if no squashfs file found)
+   if [ -z "${overlay_sfs}" ]; then
+      liram_unpack_optional "${stage_name}-overlay" "" /
+   fi
+
    # call common populate function
-   irun liram_populate_layout__stage3_common
+   irun liram_layout_stage__common_populate "${stage_name}"
 }
 
 
+liram_layout_stage__common_populate() {
+   local v0 TARBALL_SCAN_NAMES SFS_SCAN_NAMES k stage_name
+   stage_name="${1:?}"
 
-liram_populate_layout__stage3_common() {
-   local v0 TARBALL_SCAN_NAMES SFS_SCAN_NAMES k
-
-   liram_info "stage3-common populating"
-   TARBALL_SCAN_NAMES="stage3-overlay etc kmod firmware scripts"
+   liram_info "${stage_name}-common populating"
+   TARBALL_SCAN_NAMES="etc kmod firmware scripts"
    SFS_SCAN_NAMES=
 
    # scan files
    irun liram_scan_files
-
-   # stage3-overlay
-   liram_unpack_optional stage3-overlay "" /
 
    # early setup (liram subtrees)
    inonfatal liram_setup_subtrees
@@ -206,7 +271,7 @@ liram_populate_layout__stage3_common() {
       if [ -d /lib/firmware/ ]; then
          liram_info \
             "transferring firmware files from initramfs to newroot"
-         irun with_globbing_do liram_layout_stage3__transfer_files \
+         irun with_globbing_do liram_layout_stage__transfer_files \
             /lib/firmware "${NEWROOT}/lib/firmware"
       fi
    fi
@@ -226,9 +291,9 @@ liram_populate_layout__stage3_common() {
 }
 
 
-# @private @recursive int liram_layout_stage3__transfer_files ( from, to )
+# @private @recursive int liram_layout_stage__transfer_files ( from, to )
 #
-liram_layout_stage3__transfer_files() {
+liram_layout_stage__transfer_files() {
    local f fname
 
    if ! mkdir -p -- "${2}/"; then
@@ -246,7 +311,7 @@ liram_layout_stage3__transfer_files() {
          fi
       elif [ -d "${f}" ]; then
          if ! \
-            liram_layout_stage3__transfer_files "${f}" "${2}/${fname}"
+            liram_layout_stage__transfer_files "${f}" "${2}/${fname}"
          then
             liram_log WARN "failed to copy dir ${f}"
             return 3
