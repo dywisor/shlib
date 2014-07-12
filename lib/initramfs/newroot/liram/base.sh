@@ -293,6 +293,10 @@ liram_umount_sysdisk() { liram_unmount_sysdisk "$@"; }
 #  Mounts NEWROOT as %LIRAM_ROOTFS_TYPE.
 #
 liram_mount_rootfs() {
+   if [ -z "${LIRAM_ROOTFS_SIZE-}" ]; then
+      liram_die "LIRAM_ROOTFS_SIZE is not set."
+   fi
+
    case "${LIRAM_ROOTFS_TYPE-}" in
       ''|'tmpfs')
          imount_fs \
