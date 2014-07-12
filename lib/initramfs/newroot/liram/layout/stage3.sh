@@ -231,21 +231,24 @@ liram_populate_layout__stage3_common() {
 liram_layout_stage3__transfer_files() {
    local f fname
 
-   inonfatal mkdir -p -- "${2}/" || return
+   if ! mkdir -p -- "${2}/"; then
+      liram_log WARN "failed to create dir ${2}"
+      return 1
+   fi
 
    for f in "${1}/"*; do
       fname="${f##*/}"
 
       if [ -f "${f}" ] || [ -h "${f}" ]; then
          if ! cp -a -- "${f}" "${2}/${fname}"; then
-            liram_log WARN "failed to copy firmware file ${f}"
+            liram_log WARN "failed to copy file ${f}"
             return 2
          fi
       elif [ -d "${f}" ]; then
          if ! \
             liram_layout_stage3__transfer_files "${f}" "${2}/${fname}"
          then
-            liram_log WARN "failed to copy firmware dir ${f}"
+            liram_log WARN "failed to copy dir ${f}"
             return 3
          fi
       else
