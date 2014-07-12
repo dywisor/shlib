@@ -57,7 +57,7 @@ liram_populate_layout_stage3() {
    irun liram_scan_files
 
    # unpack stage3
-   irun liram_unpack_name stage /
+   irun liram_unpack_name stage3 /
 
    # call common populate function
    irun liram_populate_layout__stage3_common
@@ -77,7 +77,7 @@ liram_populate_layout_squashed_stage3() {
 
    liram_info "squashed-stage3 layout"
    TARBALL_SCAN_NAMES=
-   SFS_SCAN_NAMES=stage3
+   SFS_SCAN_NAMES="stage3"
 
    # scan for rootfs file
    irun liram_scan_files
