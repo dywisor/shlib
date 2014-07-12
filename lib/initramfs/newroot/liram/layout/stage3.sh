@@ -83,7 +83,7 @@ liram_populate_layout_squashed_stage3() {
    irun liram_scan_files
 
    init_sfs_root="/rootfs_union_root"
-   newroot_sfs_root="${NEWROOT:?}/.${init_sfs_root#./}"
+   newroot_sfs_root="${NEWROOT:?}/.${init_sfs_root#/}"
 
    # filecheck
    liram_get_squashfs stage3 && sfs_file="${v0:?}" || \
@@ -237,10 +237,17 @@ liram_layout_stage3__transfer_files() {
       fname="${f##*/}"
 
       if [ -f "${f}" ] || [ -h "${f}" ]; then
-         inonfatal cp -a -- "${f}" "${2}/${fname}" || return
+         if ! cp -a -- "${f}" "${2}/${fname}"; then
+            liram_log WARN "failed to copy firmware file ${f}"
+            return 2
+         fi
       elif [ -d "${f}" ]; then
-         inonfatal liram_layout_stage3__transfer_files \
-            "${f}" "${2}/${fname}" || return
+         if ! \
+            liram_layout_stage3__transfer_files "${f}" "${2}/${fname}"
+         then
+            liram_log WARN "failed to copy firmware dir ${f}"
+            return 3
+         fi
       else
          liram_log WARN "transfer-files: cannot handle ${f}"
       fi
