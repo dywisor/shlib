@@ -60,6 +60,8 @@ aufs__get_branches_opt() {
    v0=
    local __AUFS_BRANCHES=
 
+   # BROKEN: __AUFS_BRANCHES gets reset in aufs__branchline
+   function_die "broken implementation" "aufs__get_branches_opt"
    [ -z "${1-}" ] || aufs__branchline rw ${1}
    [ -z "${2-}" ] || aufs__branchline rr ${2}
    [ -z "${3-}" ] || aufs__branchline ro ${3}
