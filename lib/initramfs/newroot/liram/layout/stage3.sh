@@ -119,7 +119,7 @@ liram_layout_squashed_stage__populate() {
    #
    # newroot_sfs_root : final directory for union base mounts
    #
-   local init_sfs_root newroot_sfs_root can_cleanup iter
+   local init_sfs_root newroot_sfs_root can_cleanup iter mnt_opts
    local stage_sfs overlay_sfs
 
    liram_info "squashed-${stage_name} layout"
@@ -183,18 +183,32 @@ liram_layout_squashed_stage__populate() {
    imount --move "${NEWROOT}" "${init_sfs_root}/mem"
 
    # mount union<mem,loop/rootfs> at %NEWROOT
-   iter="${init_sfs_root}/loop/rootfs=rr"
-   [ -z "${overlay_sfs}" ] || iter="${init_sfs_root}/loop/overlay=rr:${iter}"
-   iter="${init_sfs_root}/mem=rw:${iter}"
+   mnt_opts="${init_sfs_root}/loop/rootfs=rr"
+   [ -z "${overlay_sfs}" ] || \
+      mnt_opts="${init_sfs_root}/loop/overlay=rr:${mnt_opts}"
+   mnt_opts="br:${init_sfs_root}/mem=rw:${mnt_opts}"
 
-   imount -t aufs -o "br:${iter}" aufs_rootfs "${NEWROOT}"
+   case "${LIRAM_ROOTFS_TYPE-}" in
+      zram)
+         mnt_opts="dio,${mnt_opts}"
+      ;;
+   esac
+
+   # dirperm1: insecure
+   mnt_opts="dirperm1,${mnt_opts}"
+
+   imount -t aufs -o "${mnt_opts}" aufs_rootfs "${NEWROOT}"
 
 
    # mount-move <initramfs sfs root>/{container,loop/rootfs,mem}
    #  to <newroot sfs root>
+   #
+   ##hide-bind-mount to avoid UDBA (and add udba=none to aufs mount opts above)
+   ##irun mkdir -p -- "${newroot_sfs_root}/HIDE"
    for iter in container loop/rootfs ${overlay_sfs:+loop/overlay} mem; do
       irun mkdir -p -- "${newroot_sfs_root}/${iter}"
       imount --move "${init_sfs_root}/${iter}" "${newroot_sfs_root}/${iter}"
+      ##imount --bind "${newroot_sfs_root}/HIDE" "${newroot_sfs_root}/${iter}"
    done
 
    if [ "${can_cleanup}" = "y" ]; then
