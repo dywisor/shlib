@@ -201,18 +201,23 @@ REF_ARGV="\"\${@}\""
 echo "#!/bin/sh
 set -eu
 readonly DESTROOT=\"\${1:-${2}}\"
-readonly LOGFILE=\"\${INSTALL_LOGFILE-}\"
+readonly LOGFILE=\"\${INSTALL_LOGFILE--}\"
 
 die() { echo \"\${1:-died.}\" 1>&2; exit \${2:-2}; }
 
-if [ -n \"\${LOGFILE}\" ]; then
+if [ -z \"\${LOGFILE}\" ]; then
+run() { ${REF_ARGV} || die \"command '\$*' returned \$?\" \$?; }
+elif [ \"\${LOGFILE}\" = \"-\" ]; then
+run() {
+   echo \"+ \${*}\"
+   ${REF_ARGV} || die \"command '\$*' returned \$?\" \$?
+}
+else
 : > \"\${LOGFILE}\"
 run() {
    echo \"+ \${*}\" >> \"\${LOGFILE}\"
    ${REF_ARGV} || die \"command '\$*' returned \$?\" \$?
 }
-else
-run() { ${REF_ARGV} || die \"command '\$*' returned \$?\" \$?; }
 fi
 
 INSTALL_DIRS() {
