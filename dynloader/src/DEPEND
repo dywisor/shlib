@@ -1,0 +1,5 @@
+./base.sh
+./datastruct.bash
+./deploader.sh
+./modloader.sh
+./dynloader.sh
