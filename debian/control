@@ -1,0 +1,46 @@
+Source: shlib
+Section: misc
+Priority: optional
+Maintainer: André Erdmann <dywi@mailerd.de>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.5
+Homepage: https://github.com/dywisor/shlib
+Vcs-Git: git://git.erdmann.es/dywi/shlib.git 
+Vcs-Browser: http://git.erdmann.es/git_public/dywi/shlib.git
+
+Package: shlib-modules
+Architecture: all
+Depends: ${misc:Depends}
+Description: shell module library files
+ shlib, the shell module library, is a project that aims to provide reusable
+ shell code in modular form, thus allowing to create small scripts as well as
+ big library files.
+ .
+ Its features range from basic functions like die() known from Perl,
+ generic iterators, file system manipulation and colored messages to more
+ complex functionality such as squashfs containers and initramfs code, including
+ liram, a distribution-agnostic approach to load a (Linux) system into tmpfs.
+ .
+ This package contains the module files.
+
+Package: shlib-dynloader
+Architecture: all
+Depends: ${misc:Depends}
+Recommends: shlib-modules
+Description: shell module library loader
+ shlib, the shell module library, is a project that aims to provide reusable
+ shell code in modular form, thus allowing to create small scripts as well as
+ big library files.
+ .
+ Its features range from basic functions like die() known from Perl,
+ generic iterators, file system manipulation and colored messages to more
+ complex functionality such as squashfs containers and initramfs code, including
+ liram, a distribution-agnostic approach to load a (Linux) system into tmpfs.
+ .
+ This package contains the dynamic module loader.
+
+Package: shlib
+Architecture: all
+Depends: ${misc:Depends}, shlib-modules, shlib-dynloader
+Description: shell module library
+ shlib metapackage
