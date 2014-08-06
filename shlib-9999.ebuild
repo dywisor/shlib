@@ -34,13 +34,13 @@ src_prepare() {
 src_configure() { :; }
 
 src_compile() {
-	emake -f Makefile.${PN} \
+	emake \
 		SLOT="${SLOT}" PREFIX="${EPREFIX}/usr" \
 		$(usex shlibcc{,-wrapper} "") $(usex dynloader{,} "")
 }
 
 src_install() {
-	emake -f Makefile.${PN} \
+	emake \
 		DESTDIR="${D}" PREFIX="${EPREFIX}/usr" SLOT="${SLOT}" \
 		SYMLINK_SLOT=$(usex symlink 1 0) \
 		install-src \

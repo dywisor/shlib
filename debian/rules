@@ -28,7 +28,7 @@ include /usr/share/dpkg/default.mk
 #	-DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH)
 
 
-MY_SHLIB_MAKE = $(MAKE) -f $(CURDIR)/Makefile.shlib-src \
+MY_SHLIB_MAKE = $(MAKE) \
 	PREFIX=/usr \
 	BINDIR_TO_SHAREDIR_RELPATH=../share/shlib/default
 

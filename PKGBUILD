@@ -14,7 +14,7 @@ pkgver() {
 }
 
 my_shlib_make() {
-	make -C "${pkgbase}/" -f ./Makefile.${_PN}-src PREFIX=/usr "${@}"
+	make -C "${pkgbase}/" PREFIX=/usr "${@}"
 }
 
 build() {
