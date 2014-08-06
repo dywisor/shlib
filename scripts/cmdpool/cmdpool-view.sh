@@ -1,1 +1,0 @@
-cmdpool-manage.sh

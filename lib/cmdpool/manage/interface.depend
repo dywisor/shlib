@@ -1,6 +1,0 @@
-defsym
-message
-cmdpool/manage/vars
-cmdpool/manage/argparse
-cmdpool/manage/actions/argparse
-cmdpool/manage/actions/default
