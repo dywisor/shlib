@@ -1,7 +1,5 @@
 BASH       ?= 0
 SHLIBCC    := ./CC
-GENINSTALL := ./build-scripts/generate-install-src.sh
-GENWRAPPER := ./build-scripts/generate-shlibcc-wrapper.sh
 
 ifeq ($(BASH),1)
 SHLIBCCFLAGS := --as-lib --strip-virtual --stable-sort --bash
@@ -62,61 +60,3 @@ install: $(_SHLIB_FILE) verify
 uninstall: $(SHLIB_DEST)
 	rm -- $(SHLIB_DEST)
 
-
-# targets for building the initramfs
-./build/initramfs.cpio: ./build-scripts/buildvars.sh
-	QUIET=y ./build-scripts/buildvars.sh --force \
-		$(CURDIR) $(CURDIR)/build/work busybox-initramfs $@
-
-.PHONY += initramfs
-initramfs: ./build/initramfs.cpio
-
-.PHONY += clean-initramfs
-clean-initramfs:
-	rm -rf -- ./build/work
-	rm -vf -- ./build/initramfs.cpio
-
-
-# targets for installing shlib's sources
-
-$(SHLIB_SRC_DEST):
-	-mkdir -p -- $(SHLIB_SRC_DEST)
-	test -d $(SHLIB_SRC_DEST)
-
-# install-*: buffer xtrace output to file so that it doesn't slow down
-# the install process (without relying on a shell with the pipefail feature)
-#
-.PHONY += install-src
-install-src: $(GENINSTALL) ./lib ./build
-	-rm -f -- ./build/install-src.log
-	sh $(GENINSTALL) "$(CURDIR)/lib" \
-		"$(SHLIB_SRC_DEST)/include" "-m 0644" "" "-m 0755" | \
-		INSTALL_LOGFILE=./build/install-src.log sh
-	-cat ./build/install-src.log
-
-.PHONY += install-script-templates
-install-script-templates: $(GENINSTALL) ./scripts ./build
-	-rm -f -- ./build/install-script-templates.log
-	sh $(GENINSTALL) "$(CURDIR)/scripts" \
-		"$(SHLIB_SRC_DEST)/examples" "-m 0644" "" "-m 0755" | \
-			INSTALL_LOGFILE=./build/install-script-templates.log sh
-	-cat ./build/install-script-templates.log
-
-./build/shlibcc-wrapper.sh: ./build
-	sh $(GENWRAPPER) shlibcc "$(SHLIB_SRC_REAL_DEST)/include" > $@
-	chmod 0755 -- $@
-
-./build/shlibcc-scriptgen.sh: ./build
-	sh $(GENWRAPPER) scriptgen "$(SHLIB_SRC_REAL_DEST)/include" > $@
-	chmod 0755 -- $@
-
-.PHONY += build-shlibcc-wrapper
-build-shlibcc-wrapper: ./build/shlibcc-wrapper.sh ./build/shlibcc-scriptgen.sh
-	@true
-
-.PHONY += install-shlibcc-wrapper
-install-shlibcc-wrapper:  build-shlibcc-wrapper $(SHLIB_SRC_DEST)
-	install -T -m 0755 -- ./build/shlibcc-wrapper.sh \
-		"$(SHLIB_SRC_DEST)/shlibcc-wrapper.sh"
-	install -T -m 0755 -- ./build/shlibcc-scriptgen.sh \
-		"$(SHLIB_SRC_DEST)/shlibcc-scriptgen.sh"
