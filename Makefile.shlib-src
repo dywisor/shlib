@@ -80,17 +80,17 @@ endif
 
 PHONY += install-dynloader
 install-dynloader:
-	$(_DODIR) -- $(DESTDIR)$(SHLIB_SHAREDIR) $(DESTDIR)$(BINDIR)
+	$(_DODIR) -- $(DESTDIR)$(SHLIB_SHAREDIR)/dynloader $(DESTDIR)$(BINDIR)
 
 	true $(foreach k,$(addsuffix .bash,runscript runscript-wrapper dynloader),\
-		&& $(_DOEXE) -- $(S)/dynloader/$(k) $(DESTDIR)$(SHLIB_SHAREDIR)/$(k) \
+		&& $(_DOEXE) -- $(S)/dynloader/$(k) $(DESTDIR)$(SHLIB_SHAREDIR)/dynloader/$(k) \
 	)
 
-	$(_DOLINK) -- $(BINDIR_TO_SHAREDIR_RELPATH)/runscript.bash \
+	$(_DOLINK) -- $(BINDIR_TO_SHAREDIR_RELPATH)/dynloader/runscript.bash \
 		$(DESTDIR)$(BINDIR)/shlib-runscript$(SLOT_SUFFIX)
 
 ifeq ($(_WANT_SLOT_SYM),1)
-	$(_DOLINK) -- $(BINDIR_TO_SHAREDIR_RELPATH)/runscript.bash \
+	$(_DOLINK) -- $(BINDIR_TO_SHAREDIR_RELPATH)/dynloader/runscript.bash \
 		$(DESTDIR)$(BINDIR)/shlib-runscript
 endif
 
