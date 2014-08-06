@@ -1,0 +1,6 @@
+cleanup lib/devel/
+ - remove lib/devel/shlib, build-scripts/{dobuild*,buildvars}
+ - reduce generate.py to what's actually necessary:
+   - splitlib_*, link_shared, standalone
+
+cleanup scripts/
