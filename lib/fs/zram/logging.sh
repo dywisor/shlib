@@ -29,3 +29,9 @@ zram_log_warn() {
 zram_log_error() {
    zram_log "${@}" --level=ERROR
 }
+
+# @logger "/dev/null" zram_log_null ( *ignored, **ZRAM_NAME= )
+#
+zram_log_null() {
+   return 0
+}

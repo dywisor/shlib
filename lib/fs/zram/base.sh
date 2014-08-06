@@ -137,7 +137,7 @@ zram_autoload_module() {
 
 
 # @private::protected zram__write_sysfs (
-#    filename, value, **ZRAM_NAME, **ZRAM_BLOCK, **v0!
+#    filename, value, log_level="error", **ZRAM_NAME, **ZRAM_BLOCK, **v0!
 # )
 #
 #  Writes %value to %ZRAM_BLOCK/%filename and logs failure.
@@ -149,7 +149,7 @@ zram__write_sysfs() {
    if printf "${2?}" > "${v0}"; then
       return 0
    else
-      zram_log_error "failed to write ${1}=${2%% *}"
+      zram_log_${3:-error} "failed to write ${1}=${2%% *}"
       return 2
    fi
 }
@@ -192,7 +192,8 @@ zram_is_free() {
 
 # int zram_init_vars (
 #    ident,
-#    **ZRAM_NAME!, **ZRAM_FS_NAME!, **ZRAM_DEV!, **ZRAM_BLOCK!, **ZRAM_SIZE_M!
+#    **ZRAM_NAME!, **ZRAM_FS_NAME!, **ZRAM_DEV!, **ZRAM_BLOCK!, **ZRAM_SIZE_M!,
+#    **ZRAM_COMP_ALGO!, **ZRAM_INITSTATE!
 # )
 #
 #  Initializes zram device related variables.
@@ -203,6 +204,7 @@ zram_is_free() {
 #
 zram_init_vars() {
    #@varcheck 1
+   local buf
 
    zram_zap_vars
    ZRAM_NAME="zram${1#zram}"
@@ -224,10 +226,35 @@ zram_init_vars() {
          zram_log_error "${ZRAM_DEV} does not exist."
          return 3
       fi
+   fi
+
+   read -r ZRAM_INITSTATE < "${ZRAM_BLOCK}/initstate" || \
+      zram_log_warn "failed to read initstate!"
+
+
+   if [ ! -e "${ZRAM_BLOCK}/comp_algorithm" ]; then
+      zram_log_debug "${ZRAM_BLOCK} has no comp_algorithm attribute"
+
+   elif ! read -r buf < "${ZRAM_BLOCK}/comp_algorithm"; then
+      zram_log_error "failed to read ${ZRAM_BLOCK}/comp_algorithm"
 
    else
-      return 0
+      set -- ${buf}
+      buf=
+      while [ ${#} -gt 0 ]; do
+         case "${1}" in
+            '['*']')
+               buf="${1#\[}"
+               buf="${buf%\]}"
+               ZRAM_COMP_ALGO="${buf}"
+               break
+            ;;
+         esac
+         shift || function_die "out of bounds"
+      done
    fi
+
+   return 0
 }
 
 # void zram_zap_vars ( **ZRAM_*! )
@@ -240,16 +267,25 @@ zram_zap_vars() {
    ZRAM_BLOCK=
    ZRAM_SIZE_M=
    ZRAM_FS_NAME=
+   ZRAM_COMP_ALGO=
+   ZRAM_INITSTATE=
 }
 
 
 # int zram_init (
 #    ident, size_m=, type=, *type_init_args,
-#    **ZRAM_NAME!, **ZRAM_FSNAME!, **ZRAM_DEV!, **ZRAM_BLOCK!, **ZRAM_SIZE_M!
-# )
+#    **ZRAM_COMPRESSION=,
+#    **ZRAM_NAME!, **ZRAM_FSNAME!, **ZRAM_DEV!, **ZRAM_BLOCK!, **ZRAM_SIZE_M!,
+#    **ZRAM_COMP_ALGO!
+# ), raises function_die()
 #
 #  Initializes a zram device referenced by its identifier with the
 #  requested size, which has to be an integer greater than 0 or empty.
+#
+#  Sets the device's compression algorithm to %ZRAM_COMPRESSION if set and
+#  not empty. %ZRAM_COMPRESSION can also be a list, in which case the
+#  first supported algo will be chosen (determined by naive try-and-error
+#  iteration).
 #
 #  Also accepts a %type parameter.
 #  If set and not empty, the type-specific init function(1) will be called
@@ -280,7 +316,14 @@ zram_init() {
 
 
    ${AUTODIE_NONFATAL-} zram_init_vars "${1?}" || return
-   [ -z "${2-}" ] || ${AUTODIE_NONFATAL-} zram_set_size "${2}"
+
+   if [ -n "${ZRAM_COMPRESSION-}" ]; then
+      ${AUTODIE_NONFATAL-} zram_set_compression ${ZRAM_COMPRESSION}
+   fi
+
+   if [ -n "${2-}" ]; then
+      ${AUTODIE_NONFATAL-} zram_set_size "${2}"
+   fi
 
    if [ -n "${init_func}" ]; then
       shift 3 || function_die "logical error"
@@ -492,6 +535,35 @@ zram_reinit() {
    fi
 }
 
+# int zram_set_compression (
+#    *comp_algo_list, **ZRAM_NAME, **ZRAM_BLOCK, **ZRAM_COMP_ALGO!
+# )
+#
+#  Sets the compression algorithm of a zram device (%ZRAM_BLOCK).
+#
+#  Chooses the first supported value out of %comp_algo_list.
+#
+#  Returns: success (true/false)
+#
+zram_set_compression() {
+   [ -n "$*" ] || function_die "bad usage" "zram_set_compression()"
+
+   while [ ${#} -gt 0 ]; do
+      if zram__write_sysfs comp_algorithm "${1}" null; then
+         zram_log_info "using comp_algo ${1}"
+         ZRAM_COMP_ALGO="${1}"
+         return 0
+      else
+         zram_log_debug "compression ${1} not supported."
+      fi
+      shift || function_die
+   done
+
+   zram_log_error "failed to set comp_algo!"
+   return 1
+}
+
+
 # int zram_set_size (
 #    size_m, **ZRAM_NAME, **ZRAM_BLOCK, **ZRAM_SIZE_M!
 # )
@@ -501,7 +573,7 @@ zram_reinit() {
 #  %size_m has to be an integer >= 0.
 #
 #  Returns: success (true/false)
-
+#
 zram_set_size() {
    #@varcheck 1
    ZRAM_SIZE_M=
