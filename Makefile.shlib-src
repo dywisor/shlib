@@ -82,7 +82,7 @@ PHONY += install-dynloader
 install-dynloader:
 	$(_DODIR) -- $(DESTDIR)$(SHLIB_SHAREDIR) $(DESTDIR)$(BINDIR)
 
-	true $(foreach k,runscript.bash runscript-wrapper.bash,\
+	true $(foreach k,$(addsuffix .bash,runscript runscript-wrapper dynloader),\
 		&& $(_DOEXE) -- $(S)/dynloader/$(k) $(DESTDIR)$(SHLIB_SHAREDIR)/$(k) \
 	)
 
