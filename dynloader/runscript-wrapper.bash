@@ -26,7 +26,7 @@ while [ ${#} -gt 0 ]; do
    esac
 done
 
-if [ -z "${SHLIB_ROOT}" ]; then
+if [ -z "${SHLIB_ROOT-}" ]; then
    SHLIB_ROOT="${RUNSCRIPT_EXE_DIR%/*}"
 fi
 
