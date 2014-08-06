@@ -256,7 +256,7 @@ phasemux_run_hook_script() {
 }
 
 # int phasemux_run_hook_dir (
-#    phase, dirpath, **PHASEMUX_CONTINUE_ON_ERROR=y
+#    phase, dirpath|filepath, **PHASEMUX_CONTINUE_ON_ERROR=y
 # ), raises function_die()
 #
 #  Calls phasemux_run_hook_script() with the given phase for each
@@ -278,6 +278,18 @@ phasemux_run_hook_dir() {
       ${LOGGER} --level=ERROR "invalid phase '${PHASE}'"
       return 1
 
+   elif [ -f "${HOOKDIR}" ]; then
+      if ! phasemux_run_hook_script "${HOOKDIR}"; then
+         ${LOGGER} --level=ERROR \
+            "errors occured while running hook script '${HOOKDIR}' (${?})"
+
+         if [ "${PHASEMUX_CONTINUE_ON_ERROR:-y}" != "y" ]; then
+            return 30
+         fi
+      fi
+
+      return 0
+
    elif [ ! -d "${HOOKDIR}" ]; then
       ${LOGGER} --level=WARN "hook dir '${HOOKDIR}' does not exist."
       return 2
@@ -294,7 +306,7 @@ phasemux_run_hook_dir() {
                ${LOGGER} --level=ERROR \
                   "errors occured while running hook script '${hook_file}' (${?})"
 
-               if [ "${PHASEMUX_CONTINUE_ON_ERROR:-y}" = "y" ]; then
+               if [ "${PHASEMUX_CONTINUE_ON_ERROR:-y}" != "y" ]; then
                   return 30
                fi
             fi

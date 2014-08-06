@@ -49,7 +49,7 @@ pack__construct_argv_and_run() {
          if [ -n "${PACK_COMPRESS__TAR_OPT-}" ]; then
             opts="${opts}${opts:+ }${PACK_COMPRESS__TAR_OPT}"
          fi
-         set -- \
+         set -- ${PACKLIB_CMD_PREFIX-} \
             tar c -C "${PACK_SRC%/}/" ./ ${opts} -f "${PACK_DESTFILE}" "$@"
       ;;
       squashfs)
@@ -57,7 +57,7 @@ pack__construct_argv_and_run() {
          if [ -n "${PACK_COMPRESS__MKSFS_OPT-}" ]; then
             opts="${opts}${opts:+ }${PACK_COMPRESS__MKSFS_OPT}"
          fi
-         set -- \
+         set -- ${PACKLIB_CMD_PREFIX-} \
             mksquashfs "${PACK_SRC%/}/" "${PACK_DESTFILE}" ${opts} "$@"
       ;;
       *)

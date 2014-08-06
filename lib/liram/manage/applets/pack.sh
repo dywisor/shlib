@@ -5,7 +5,7 @@
 # )
 liram_manage_merge_slot_workdir() {
    local restore_noglob=
-   local v_opt
+   local v_opt iter
    __quiet__ || v_opt="-v"
 
    if ! check_globbing_enabled; then
@@ -14,8 +14,17 @@ liram_manage_merge_slot_workdir() {
    fi
 
    liram_manage_log_info "Moving image files to slot ${LIRAM_DEST_SLOT_NAME}"
-   liram_manage_autodie \
-      mv ${v_opt} -t "${LIRAM_DEST_SLOT}" -- "${LIRAM_DEST_SLOT_WORKDIR}/"?*
+
+   if shell_is_busybox; then
+      # "mv -t DEST ..." probably not available
+      for iter in "${LIRAM_DEST_SLOT_WORKDIR}/"?*; do
+         # fails if glob did not expand (expected)
+         liram_manage_autodie mv ${v_opts} -- "${iter}" "${LIRAM_DEST_SLOT}/"
+      done
+   else
+      liram_manage_autodie \
+         mv ${v_opt} -t "${LIRAM_DEST_SLOT}" -- "${LIRAM_DEST_SLOT_WORKDIR}/"?*
+   fi
 
    liram_manage_log_info "Removing work dir"
    liram_manage_autodie rm -f ${v_opt} -- "${LIRAM_DEST_SLOT_WORKDIR}/.keep"

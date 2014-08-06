@@ -1,4 +1,3 @@
-#!/bin/bash
 #@HEADER
 # Continuously parse command output.
 #
