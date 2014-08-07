@@ -22,6 +22,7 @@ fs/lockfile
 fs/md_each
 fs/pack
 fs/path
+fs/stat
 fs/symlinkdb
 fs/symlink_replace
 fs/tmpdir
