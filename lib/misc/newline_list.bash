@@ -31,7 +31,7 @@ newline_list__check_is_empty_but_set() {
          return 0
       ;;
       '')
-         #@debug echo "BUG: successful declare should not produce empty %is_set" 1>&2
+         #@debug echo "BUG: successful declare() should not produce empty %is_set" 1>&2
          return 3
       ;;
    esac
