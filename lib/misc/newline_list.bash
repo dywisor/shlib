@@ -1,6 +1,6 @@
 #@section functions
 
-# @private int newline_list__check_if_set ( varname )
+# @private int newline_list__check_if_set ( varname, do_init="" )
 #
 newline_list__check_if_set() {
    : ${1:?}
@@ -8,10 +8,10 @@ newline_list__check_if_set() {
    local is_set
 
    eval "is_set=\"\${${1:?}[*]+YES}\""
-   if [ -n "${is_set}" ]; then
+   if [[ -n "${is_set}" ]]; then
       return 0
    else
-      declare -ga "${1}"
+      [[ -z "${2-}" ]] || declare -ga "${1}"
       return 1
    fi
 }
@@ -28,19 +28,32 @@ newline_list_init() {
    declare -ga ${1:?}
 }
 
+# void newline_list_init_empty ( varname, **$varname! )
+#
+newline_list_init_empty() {
+   declare -ga ${1:?} && eval "${1}=()"
+}
+
+# void newline_list_unset ( varname, **$varname! )
+#
+newline_list_unset() {
+   unset -v ${1:?}
+}
+
 # void newline_list_copy ( src_list, dest_list="v0", **$dest_list! )
 #
 newline_list_copy() {
-   if newline_list__check_if_set "${1}"; then
+   if newline_list__check_if_set "${1}" y; then
       eval "${2:-v0}=( \"\${${1:?}[@]?}\" )"
    else
-      eval "${2:-v0}=()"
+      newline_list_init_empty "${2:-v0}"
    fi
 }
 
 # void newline_list_join ( *values, **v0! )
 #
 newline_list_join() {
+   newline_list_init v0
    v0=( "$@" )
 }
 
@@ -48,7 +61,7 @@ newline_list_join() {
 #
 newline_list_add_list() {
    newline_list_init ${1:?}
-   if newline_list__check_if_set "${1}"; then
+   if newline_list__check_if_set "${1}" y; then
       eval "${1}=(  \"\${${2:?}[@]?}\" \"\${${1:?}[@]?}\" )"
    else
       eval "${1}=(  \"\${${2:?}[@]?}\" )"
@@ -71,7 +84,7 @@ newline_list_add() {
    shift
 
    newline_list_init ${varname}
-   if newline_list__check_if_set "${varname}"; then
+   if newline_list__check_if_set "${varname}" y; then
       eval "${varname}=( \"\${@}\" \"\${${varname:?}[@]?}\" )"
    else
       eval "${varname}=( \"\${@}\" )"
@@ -124,7 +137,8 @@ newline_list_foreach() {
 # void newline_list_filter_to_v0 ( varname, ^func, *args, **v0! )
 #
 newline_list_filter_to_v0() {
-   declare -ga v0=()
+   newline_list_init v0
+   v0=()
 
    local k
    local func="${2:?}"
@@ -170,7 +184,11 @@ newline_list_filter() {
 newline_list_call() {
    local -a __list
    newline_list_copy "${2:?}" __list
-   set -- ${1:?} "${__list[@]}"
+   if [[ -n "${__list[*]+SET}" ]]; then
+      set -- ${1:?} "${__list[@]}"
+   else
+      set -- ${1:?}
+   fi
    unset -v __list
    "$@"
 }
@@ -194,11 +212,21 @@ newline_list_has() {
 # int newline_list_get ( varname, index, **v0! )
 #
 newline_list_get() {
+   unset -v v0
    v0=
-   local keys
-   newline_list__get_keys "${1}"
-   if [[ ${2} -lt ${#keys[@]} ]]; then
-      v0=
+   local keys index_ref arr_index list_name
+
+   list_name="${1?}"
+   index_ref=$(( ${2:?} + 1 )) || return
+
+   newline_list__get_keys "${list_name}"
+   set -- ${keys}
+
+   if [[ ${index_ref} -le ${#} ]]; then
+      eval "arr_index=\"\${${index_ref}?}\""
+      set -- "\${${list_name}[${arr_index}]?}"
+
+      eval "v0=\"${1}\""
       return 0
    else
       return 1
@@ -209,5 +237,5 @@ newline_list_print() {
    : ${1:?}
    local list_str
    eval "list_str=\"\${${1:?}[*]-}\""
-   echo "list<${list_str}>"
+   echo "${1} = list<${list_str}>"
 }

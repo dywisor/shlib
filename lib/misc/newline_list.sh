@@ -24,6 +24,19 @@ newline_list_init() {
    eval : "\${${1}=}"
 }
 
+# void newline_list_init_empty ( varname, **$varname! )
+#
+newline_list_init_empty() {
+   : ${1:?}
+   eval "${1}="
+}
+
+# void newline_list_unset ( varname, **$varname! )
+#
+newline_list_unset() {
+   unset -v ${1:?}
+}
+
 # void newline_list_copy ( src_list, dest_list="v0", **$dest_list! )
 #
 newline_list_copy() {
@@ -184,8 +197,8 @@ newline_list_get() {
    v0=
 
    local OLDIFS="${IFS}"
-   local my_list
-   local index="${2:?}"
+   local my_list index
+   index=$(( ${2:?} + 1 )) || return
    newline_list_copy "${1:?}" my_list
 
    local IFS="${IFS_NEWLINE}"
@@ -204,11 +217,13 @@ newline_list_get() {
 #
 newline_list_print() {
    local OLDIFS="${IFS}"
-   local my_list
-   newline_list_copy "${1:?}" my_list
+   local my_list list_name
+
+   list_name="${1:?}"
+   newline_list_copy "${list_name}" my_list
    IFS="${IFS_NEWLINE?}"
    set -- ${my_list}
    IFS="${OLDIFS}"
 
-   echo "list<${*}>"
+   echo "${list_name} = list<${*}>"
 }

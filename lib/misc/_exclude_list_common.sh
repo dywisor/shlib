@@ -31,8 +31,9 @@ exclude_list_create_item() {
 # )
 #
 exclude_list_make_list() {
+   newline_list_init v0
    local item
-   v0=
+
 
    if [ $# -eq 0 ]; then
       return 1
@@ -52,7 +53,7 @@ exclude_list_make_list() {
       v0="${1}"
       shift
       while [ $# -gt 0 ]; do
-         exclude_list_add_items_to_v0 "${item}"
+         exclude_list_add_items_to_v0 "${1}"
          shift
       done
    fi
@@ -61,23 +62,32 @@ exclude_list_make_list() {
 # void exclude_list_add ( *values, **EXCLUDE_LIST_WORD, **EXCLUDE_LIST! )
 #
 exclude_list_add() {
-   local v0
+   local v0 ret
+   v0=()
+
    if exclude_list_make_list "$@"; then
-      newline_list_add_list EXCLUDE_LIST v0
+      newline_list_add_list EXCLUDE_LIST v0; ret=${?}
    else
-      newline_list_init EXCLUDE_LIST
+      newline_list_init EXCLUDE_LIST; ret=${?}
    fi
+
+   newline_list_unset v0
+   return ${ret}
 }
 
 # void exclude_list_append ( *values, **EXCLUDE_LIST_WORD, **EXCLUDE_LIST! )
 #
 exclude_list_append() {
-   local v0
+   local v0 ret
+
    if exclude_list_make_list "$@"; then
-      newline_list_append_list EXCLUDE_LIST v0
+      newline_list_append_list EXCLUDE_LIST v0; ret=${?}
    else
-      newline_list_init EXCLUDE_LIST
+      newline_list_init EXCLUDE_LIST; ret=${?}
    fi
+
+   newline_list_unset v0
+   return ${ret}
 }
 
 # ~int exclude_list_call ( func, **EXCLUDE_LIST )
