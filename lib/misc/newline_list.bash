@@ -16,6 +16,29 @@ newline_list__check_if_set() {
    fi
 }
 
+# @private int newline_list__check_is_empty_but_set ( varname )
+#
+newline_list__check_is_empty_but_set() {
+   : ${1:?}
+
+   local is_set
+   is_set="$(declare -p -- "${1}" 2>&-)"
+   [[ ${?} -eq 0 ]] || return 2
+
+   case "${is_set}" in
+      'declare -a '"${1}"\=\'\(\)\'|\
+      'declare -a'*' '"${1}"\=\'\(\)\')
+         return 0
+      ;;
+      '')
+         #@debug echo "BUG: successful declare should not produce empty %is_set" 1>&2
+         return 3
+      ;;
+   esac
+
+   return 1
+}
+
 # @private void newline_list__get_keys ( varname, **keys! )
 #
 newline_list__get_keys() {
@@ -61,7 +84,10 @@ newline_list_join() {
 #
 newline_list_add_list() {
    newline_list_init ${1:?}
-   if newline_list__check_if_set "${1}" y; then
+
+   if newline_list__check_is_empty_but_set "${2}"; then
+      true
+   elif newline_list__check_if_set "${1}" y; then
       eval "${1}=(  \"\${${2:?}[@]?}\" \"\${${1:?}[@]?}\" )"
    else
       eval "${1}=(  \"\${${2:?}[@]?}\" )"
@@ -73,7 +99,9 @@ newline_list_add_list() {
 #
 newline_list_append_list() {
    newline_list_init ${1:?}
-   eval "${1}+=( \"\${${2:?}[@]?}\" )"
+   if ! newline_list__check_is_empty_but_set "${2}"; then
+      eval "${1}+=( \"\${${2:?}[@]?}\" )"
+   fi
    return 0
 }
 
