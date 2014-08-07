@@ -4,3 +4,5 @@ cleanup lib/devel/
    - splitlib_*, link_shared, standalone
 
 cleanup scripts/
+
+doc/ terribly out of date
