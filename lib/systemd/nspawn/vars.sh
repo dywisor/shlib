@@ -13,6 +13,23 @@ systemd_nspawn_set_root_image() {
    [ -f "${SYSTEMD_NSPAWN_ROOT_IMAGE}" ]
 }
 
+systemd_nspawn_set_root() {
+   SYSTEMD_NSPAWN_ROOT_DIR=
+   SYSTEMD_NSPAWN_ROOT_IMAGE=
+
+   if [ -z "${1?}" ]; then
+      return 2
+
+   elif [ -f "${1}" ]; then
+      SYSTEMD_NSPAWN_ROOT_IMAGE="${1}"
+      return 0
+
+   else
+      SYSTEMD_NSPAWN_ROOT_DIR="${1}"
+      [ -d "${1}" ]
+   fi
+}
+
 # void systemd_nspawn_get_root_opt(...), raises function_die()
 #
 systemd_nspawn_get_root_opt() {

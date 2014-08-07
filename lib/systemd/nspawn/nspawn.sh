@@ -32,7 +32,13 @@ systemd_nspawn_prepare_cmd() {
 #  to the systemd-nspawn call.
 #
 systemd_nspawn_exe() {
-   ${X_SYSTEMD_NSPAWN:?} "${@}"
+   if [ "${SYSTEMD_NSPAWN_PRINTCMD:-n}" = "y" ]; then
+      echo ${X_SYSTEMD_NSPAWN:?} "${@}"
+   fi
+
+   if [ "${SYSTEMD_NSPAWN_RUNCMD:-y}" = "y" ]; then
+      ${X_SYSTEMD_NSPAWN:?} "${@}"
+   fi
 }
 
 # @private int systemd_nspawn__run (
