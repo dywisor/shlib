@@ -1,0 +1,4 @@
+systemd/nspawn/vars_base
+systemd/nspawn/util
+
+function/die
