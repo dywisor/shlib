@@ -33,7 +33,7 @@ systemd_nspawn_prepare_cmd() {
 #
 systemd_nspawn_exe() {
    if [ "${SYSTEMD_NSPAWN_PRINTCMD:-n}" = "y" ]; then
-      echo ${X_SYSTEMD_NSPAWN:?} "${@}"
+      printf "%s %s\n" "${X_SYSTEMD_NSPAWN:?}" "${*}"
    fi
 
    if [ "${SYSTEMD_NSPAWN_RUNCMD:-y}" = "y" ]; then
@@ -48,12 +48,10 @@ systemd_nspawn_exe() {
 #  Actually runs systemd-nspawn with the given args
 #  in %SYSTEMD_NSPAWN_ROOT_DIR or %SYSTEMD_NSPAWN_ROOT_IMAGE.
 #
-
-#
 systemd_nspawn__run() {
    local root_opt root_val
    systemd_nspawn_get_root_opt && \
-   systemd_nspawn_exe ${X_SYSTEMD_NSPAWN:?} ${root_opt:?} "${root_val:?}" "${@}"
+   systemd_nspawn_exe ${root_opt:?} "${root_val:?}" "${@}"
 }
 
 # int systemd_nspawn_call ( func, list_names:="all", *args )

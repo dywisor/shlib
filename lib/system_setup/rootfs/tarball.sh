@@ -106,6 +106,9 @@ system_setup_rootfs_from_tarball() {
          "${tmpdir}/image" "${tarball_file}" "${@}" || return
 
       system_setup_rootfs_from_tarball__runcmd \
+         mkdir -p -- "${root_dir%/*}" || return
+
+      system_setup_rootfs_from_tarball__runcmd \
          mv -T -- "${tmpdir}/image" "${root_dir}" || return
    fi
 
@@ -127,7 +130,7 @@ system_setup_rootfs_from_tarball__runcmd() {
    else
       local ret=${?}
       system_setup_rootfs_from_tarball__cleanup
-      return ${reŧ}
+      return ${ret}
    fi
 }
 

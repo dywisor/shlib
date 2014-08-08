@@ -1,2 +1,4 @@
 system_setup/rootfs/tarball
 systemd/nspawn/vars
+
+message
