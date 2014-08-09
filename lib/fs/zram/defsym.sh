@@ -25,3 +25,4 @@ readonly ZRAM_BYTES_TO_MBYTES_FACTOR=$(( 1024 * 1024 ))
 : ${X_MKFS_EXT2:=mkfs.ext2}
 : ${X_MKFS_EXT3:=mkfs.ext3}
 : ${X_MKFS_EXT4:=mkfs.ext4}
+: ${X_MKFS_BTRFS:=mkfs.btrfs}

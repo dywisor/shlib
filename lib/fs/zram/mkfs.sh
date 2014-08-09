@@ -5,18 +5,29 @@
 #    **ZRAM_FS_NAME, **ZRAM_NAME, **ZRAM_DEV, **ZRAM_BLOCK, **ZRAM_SIZE_M
 # )
 
+# @no-stdout @private int zram_disk__run_command ( *cmdv )
+#
+zram_disk__run_command() {
+   1>>${DEVNULL} "${@}"
+}
+
+
+# @private int zram_disk__run_mkfs ( *cmdv, **ZRAM_FS_NAME, **ZRAM_DEV )
+#
+zram_disk__run_mkfs() {
+   ${AUTODIE_NONFATAL-} zram_disk__run_command \
+      "${@}" -L "${ZRAM_FS_NAME:?}" "${ZRAM_DEV:?}"
+}
+
+
 # @zram_mkfs ext4 zram_disk_mkfs_ext4()
 #
 #  <args> ignored
 #
 zram_disk_mkfs_ext4() {
-   local features
-
-   features="dir_index,extents,filetype,^has_journal,sparse_super,^uninit_bg"
-
-
-   1>>${DEVNULL} ${AUTODIE_NONFATAL-} ${X_MKFS_EXT4:?} \
-      -m 0 -E nodiscard -L "${ZRAM_FS_NAME:?}" -O "${features}" "${ZRAM_DEV:?}"
+   zram_disk__run_mkfs "${X_MKFS_EXT4:?}" \
+      -O "dir_index,extents,filetype,^has_journal,sparse_super,^uninit_bg" \
+      -E "nodiscard"
 }
 
 # @zram_mkfs ext2 zram_disk_mkfs_ext2()
@@ -24,11 +35,13 @@ zram_disk_mkfs_ext4() {
 #  <args> ignored
 #
 zram_disk_mkfs_ext2() {
-   local features
+   zram_disk__run_mkfs "${X_MKFS_EXT2:?}" -O "sparse_super"
+}
 
-   features='sparse_super'
-
-
-   1>>${DEVNULL} ${AUTODIE_NONFATAL-} ${X_MKFS_EXT2:?} \
-      -m 0 -L "${ZRAM_FS_NAME:?}" -O "${features}" "${ZRAM_DEV:?}"
+# @zram_mkfs btrfs zram_disk_mkfs_btrfs()
+#
+#  <args> ignored
+#
+zram_disk_mkfs_btrfs() {
+   zram_disk__run_mkfs "${X_MKFS_BTRFS:?}"
 }
