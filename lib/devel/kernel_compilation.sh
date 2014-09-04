@@ -561,21 +561,11 @@ kcomp__install_env_do() {
    : ${SUDOFY_USER:=${USER?}}
    SUDOFY_ONLY_OTHERS=n
 
-   case "${KCOMP_LOCAL_BUILD-}" in
-      'y')
-         KCOMP_TRUE_LOCAL_BUILD=y
-      ;;
-      '')
-         if [ -n "${CROSS_COMPILE-}" ]; then
-            KCOMP_TRUE_LOCAL_BUILD=n
-         else
-            KCOMP_TRUE_LOCAL_BUILD=y
-         fi
-      ;;
-      *)
-         KCOMP_TRUE_LOCAL_BUILD=n
-      ;;
-   esac
+   if [ "${KCOMP_LOCAL_BUILD:-X}" = "y" ]; then
+      KCOMP_TRUE_LOCAL_BUILD=y
+   else
+      KCOMP_TRUE_LOCAL_BUILD=n
+   fi
 
    MAKEOPTS_APPEND=
    makeopts_append() { MAKEOPTS_APPEND="${MAKEOPTS_APPEND} $*"; }
