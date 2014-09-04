@@ -626,9 +626,14 @@ kcomp__do_install() {
       if [ "${KCOMP_TRUE_LOCAL_BUILD}" != "y" ]; then
          dolog_info -0 "Removing source/build symlinks in ${INSTALL_MOD_PATH} ... "
 
-         for symlink in source build; do
-            symlink="${INSTALL_MOD_PATH}/lib/modules/${KERNEL_RELEASE}/${symlink}"
-            [ ! -h "${symlink}" ] || sudofy rm "${symlink}"
+         for symlink_name in source build; do
+            symlink="${INSTALL_MOD_PATH}/lib/modules/${KERNEL_RELEASE}/${symlink_name}"
+
+            if [ -h "${symlink}" ]; then
+               sudofy rm -- "${symlink}"
+            else
+               dolog_warn -0 "Cannot remove ${symlink_name} in ${INSTALL_MOD_PATH}: no such link"
+            fi
          done
       fi
    else
