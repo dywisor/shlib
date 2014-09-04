@@ -288,7 +288,7 @@ kcomp_get_kver() {
 #     by passing
 #
 #     * KERNEL_TARGET=zImage
-#     * KERNEL_TARGET=uImage
+#     * KERNEL_REAL_TARGET=uImage
 #     * KERNEL_APPEND_DTB=arch/arm/boot/kirkwood-dreamplug.dtb
 #     * KERNEL_UIMAGE_NAME         (defaults to KERNEL_BASENAME-KERNEL_RELEASE)
 #     * KERNEL_UIMAGE_COMPRESSION  (defaults to none)
@@ -561,14 +561,21 @@ kcomp__install_env_do() {
    : ${SUDOFY_USER:=${USER?}}
    SUDOFY_ONLY_OTHERS=n
 
-   if [ "${KCOMP_LOCAL_BUILD:-n}" = "y" ]; then
-      KCOMP_TRUE_LOCAL_BUILD=y
-   elif [ -n "${CROSS_COMPILE-}" ] && [ -z "${KCOMP_LOCAL_BUILD-}" ]; then
-      KCOMP_TRUE_LOCAL_BUILD=n
-   else
-      # default assumption
-      KCOMP_TRUE_LOCAL_BUILD=y
-   fi
+   case "${KCOMP_LOCAL_BUILD-}" in
+      'y')
+         KCOMP_TRUE_LOCAL_BUILD=y
+      ;;
+      '')
+         if [ -n "${CROSS_COMPILE-}" ]; then
+            KCOMP_TRUE_LOCAL_BUILD=n
+         else
+            KCOMP_TRUE_LOCAL_BUILD=y
+         fi
+      ;;
+      *)
+         KCOMP_TRUE_LOCAL_BUILD=n
+      ;;
+   esac
 
    MAKEOPTS_APPEND=
    makeopts_append() { MAKEOPTS_APPEND="${MAKEOPTS_APPEND} $*"; }
