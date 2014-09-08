@@ -89,19 +89,35 @@ net_setup_fixup() {
 }
 
 net_setup_dns() {
-   local dnsf="${NET_SETUP_CONFIG_ROOT:?}/globals/dns"
+   local namesrv dnsf resf
+
+   dnsf="${NET_SETUP_CONFIG_ROOT:?}/globals/dns"
+   resf="${dnsf%/*}/resolv.conf"
+
 
    if [ -f "${dnsf}" ]; then
       net_setup_log_info "Setting dns config"
       # -s $dnsf is always true,
       # empty entries are discarded when creating this file
       #[ -s "${dnsf}" ] || net_setup_log_warn "dns config file is empty"
-      if [ -e "/etc/resolv.conf" ] || [ -h "/etc/resolv.conf" ]; then
-         mv -f -- /etc/resolv.conf /etc/resolv.conf.bak
+
+      if { \
+         rm -f -- "${resf}" && \
+         while read -r namesrv; do
+            [ -z "${namesrv}" ] || printf "%s %s\n" "nameserver" "${namesrv}"
+         done < "${dnsf}" > "${resf}"
+      }; then
+         net_setup_log_warn "failed to create resolv.conf"
+         return 0
+
       else
-         ${AUTODIE_NONFATAL-} dodir_clean /etc || return
+         if [ -e "/etc/resolv.conf" ] || [ -h "/etc/resolv.conf" ]; then
+            mv -f -- /etc/resolv.conf /etc/resolv.conf.bak
+         else
+            ${AUTODIE_NONFATAL-} dodir_clean /etc || return
+         fi
+         cp -f -- "${resf}" /etc/resolv.conf
       fi
-      cp -f -- "${dnsf}" /etc/resolv.conf
    else
       net_setup_log_warn "no dns servers configured."
       return 0
