@@ -1,0 +1,16 @@
+system_setup/systemd-hacks/defsym
+system_setup/systemd-hacks/base
+
+system_setup/target/all
+
+misc/fnmatch
+strutil/fnmatch
+
+fs/test_macros
+
+autodie
+die
+defsym
+message
+mainscript_dispatcher
+globbing
