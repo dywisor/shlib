@@ -33,3 +33,17 @@ function_alias() {
    shift 2
    eval "${func_alias}() { ${func} $@ \"\$@\"; }"
 }
+
+# void function_alias_quoted ( func, func_alias, *pos_args )
+#
+#  Like function_alias(), but quotes the args.
+#
+function_alias_quoted() {
+   : ${1:?} ${2:?}
+   local func func_alias
+   func="${1}"
+   func_alias="${2}"
+
+   shift 2 && get_cmd_str "${func}" "$@" "\$@" || return
+   eval "${func_alias}() { ${v0}; }"
+}
