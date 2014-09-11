@@ -40,5 +40,5 @@ run_main_function() {
 
    get_main_function "${1-}" && shift || return
 
-   "${func:?}" "$@"
+   "${MAIN_FUNCTION:?}" "$@"
 }
