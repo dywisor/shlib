@@ -127,8 +127,8 @@ shlib_dynloader__runscript() {
    : ${1:?<script_file> arg missing or empty}
    local script_file
 
-   shlib_dynloader_load_deps scriptinfo    || return
-   shlib_dynloader_load_script_deps "${1}" || return
+   shlib_dynloader_load_deps scriptinfo    || return 243
+   shlib_dynloader_load_script_deps "${1}" || return 244
 
    shift && \
    shlib_dynloader__runscript_${F_SHLIB_DYNLOADER_RUNSCRIPT_EXEC:?} "${@}"
