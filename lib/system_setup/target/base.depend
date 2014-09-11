@@ -1,0 +1,15 @@
+die
+autodie
+globbing
+printcmd
+message
+
+fs/test_macros
+
+function/annotate
+function/defined
+function/wrapper
+
+misc/fnmatch
+
+system_setup/target/defsym

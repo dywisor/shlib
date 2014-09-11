@@ -1,0 +1,6 @@
+system_setup/target/base
+system_setup/target/defsym
+
+function/annotate
+
+!initramfs/default
