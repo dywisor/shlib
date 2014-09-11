@@ -11,11 +11,12 @@ mainscript_declare_function_alias() {
    func_alias_name="${1:?}"; shift
 
    function_alias_quoted \
-      "${MAINSCRIPT_NAMESPACE:?}__alias_${func_alias_name}" "$@"
+      "${MAINSCRIPT_NAMESPACE:?}__alias_${func_alias_name}" \
+      run_main_function "$@"
 }
 
 get_main_function() {
-   func=
+   MAIN_FUNCTION=
    [ -n "${1-}" ] || die "no command specified."
 
    local fiter
@@ -26,7 +27,7 @@ get_main_function() {
       "${1}"
    do
       if function_defined "${fiter}"; then
-         func="${fiter}"
+         MAIN_FUNCTION="${fiter}"
          return 0
       fi
    done
@@ -35,6 +36,9 @@ get_main_function() {
 }
 
 run_main_function() {
-   local func
-   get_main_function "${1-}" && shift && "${func:?}" "$@"
+   local MAIN_FUNCTION
+
+   get_main_function "${1-}" && shift || return
+
+   "${func:?}" "$@"
 }
