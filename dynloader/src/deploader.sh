@@ -12,7 +12,7 @@ shlib_dynloader__load_dependency() {
 
    case "${1}" in
 
-      ''|'#'*)
+      ''|'#'*|'!'*)
          true
       ;;
 
