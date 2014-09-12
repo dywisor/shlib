@@ -3,8 +3,9 @@
 #
 # list of functions:
 #  grep -hEo -- '^systemd_hacks_[a-zA-Z_0-9]+' systemd-hacks-functions.sh | sort
-systemd_hacks_print_function_help() {
+systemd_hacks_print_function_help() (
    # forward reference to systemd_hacks_print_function_help__pretty_print()
+   set -f
 cat << EOF | systemd_hacks_print_function_help__pretty_print
 #
 # Functions:
@@ -200,6 +201,12 @@ cat << EOF | systemd_hacks_print_function_help__pretty_print
 #         "a* \${SYSTEMD_CONFDIR%/}/system/*" '*' dumps
 #
 #
+# systemd_hacks_set_default_aliases()
+#
+#  Adds the default function aliases.
+#  Has no usable effect when called via cmdline.
+#
+#
 # systemd_hacks_uninstall_unit ( unit_patterns )
 #
 #  Removes all unit files matching any of the given patterns and
@@ -227,7 +234,7 @@ cat << EOF | systemd_hacks_print_function_help__pretty_print
 #
 #
 EOF
-}
+)
 
 #@section vars
 
@@ -319,36 +326,11 @@ systemd_hacks_print_function_help__pretty_print() {
             ;;
          esac
       fi
-
-      if false; then
-
-      case "${line}" in
-
-         ' '*|'')
-            if ${in_func_sig}; then
-               einfo "${line}" '+'
-            elif ${in_func_help}; then
-               einfo "${line# }" '|'
-            else
-               einfo "${line# }" '*'
-            fi
-         ;;
-         ')')
-            if ${in_func_sig}; then
-               einfo "${line}" '+'
-               in_func_sig=false
-            else
-               einfo "${line}" '|'
-            fi
-         ;;
-
-
-      esac
-      fi
    done
 }
 
-
+# systemd_hacks_declare_function_alias ( alias_name, func_name, *pos_args )
+#
 systemd_hacks_declare_function_alias() {
    : ${1:?} ${2:?}
    if [ -z "${__SYSTEMD_HACKS_ALIASES-}" ]; then
@@ -363,9 +345,11 @@ systemd_hacks__print_alias() {
    einfo "${1}() is ${2}()" '*'
 }
 
-systemd_hacks_print_aliases() {
+systemd_hacks_print_aliases() (
    [ -n "${__SYSTEMD_HACKS_ALIASES-}" ] || return 0
    local fpair falias alias_maxlen=0 k
+
+   set -f
 
    case "${F_PRINT_ALIAS-}" in
       ''|'default')
@@ -399,15 +383,12 @@ systemd_hacks_print_aliases() {
          done
       ;;
    esac
-}
+)
 
 systemd_hacks_print_help() {
    local __MESSAGE_INDENT="${__MESSAGE_INDENT-}"
 
-   ###einfo "Functions:" '*'
-   ###message_indent
    systemd_hacks_print_function_help
-   ###message_outdent
 
    if [ -n "${__SYSTEMD_HACKS_ALIASES-}" ]; then
       einfo "Aliases" '*'
@@ -681,6 +662,29 @@ systemd_hacks_check_function_argc() {
 
 
 # now the useful functions.
+
+# void systemd_hacks_set_default_aliases()
+#
+systemd_hacks_set_default_aliases() {
+   local iter
+
+   for iter in \
+      enable enable_single install remove replace uninstall
+   do
+      systemd_hacks_declare_function_alias "${iter}" "${iter}_unit"
+   done
+
+   for iter in disable enable_matching mask mask_matching; do
+      systemd_hacks_declare_function_alias "${iter}" "${iter}_units"
+   done
+
+   systemd_hacks_declare_function_alias \
+      move_to_libdir move_units_to_libdir
+
+   systemd_hacks_declare_function_alias \
+      help print_help
+
+}
 
 # ~int systemd_hacks_search_target_dirs_all (
 #    target_dir_pattern:=**SYSTEMD_HACKS_DEFAULT_TARGET,
