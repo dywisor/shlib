@@ -39,14 +39,13 @@ argparse_minimal_do_parse_global_options() {
             fi
          fi
       ;;
-
       '--')
-         doshift=0
          breakparse=true
       ;;
+      *)
+         return 1
+      ;;
    esac
-
-   return 1
 }
 
 # void argparse_minimal_parse_arg (
