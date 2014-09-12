@@ -9,10 +9,12 @@ mainscript_declare_function_alias() {
    local func_alias_name
 
    func_alias_name="${1:?}"; shift
+   : ${1:?}
 
    function_alias_quoted \
+      run_main_function \
       "${MAINSCRIPT_NAMESPACE:?}__alias_${func_alias_name}" \
-      run_main_function "$@"
+      "$@"
 }
 
 get_main_function() {
@@ -22,7 +24,7 @@ get_main_function() {
    local fiter
 
    for fiter in \
-      "${MAINSCRIPT_NAMESPACE}__alias__${1}" \
+      "${MAINSCRIPT_NAMESPACE}__alias_${1}" \
       "${MAINSCRIPT_NAMESPACE}_${1}" \
       "${1}"
    do
