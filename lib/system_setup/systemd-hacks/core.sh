@@ -4,7 +4,11 @@
 # list of functions:
 #  grep -hEo -- '^systemd_hacks_[a-zA-Z_0-9]+' systemd-hacks-functions.sh | sort
 systemd_hacks_print_function_help() {
-cat << EOF
+   # forward reference to systemd_hacks_print_function_help__pretty_print()
+cat << EOF | systemd_hacks_print_function_help__pretty_print
+#
+# Functions:
+#
 # systemd_hacks_declare_function_alias(...)
 #
 #  Internal helper function for function alias creation.
@@ -234,12 +238,185 @@ case "${MAINSCRIPT_NAMESPACE-}" in
    ;;
 esac
 
+__SYSTEMD_HACKS_ALIASES=
+
 #@section functions
+
+systemd_hacks_print_function_help__pretty_print() {
+   local __MESSAGE_INDENT="${__MESSAGE_INDENT-}"
+   local line_in line buf in_func_sig in_func_help prev_line_empty
+
+   in_func_sig=false
+   in_func_help=false
+   prev_line_empty=false
+
+   message_indent
+
+   while read -r line_in; do
+      line="${line_in#\#}"; line="${line# }"
+      set -- ${line}
+      [ "${1:-_}" != "@X" ] || continue
+
+      if ${in_func_sig}; then
+         if [ "$*" = ")" ]; then
+            einfo ')' '+'
+            in_func_sig=false
+
+            #message_outdent
+            #message_indent
+
+            in_func_help=true
+         else
+            einfo "${line# }" '>'
+         fi
+
+         # dont care // always set false
+         prev_line_empty=false
+
+      elif ${in_func_help}; then
+         if [ -n "$*" ]; then
+            einfo "${line# }" '|'
+            prev_line_empty=false
+
+         elif ${prev_line_empty}; then
+            echo
+            #prev_line_empty=true
+            message_outdent
+            in_func_help=false
+
+         else
+            einfo "" '|'
+            prev_line_empty=true
+         fi
+
+      else
+         case "${line}" in
+            ?*'('*')'*)
+               #in_func_sig=true
+               buf="${line%%\(*}"
+               einfo "(${line#*\(}" "${buf% }"
+               #in_func_sig=false
+               message_indent
+               in_func_help=true
+               prev_line_empty=false
+            ;;
+            ?*'('*)
+               in_func_sig=true
+               buf="${line%%\(*}"
+               einfo "(${line#*\(}" "${buf% }"
+               message_indent
+               prev_line_empty=false
+            ;;
+            '')
+               echo
+               prev_line_empty=true
+            ;;
+
+            *)
+               message_outdent
+               einfo "${line# }" '*'
+               message_indent
+            ;;
+         esac
+      fi
+
+      if false; then
+
+      case "${line}" in
+
+         ' '*|'')
+            if ${in_func_sig}; then
+               einfo "${line}" '+'
+            elif ${in_func_help}; then
+               einfo "${line# }" '|'
+            else
+               einfo "${line# }" '*'
+            fi
+         ;;
+         ')')
+            if ${in_func_sig}; then
+               einfo "${line}" '+'
+               in_func_sig=false
+            else
+               einfo "${line}" '|'
+            fi
+         ;;
+
+
+      esac
+      fi
+   done
+}
 
 
 systemd_hacks_declare_function_alias() {
+   : ${1:?} ${2:?}
+   if [ -z "${__SYSTEMD_HACKS_ALIASES-}" ]; then
+      __SYSTEMD_HACKS_ALIASES="${1}=${2}"
+   else
+      __SYSTEMD_HACKS_ALIASES="${__SYSTEMD_HACKS_ALIASES} ${1}=${2}"
+   fi
    mainscript_declare_function_alias "$@"
 }
+
+systemd_hacks__print_alias() {
+   einfo "${1}() is ${2}()" '*'
+}
+
+systemd_hacks_print_aliases() {
+   [ -n "${__SYSTEMD_HACKS_ALIASES-}" ] || return 0
+   local fpair falias alias_maxlen=0 k
+
+   case "${F_PRINT_ALIAS-}" in
+      ''|'default')
+         for fpair in ${__SYSTEMD_HACKS_ALIASES}; do
+            falias="${fpair%%=*}"
+            k=${#falias}
+            if [ ${k} -gt ${alias_maxlen} ]; then
+               alias_maxlen=${k}
+            fi
+         done
+         alias_maxlen=$(( ${alias_maxlen} + 1 ))
+
+         # very efficient:
+         #  foreach fpair: echo|sort|while <>: printf $(printf )
+         #
+         for fpair in ${__SYSTEMD_HACKS_ALIASES}; do
+            printf "%s %s\n" "${fpair%%=*}" "${fpair#*=}"
+         done | \
+            sort | (
+               # subshell usually not necessary
+               while read -r alias_name func BAD_INPUT; do
+                  einfo "${func}" \
+                     "$(printf "%-${alias_maxlen}s\n" "${alias_name}" )"
+               done
+            )
+
+      ;;
+      *)
+         for fpair in ${__SYSTEMD_HACKS_ALIASES}; do
+            ${F_PRINT_ALIAS:?} "${fpair%%=*}" "${fpair#*=}"
+         done
+      ;;
+   esac
+}
+
+systemd_hacks_print_help() {
+   local __MESSAGE_INDENT="${__MESSAGE_INDENT-}"
+
+   ###einfo "Functions:" '*'
+   ###message_indent
+   systemd_hacks_print_function_help
+   ###message_outdent
+
+   if [ -n "${__SYSTEMD_HACKS_ALIASES-}" ]; then
+      einfo "Aliases" '*'
+      message_indent
+      systemd_hacks_print_aliases
+      message_outdent
+   fi
+}
+
 
 # shorthands for cmdline usage
 dumps() {
@@ -461,6 +638,47 @@ __systemd_hacks_resolve_unit_destfile_path() {
    __extend_unit_file_vars
 }
 
+systemd_hacks_check_function_argc() {
+   local min_argc max_argc
+   case "${2:?}" in
+      *'-'*)
+         min_argc="${2%%-*}"
+         max_argc="${2#*-}"
+         : ${min_argc:=1}
+         : ${max_argc:=0}
+
+         if \
+            [ "${max_argc}" = "N" ] || [ ${max_argc} -eq ${min_argc} ]
+         then
+            max_argc=0
+         fi
+      ;;
+      *)
+         min_argc="${2}"
+         max_argc=0
+      ;;
+   esac
+
+   if [ ${max_argc} -eq 0 ]; then
+      [ ${3:?} -lt ${min_argc} ] || return 0
+
+      local msg
+      die \
+         "function ${1:?}() takes at least ${min_argc} arg(s), got ${3}." \
+         ${EX_USAGE}
+
+
+   elif [ ${3:?} -lt ${min_argc} ]; then
+      die "function ${1:?}() takes ${2} arg(s), got ${3}" ${EX_USAGE}
+
+   elif [ ${3:?} -gt ${max_argc} ]; then
+      ewarn "function ${1:?}() takes ${2} arg(s), got ${3}" "USAGE"
+
+   else
+      return 0
+   fi
+}
+
 
 # now the useful functions.
 
@@ -470,7 +688,9 @@ __systemd_hacks_resolve_unit_destfile_path() {
 # )
 #
 systemd_hacks_search_target_dirs_all() {
-   : ${1?} ${2:?}
+   systemd_hacks_check_function_argc search_target_dirs_all 2- $#
+
+   [ -n "${2-}" ] || die "no function specified" ${EX_USAGE}
    __systemd_hacks_set_default_target
 
    local target_dir_pattern
@@ -491,7 +711,7 @@ systemd_hacks_search_target_dirs_all() {
 
    shift || die
 
-   system_confdir__walk \
+   autodie system_confdir__walk \
       "${target_dir_pattern}" test_is_file_or_symlink "$@"
 }
 
@@ -504,6 +724,8 @@ systemd_hacks_search_target_dirs() {
    if [ -z "${1-}" ]; then
       die "expected a non-empty arg for unit_patterns."
    fi
+   [ -n "${3-}" ] || die "no function specified" ${EX_USAGE}
+   #systemd_hacks_check_function_argc search_target_dirs 3- $#
 
    local unit_patterns
    get_fnmatch_unit_patterns "${1}"
@@ -525,8 +747,10 @@ systemd_hacks_search_target_dirs() {
 #
 systemd_hacks_search_target_dirs_linking_to() {
    if [ -z "${1-}" ]; then
-      die "expected a non-empty arg for link_dest_patterns."
+      die "expected a non-empty arg for link_dest_patterns." ${EX_USAGE}
    fi
+   [ -n "${3-}" ] || die "no function specified" ${EX_USAGE}
+   #systemd_hacks_check_function_argc search_target_dirs_linking_to 3- $#
 
    local unit_patterns
    get_fnmatch_unit_patterns "${1}"
@@ -579,7 +803,7 @@ ${__unit_linking_to_name_patterns} ${iter}"
 
    ! ${must_unset_noglob} || set +f
 
-   systemd_hacks_search_target_dirs_all "${__target_arg}" \
+   autodie systemd_hacks_search_target_dirs_all "${__target_arg}" \
       __systemd_hacks_filter_unit_linking_to_do "$@"
 }
 
@@ -588,13 +812,16 @@ ${__unit_linking_to_name_patterns} ${iter}"
 # )
 #
 systemd_hacks_search_system_units() {
-   : ${1:?} ${2:?}
+   [ -n "${1-}" ] || die "no unit patterns given" ${EX_USAGE}
+   [ -n "${2-}" ] || die "no function specified"  ${EX_USAGE}
+   #systemd_hacks_check_function_argc search_system_units 2- $#
+
    local unit_patterns
    get_fnmatch_unit_patterns "${1}"
 
    shift || die
 
-   system_libdir__walk "/" test_is_file_or_symlink \
+   autodie system_libdir__walk "/" test_is_file_or_symlink \
       if_fnmatch_unit_do "${unit_patterns}" "$@"
 }
 
@@ -603,13 +830,16 @@ systemd_hacks_search_system_units() {
 # )
 #
 systemd_hacks_search_config_units() {
-   : ${1:?} ${2:?}
+   [ -n "${1-}" ] || die "no unit patterns given" ${EX_USAGE}
+   [ -n "${2-}" ] || die "no function specified"  ${EX_USAGE}
+   #systemd_hacks_check_function_argc search_config_units 2- $#
+
    local unit_patterns
    get_fnmatch_unit_patterns "${1}"
 
    shift || die
 
-   system_confdir__walk "/" test_is_file_or_symlink \
+   autodie system_confdir__walk "/" test_is_file_or_symlink \
       if_fnmatch_unit_do "${unit_patterns}" "$@"
 }
 
@@ -618,6 +848,8 @@ systemd_hacks_search_config_units() {
 # )
 #
 systemd_hacks_enable_single_unit() {
+   systemd_hacks_check_function_argc enable_single_unit 1-2 $#
+
    __systemd_hacks_set_default_target
 
 
@@ -649,25 +881,25 @@ systemd_hacks_enable_single_unit() {
 # )
 #
 systemd_hacks_enable_matching_units() {
-   __systemd_hacks_set_default_target
+   systemd_hacks_check_function_argc enable_matching_units 1-2 $#
+   [ -n "${1-}" ] || die "no unit patterns given" ${EX_USAGE}
 
-   if [ -z "${1-}" ]; then
-      die "no unit patterns given"
-   fi
+   __systemd_hacks_set_default_target
 
 
    local unit_patterns
    get_fnmatch_unit_patterns "${1}"
 
    local __unit_enable_target_dir
+   # autodie() not necessary
    autodie get_systemd_target_wants_dir \
       "${2:-${SYSTEMD_HACKS_DEFAULT_TARGET}}"
    __unit_enable_target_dir="${confdir}"
 
-   systemd_hacks_search_system_units "${unit_patterns}" \
+   autodie systemd_hacks_search_system_units "${unit_patterns}" \
       __systemd_hacks_enable_matching_libdir_unit
 
-   systemd_hacks_search_config_units "${unit_patterns}" \
+   autodie systemd_hacks_search_config_units "${unit_patterns}" \
       __systemd_hacks_enable_matching_confdir_unit
 
 }
@@ -697,14 +929,12 @@ systemd_hacks_enable_unit() {
 # )
 #
 systemd_hacks_enable_units() {
-   local retcode=0
-
    while [ $# -gt 0 ]; do
-      [ -z "${1}" ] || systemd_hacks_enable_unit "${1}" || retcode=${?}
+      if [ -n "${1}" ]; then
+         autodie systemd_hacks_enable_unit "${1}"
+      fi
       shift
    done
-
-   return ${retcode}
 }
 
 # int systemd_hacks_disable_unit (
@@ -712,20 +942,27 @@ systemd_hacks_enable_units() {
 # )
 #
 systemd_hacks_disable_unit() {
-   systemd_hacks_search_target_dirs \
+   systemd_hacks_check_function_argc disable_unit 1-2 $#
+
+   autodie systemd_hacks_search_target_dirs \
       "${1}" "${2-}" __systemd_hacks_disable_unit
 }
 
 # int systemd_hacks_disable_units ( *unit )
 #
 systemd_hacks_disable_units() {
-   systemd_hacks_search_target_dirs "${*}" "" __systemd_hacks_disable_unit
+   systemd_hacks_check_function_argc disable_units 1- $#
+
+   autodie systemd_hacks_search_target_dirs \
+      "${*}" "" __systemd_hacks_disable_unit
 }
 
 # int systemd_hacks_disable_all_units()
 #
 systemd_hacks_disable_all_units() {
-   systemd_hacks_disable_unit '*' '*'
+   systemd_hacks_check_function_argc disable_all_units 0 $#
+
+   autodie systemd_hacks_disable_unit '*' '*'
 }
 
 # int systemd_hacks_disable_units_linking_to (
@@ -733,13 +970,17 @@ systemd_hacks_disable_all_units() {
 # )
 #
 systemd_hacks_disable_units_linking_to() {
-   systemd_hacks_search_target_dirs_linking_to \
+   systemd_hacks_check_function_argc disable_units_linking_to 1-2 $#
+
+   autodie systemd_hacks_search_target_dirs_linking_to \
       "${1-}" "${2-@any}" __systemd_hacks_disable_unit
 }
 
 # int systemd_hacks_remove_unit ( unit_patterns )
 #
 systemd_hacks_remove_unit() {
+   systemd_hacks_check_function_argc remove_unit 1 $#
+
    autodie systemd_hacks_search_config_units \
       "${1}" __systemd_hacks_remove_unit_file
 
@@ -750,8 +991,10 @@ systemd_hacks_remove_unit() {
 # int systemd_hacks_uninstall_unit ( unit_patterns )
 #
 systemd_hacks_uninstall_unit() {
-   systemd_hacks_disable_units_linking_to "${1}" "@any" && \
-   systemd_hacks_remove_unit "${1}"
+   systemd_hacks_check_function_argc uninstall_unit 1 $#
+
+   autodie systemd_hacks_disable_units_linking_to "${1}" "@any"
+   autodie systemd_hacks_remove_unit "${1}"
 }
 
 # int systemd_hacks_install_unit ( unit_src, unit_dst= )
@@ -767,6 +1010,8 @@ systemd_hacks_install_unit() {
       die "<unit_src> arg ${src_file} is not a file."
    fi
 
+   systemd_hacks_check_function_argc install_unit "1-2" $#
+
    __systemd_hacks_resolve_unit_destfile_path \
       "${2:-${src_file##*/}}" "${src_file}"
 
@@ -777,23 +1022,27 @@ systemd_hacks_install_unit() {
       if test_fs_exists "${iter}"; then
          __systemd_hacks_print_action_info \
             "removing ${iter#${TARGET_DIR%/}} (about to be replaced)"
+
          autodie remove_file "${iter}"
       fi
    done
 
    __systemd_hacks_print_action_info \
       "installing ${src_file##*/} to ${unit_file_relpath}"
+
    autodie copy_file "${src_file}" "${unit_file}"
 }
 
 # int systemd_hacks_replace_unit ( unit_src, unit_dst= )
 #
 systemd_hacks_replace_unit() {
+   # install_unit() takes care of arg validation
    systemd_hacks_install_unit "$@" || return
 
    __systemd_hacks_print_action_info \
       "fixing units linking to ${unit_file_alt_relpath} -> ${unit_file_relpath}"
-   systemd_hacks_search_target_dirs_linking_to \
+
+   autodie systemd_hacks_search_target_dirs_linking_to \
       "${unit_file_alt_relpath:?}" @any \
       __systemd_hacks_replace_unit_symlink "${unit_file_relpath}"
 }
@@ -806,9 +1055,11 @@ __systemd_hacks_move_unit_to_libdir() {
       "${unit_link:?}" "${unit_file_relpath:?}"
 }
 
-# int systemd_hacks_move_units_to_libdir ( unit_patterns )
+# int systemd_hacks_move_units_to_libdir ( unit_patterns:="*.*" )
 #
 systemd_hacks_move_units_to_libdir() {
+   systemd_hacks_check_function_argc move_units_to_libdir 1 $#
+
    autodie systemd_hacks_search_config_units "${1-*.*}" \
       __systemd_hacks_move_unit_to_libdir
 }
@@ -841,9 +1092,7 @@ __systemd_hacks_mask_unit() {
          "${unit_suffix#.} ${unit_link_name:?}" \
          "doesn't need to be masked (does not exist in libdir)"
 
-      if [ "${SYSTEMD_HACKS_MASK_PHANTOMS:-n}" != "y" ]; then
-         return 0
-      fi
+      [ "${SYSTEMD_HACKS_MASK_PHANTOMS:-n}" = "y" ] || return 0
 
       __systemd_hacks_print_action_warn \
          "masking it anyway due to MASK_PHANTOMS=y"
@@ -856,10 +1105,6 @@ __systemd_hacks_mask_unit() {
 # int systemd_hacks_mask_units ( *unit )
 #
 systemd_hacks_mask_units() {
-   if [ -z "${1-}" ]; then
-      die "missing <unit> arg."
-   fi
-
    while [ $# -gt 0 ]; do
       if [ -n "${1}" ]; then
          zap_unit_vars
@@ -878,5 +1123,8 @@ systemd_hacks_mask_units() {
 # int systemd_hacks_mask_matching_units ( unit_patterns )
 #
 systemd_hacks_mask_matching_units() {
-   systemd_hacks_search_system_units "${1}" __systemd_hacks_mask_unit
+   [ -n "${1-}" ] || die "no unit patterns given" ${EX_USAGE}
+   systemd_hacks_check_function_argc mask_matching_units 1 $#
+
+   autodie systemd_hacks_search_system_units "${1}" __systemd_hacks_mask_unit
 }
