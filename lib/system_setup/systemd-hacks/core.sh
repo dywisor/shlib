@@ -1015,22 +1015,25 @@ systemd_hacks_install_unit() {
    __systemd_hacks_resolve_unit_destfile_path \
       "${2:-${src_file##*/}}" "${src_file}"
 
-   for iter in \
-      "${unit_file}" \
-      "${TARGET_DIR%/}/${unit_file_alt_relpath#/}"
-   do
-      if test_fs_exists "${iter}"; then
-         __systemd_hacks_print_action_info \
-            "removing ${iter#${TARGET_DIR%/}} (about to be replaced)"
+   if test_fs_exists "${unit_file}"; then
+      __systemd_hacks_print_action_info \
+         "removing ${unit_file_relpath}} (about to be replaced)"
 
-         autodie remove_file "${iter}"
-      fi
-   done
+      autodie remove_file "${unit_file}"
+   fi
 
    __systemd_hacks_print_action_info \
       "installing ${src_file##*/} to ${unit_file_relpath}"
 
    autodie copy_file "${src_file}" "${unit_file}"
+
+   if test_fs_exists "${TARGET_DIR%/}/${unit_file_alt_relpath#/}"; then
+      __systemd_hacks_print_action_info \
+         "removing ${unit_file_alt_relpath} (now in libdir)"
+
+      autodie remove_file "${TARGET_DIR%/}/${unit_file_alt_relpath#/}"
+   fi
+
 }
 
 # int systemd_hacks_replace_unit ( unit_src, unit_dst= )
@@ -1058,7 +1061,7 @@ __systemd_hacks_move_unit_to_libdir() {
 # int systemd_hacks_move_units_to_libdir ( unit_patterns:="*.*" )
 #
 systemd_hacks_move_units_to_libdir() {
-   systemd_hacks_check_function_argc move_units_to_libdir 1 $#
+   systemd_hacks_check_function_argc move_units_to_libdir 0-1 $#
 
    autodie systemd_hacks_search_config_units "${1-*.*}" \
       __systemd_hacks_move_unit_to_libdir
