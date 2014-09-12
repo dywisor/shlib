@@ -18,8 +18,17 @@ mainscript_declare_function_alias() {
 }
 
 get_main_function() {
+   case "${1-}" in
+      '')
+         die "no command specified" ${EX_USAGE}
+      ;;
+      '-h'|'--help')
+         get_main_function print_help
+         return ${?}
+      ;;
+   esac
+
    MAIN_FUNCTION=
-   [ -n "${1-}" ] || die "no command specified."
 
    local fiter
 
