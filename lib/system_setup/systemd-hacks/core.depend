@@ -3,6 +3,8 @@ system_setup/systemd-hacks/base
 
 system_setup/target/all
 
+misc/pragma
+
 misc/fnmatch
 strutil/fnmatch
 

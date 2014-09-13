@@ -249,6 +249,18 @@ __SYSTEMD_HACKS_ALIASES=
 
 #@section functions
 
+__systemd_hacks_assert_path_in_confdir() {
+   case "${1#${TARGET_DIR%/}}" in
+      "${SYSTEMD_LIBDIR%/}/"?*)
+         false
+      ;;
+      "${SYSTEMD_CONFDIR%/}/"?*)
+         return 0
+      ;;
+   esac
+   die "assertion failed: ${2:-?desc?} path outside of systemd's confdir: ${1}" 230
+}
+
 systemd_hacks_print_function_help__pretty_print() {
    local __MESSAGE_INDENT="${__MESSAGE_INDENT-}"
    local line_in line buf in_func_sig in_func_help prev_line_empty
@@ -428,10 +440,12 @@ __systemd_hacks_print_action_err() {
 
 
 __systemd_hacks_disable_unit() {
+   __systemd_hacks_assert_path_in_confdir \
+      "${unit_link:?}" "disable_unit(), unit link"
+
    __systemd_hacks_print_action_info \
       "removing ${unit_suffix#.} ${unit_basename}" \
       "from target ${target} [.${target_dir##*/*.target.}]"
-
    remove_file "${unit_link:?}"
 }
 
@@ -470,8 +484,14 @@ __systemd_hacks_filter_unit_linking_to() {
 }
 
 __systemd_hacks_replace_unit_symlink() {
-   autodie remove_file "${unit_file}"
-   autodie create_symlink "${1:?}" "${unit_file}"
+   __systemd_hacks_assert_path_in_confdir \
+      "${unit_link:?}" "replace_unit_symlink(), unit link"
+
+   __systemd_hacks_print_action_info \
+      "replacing ${unit_link_name} in ${target_dir##*/}"
+
+   autodie remove_file "${unit_link}"
+   autodie create_symlink "${1:?}" "${unit_link}"
 }
 
 __systemd_hacks_remove_unit_file() {
@@ -488,13 +508,27 @@ __systemd_hacks_filter_unit_linking_to_do() {
    "$@"
 }
 
+
 __systemd_hacks_enable_unit() {
-   if test_fs_exists "${unit_file}"; then
-      autodie remove_file "${unit_file}"
+   #__extend_unit_link_vars()
+   : ${unit_link_name:=${unit_name:?}}
+   if [ -z "${unit_link-}" ]; then
+      unit_link="${target_dir:?}/${unit_link_name}"
+      unit_link_relpath="${unit_link#${TARGET_DIR%/}}"
    fi
 
-   autodie create_symlink \
-      "${unit_file_relpath}" "${target_dir}/${unit_name}"
+   __systemd_hacks_assert_path_in_confdir \
+      "${unit_link_relpath}" "enable_unit(), unit link relpath"
+
+   if test_fs_exists "${unit_link}"; then
+      einfo "removing old ${unit_link_name} link"
+      autodie remove_file "${unit_link}"
+   fi
+
+   __systemd_hacks_print_action_info \
+      "enabling ${unit_suffix#.} ${unit_basename} in ${target_dir##*/}"
+
+   autodie create_symlink "${unit_file_relpath}" "${unit_link}"
 }
 
 __systemd_hacks_enable_matching_unit() {
@@ -510,6 +544,10 @@ __systemd_hacks_enable_matching_unit() {
    fi
 
    if __systemd_hacks_default_enable_unit_intercept; then
+      unit_link_name="${unit_name}"
+      unit_link="${target_dir}/${unit_link_name}"
+      unit_link_relpath="${unit_link#${TARGET_DIR%/}}"
+
       __systemd_hacks_enable_unit "${1:?}"
    else
       __systemd_hacks_print_action_warn \
@@ -518,6 +556,9 @@ __systemd_hacks_enable_matching_unit() {
 }
 
 __systemd_hacks_enable_matching_confdir_unit() {
+   __systemd_hacks_assert_path_in_confdir \
+      "${unit_file}" "enable_matching_confdir_unit(), unit file"
+
    __systemd_hacks_enable_matching_unit confdir
 }
 
@@ -1021,7 +1062,7 @@ systemd_hacks_install_unit() {
 
    if test_fs_exists "${unit_file}"; then
       __systemd_hacks_print_action_info \
-         "removing ${unit_file_relpath}} (about to be replaced)"
+         "removing ${unit_file_relpath} (about to be replaced)"
 
       autodie remove_file "${unit_file}"
    fi
@@ -1030,28 +1071,39 @@ systemd_hacks_install_unit() {
       "installing ${src_file##*/} to ${unit_file_relpath}"
 
    autodie copy_file "${src_file}" "${unit_file}"
+   __faking__ || test_is_real_file "${unit_file}" || \
+      die "failed to install ${unit_file}"
 
    if test_fs_exists "${TARGET_DIR%/}/${unit_file_alt_relpath#/}"; then
+      __systemd_hacks_assert_path_in_confdir \
+         "${unit_file_alt_relpath}" "unit_file_alt_relpath"
+
       __systemd_hacks_print_action_info \
          "removing ${unit_file_alt_relpath} (now in libdir)"
 
       autodie remove_file "${TARGET_DIR%/}/${unit_file_alt_relpath#/}"
    fi
 
+   __faking__ || test_is_real_file "${unit_file}" || \
+      die "removed ${unit_file} by accident..."
 }
 
 # int systemd_hacks_replace_unit ( unit_src, unit_dst= )
 #
 systemd_hacks_replace_unit() {
+   local __MESSAGE_INDENT="${__MESSAGE_INDENT-}"
    # install_unit() takes care of arg validation
    systemd_hacks_install_unit "$@" || return
 
    __systemd_hacks_print_action_info \
       "fixing units linking to ${unit_file_alt_relpath} -> ${unit_file_relpath}"
+   message_indent
 
    autodie systemd_hacks_search_target_dirs_linking_to \
       "${unit_file_alt_relpath:?}" @any \
       __systemd_hacks_replace_unit_symlink "${unit_file_relpath}"
+
+   message_outdent
 }
 
 __systemd_hacks_move_unit_to_libdir() {
