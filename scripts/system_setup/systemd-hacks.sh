@@ -5,8 +5,9 @@ set -u
 #  int <namespace>__<name> ( *argv, **arg, **doshift!, **breakparse! )
 #
 
-unset -f run_dmc
-run_dmc() { print_cmd "$@"; }
+#FAKE_MODE=y
+#unset -f run_dmc
+#run_dmc() { print_cmd "$@"; }
 
 print_help() (
    set -f
