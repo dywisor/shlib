@@ -82,9 +82,6 @@ shlib_staticloader_load_deps_for_file() {
 shlib_staticloader_main() {
    local __nodeps __mode __script_file
 
-   shlib_staticloader_load_module scriptinfo || \
-      shlib_staticloader_die "failed to load module: scriptinfo"
-
    __nodeps=false
    while [ $# -gt 0 ]; do
       case "${1-}" in
@@ -130,6 +127,9 @@ shlib_staticloader_main() {
       ""|"file")
          [ -n "${1-}" ] && [ -f "${1}" ] || \
             shlib_staticloader_die "not a file: ${1}" 241
+
+         shlib_staticloader_load_module scriptinfo || \
+            shlib_staticloader_die "failed to load module: scriptinfo"
 
          if ! ${__nodeps}; then
             shlib_staticloader_load_deps_for_file "${1}" || \
