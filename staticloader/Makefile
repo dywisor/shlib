@@ -32,11 +32,11 @@ endif
 	$(_DOEXE) -- $(O)/runscript.sh $(DESTDIR)$(STATICLOADER_DIR)/runscript.sh
 
 # cannot install both dynloader and staticloader
-	$(_DOLINK) -- $(BINDIR_TO_SHAREDIR_RELPATH)/staticloader/runscript.bash \
+	$(_DOLINK) -- $(BINDIR_TO_SHAREDIR_RELPATH)/staticloader/runscript.sh \
 		$(DESTDIR)$(BINDIR)/shlib-runscript$(SLOT_SUFFIX)
 
 ifeq ($(_WANT_SLOT_SYM),1)
-	$(_DOLINK) -- $(BINDIR_TO_SHAREDIR_RELPATH)/staticloader/runscript.bash \
+	$(_DOLINK) -- $(BINDIR_TO_SHAREDIR_RELPATH)/staticloader/runscript.sh \
 		$(DESTDIR)$(BINDIR)/shlib-runscript
 endif
 
