@@ -32,6 +32,7 @@ _SHLIBCC_GEN_LIB  += --bash
 endif
 
 X_GENINSTALL     := $(SHLIB_BUILDSCRIPTS)/generate-install-src.sh
+X_GENPRELINK     := $(SHLIB_BUILDSCRIPTS)/gen-prelinked-tree.sh
 X_GENWRAPPER     := $(SHLIB_BUILDSCRIPTS)/generate-shlibcc-wrapper.sh
 WRAPPER_SHELL    := sh
 WRAPPER_SHLIBCC  := /usr/bin/shlibcc
@@ -48,6 +49,13 @@ _WANT_SLOT_SYM := $(SYMLINK_SLOT)
 endif
 
 export SLOT_SUFFIX SHLIB_SHAREDIR _WANT_SLOT_SYM
+
+STATICLOADER_PRELINKED_ROOT = $(SHLIB_SHAREDIR)/staticloader/modules
+STATICLOADER_PRELINK_SUFFIX = .sh
+export STATICLOADER_PRELINKED_ROOT STATICLOADER_PRELINK_SUFFIX
+
+SRCDIR_STATICLOADER_BUILDDIR       = $(O)/srcdir-staticloader
+SRCDIR_STATICLOADER_PRELINKED_ROOT = $(SRCDIR_STATICLOADER_BUILDDIR)/prelinked
 
 SHLIB_INCLUDEDIR := $(SHLIB_SHAREDIR)/include
 export SHLIB_INCLUDEDIR
@@ -76,12 +84,25 @@ ifeq ($(BINDIR_TO_SHAREDIR_RELPATH),)
 $(error failed to get bindir->sharedir relpath (run "make BINDIR_TO_SHAREDIR_RELPATH=UNDEF help"))
 endif
 
-_DYNLOADER_MAKEOPTS = -C $(S)/dynloader O=$(O) S=$(S)/dynloader
+_DYNLOADER_MAKEOPTS    = -C $(S)/dynloader    O=$(O) S=$(S)/dynloader
+_STATICLOADER_MAKEOPTS = -C $(S)/staticloader O=$(O) S=$(S)/staticloader
+
+_SRCDIR_STATICLOADER_MAKEOPTS =
+_SRCDIR_STATICLOADER_MAKEOPTS += -C $(S)/staticloader
+_SRCDIR_STATICLOADER_MAKEOPTS += O=$(SRCDIR_STATICLOADER_BUILDDIR)
+_SRCDIR_STATICLOADER_MAKEOPTS += S=$(S)/staticloader
+_SRCDIR_STATICLOADER_MAKEOPTS += HAVE_SHLIB_INSTALL_VARS=0
+_SRCDIR_STATICLOADER_MAKEOPTS += STATICLOADER_DIR=$(S)/staticloader
+_SRCDIR_STATICLOADER_MAKEOPTS += STATICLOADER_MODULES_ROOT=$(SHLIB_LIB_SRC)
+_SRCDIR_STATICLOADER_MAKEOPTS += STATICLOADER_FUNCTIONS=$(S)/staticloader/functions.sh
+_SRCDIR_STATICLOADER_MAKEOPTS += STATICLOADER_PRELINKED_ROOT=$(SRCDIR_STATICLOADER_PRELINKED_ROOT)
+
 
 HAVE_SHLIB_INSTALL_VARS = 1
 export HAVE_SHLIB_INSTALL_VARS
 
-_ALL_TARGETS = shlib src dynloader shlibcc-wrapper
+_ALMOST_ALL_TARGETS = shlib src dynloader shlibcc-wrapper
+_ALL_TARGETS        = $(_ALMOST_ALL_TARGETS) staticloader srcdir-staticloader
 
 
 PHONY :=
@@ -93,7 +114,7 @@ PHONY += all
 all: shlib dynloader
 
 PHONY += install-all
-install-all: $(addprefix install-,$(_ALL_TARGETS))
+install-all: $(addprefix install-,$(_ALMOST_ALL_TARGETS))
 
 
 PHONY += clean
@@ -112,6 +133,22 @@ PHONY += clean-dynloader
 clean-dynloader:
 	$(MAKE) $(_DYNLOADER_MAKEOPTS) clean
 
+PHONY += clean-staticloader
+clean-staticloader:
+	test ! -d '$(O)/prelinked' || rm -r -- '$(O)/prelinked'
+	$(MAKE) $(_STATICLOADER_MAKEOPTS) clean
+
+
+PHONY += clean-srcdir-staticloader
+clean-srcdir-staticloader:
+	rm -f  -- '$(S)/runscript-static'
+	test ! -d '$(SRCDIR_STATICLOADER_PRELINKED_ROOT)' || \
+		rm -r '$(SRCDIR_STATICLOADER_PRELINKED_ROOT)'
+	$(MAKE) $(_SRCDIR_STATICLOADER_MAKEOPTS) clean
+
+
+PHONY +=
+
 PHONY += clean-shlibcc-wrapper
 clean-shlibcc-wrapper:
 	rm -f -- $(wildcard $(O)/*_wrapper)
@@ -126,6 +163,28 @@ src:
 PHONY += dynloader
 dynloader:
 	$(MAKE) $(_DYNLOADER_MAKEOPTS) all
+
+PHONY += staticloader
+staticloader:
+	$(X_GENPRELINK) \
+		'$(SHLIB_LIB_SRC)' '$(O)/prelinked' \
+		'$(SHLIB_INCLUDEDIR)' '$(STATICLOADER_PRELINKED_ROOT)' \
+		'$(STATICLOADER_PRELINK_SUFFIX)'
+
+	$(MAKE) $(_STATICLOADER_MAKEOPTS) all
+
+PHONY += srcdir-staticloader
+srcdir-staticloader: clean-srcdir-staticloader
+	$(X_GENPRELINK) \
+		'$(SHLIB_LIB_SRC)' '$(SRCDIR_STATICLOADER_PRELINKED_ROOT)' - - \
+		'$(STATICLOADER_PRELINK_SUFFIX)'
+
+	$(MAKE) $(_SRCDIR_STATICLOADER_MAKEOPTS) all
+	chmod +x '$(SRCDIR_STATICLOADER_BUILDDIR)/runscript.sh'
+
+	rm -f  -- '$(S)/runscript-static'
+	ln -s  -- '$(SRCDIR_STATICLOADER_BUILDDIR)/runscript.sh' '$(S)/runscript-static'
+
 
 PHONY += shlibcc-wrapper
 shlibcc-wrapper: $(foreach k,$(SHLIBCC_WRAPPERS),$(O)/$(k)_wrapper)
@@ -155,7 +214,7 @@ install-full-src:
 	$(_DODIR) -- $(DESTDIR)$(dir $(SHLIB_INCLUDEDIR))
 
 	cp -a --no-preserve=ownership --remove-destination \
-		'$(SHLIB_LIB_SRC)/' '$(DESTDIR)$(SHLIB_INCLUDEDIR)/'
+		'$(SHLIB_LIB_SRC)/.' '$(DESTDIR)$(SHLIB_INCLUDEDIR)/'
 	find '$(DESTDIR)$(SHLIB_INCLUDEDIR)/' -type f -print0 | xargs -0 chmod $(INSMODE) --
 	find '$(DESTDIR)$(SHLIB_INCLUDEDIR)/' -type d -print0 | xargs -0 chmod $(DIRMODE) --
 ifeq ($(_WANT_SLOT_SYM),1)
@@ -166,6 +225,17 @@ endif
 PHONY += install-dynloader
 install-dynloader:
 	$(MAKE) $(_DYNLOADER_MAKEOPTS) install
+
+PHONY += install-staticloader
+install-staticloader:
+	$(_DODIR) -- $(DESTDIR)$(dir $(STATICLOADER_PRELINKED_ROOT))
+
+	cp -a --no-preserve=ownership --remove-destination \
+		'$(O)/prelinked/.' '$(DESTDIR)$(STATICLOADER_PRELINKED_ROOT)/'
+	find '$(DESTDIR)$(STATICLOADER_PRELINKED_ROOT)/' -type f -print0 | xargs -0 chmod $(INSMODE) --
+	find '$(DESTDIR)$(STATICLOADER_PRELINKED_ROOT)/' -type d -print0 | xargs -0 chmod $(DIRMODE) --
+
+	$(MAKE) $(_STATICLOADER_MAKEOPTS) install
 
 PHONY += install-shlibcc-wrapper
 install-shlibcc-wrapper:
@@ -225,12 +295,16 @@ help:
 	@echo  '* shlib                    - Build the big library file'
 	@echo  '* src                      - Does nothing'
 	@echo  '* dynloader                - Build the dynamic module loader'
+	@echo  '  staticloader             - Build the static module loader'
+	@echo  '  srcdir-staticloader      - Build srcdir static module loader'
 	@echo  '  shlibcc-wrapper          - Build shlibcc wrapper scripts'
 	@echo  ''
 	@echo  'Install targets:'
 	@echo  '  install-shlib            - Install library file to DESTDIR/SHLIB_SHAREDIR'
 	@echo  '  install-src              - Install module files to DESTDIR/SHLIB_INCLUDEDIR'
 	@echo  '  install-dynloader        - Install dynloader to DESTDIR/SHLIB_SHAREDIR/dynloader'
+	@echo  '                             and set up links in DESTDIR/BINDIR'
+	@echo  '  install-staticloader     - Install staticloader to DESTDIR/SHLIB_SHAREDIR/staticloader'
 	@echo  '                             and set up links in DESTDIR/BINDIR'
 	@echo  '  install-shlibcc-wrapper  - Install shlibcc wrappers to DESTDIR/SHLIB_SHAREDIR'
 	@echo  '                             and set up links in DESTDIR/BINDIR'
@@ -241,10 +315,12 @@ help:
 	@echo  ' Note: install targets do not imply build actions'
 	@echo  ''
 	@echo  'Clean targets:'
-	@echo  '  clean-shlib              - Remove files generated by "shlib"'
-	@echo  '  clean-src                - Does nothing'
-	@echo  '  clean-dynloader          - Remove files generated by "dynloader"'
-	@echo  '  clean-shlibcc-wrapper    - Remove files generated by "shlibcc-wrapper"'
+	@echo  '  clean-shlib               - Remove files generated by "shlib"'
+	@echo  '  clean-src                 - Does nothing'
+	@echo  '  clean-dynloader           - Remove files generated by "dynloader"'
+	@echo  '  clean-staticloader        - Remove files generated by "staticloader"'
+	@echo  '  clean-srcdir-staticloader - Remove files generated by "srcdir-staticloader"'
+	@echo  '  clean-shlibcc-wrapper     - Remove files generated by "shlibcc-wrapper"'
 	@echo  ''
 	@echo  ''
 	@echo  'Variables:'

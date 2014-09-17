@@ -6,6 +6,8 @@
 # Creates a script that recursively installs <src root> to <dest root>.
 #
 #
+# FIXME: migrate to ./src-functions.sh
+#
 set -u
 readonly IFS_DEFAULT="${IFS}"
 readonly NEWLINE='

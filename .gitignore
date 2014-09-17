@@ -24,3 +24,6 @@
 /scripts/local
 /scripts/**/local
 /scripts/tmp
+
+/runscript
+/runscript-static
