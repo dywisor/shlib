@@ -239,8 +239,12 @@ liram_layout_stage__common_populate() {
    # scan files
    irun liram_scan_files
 
+   # rootfs-mounted hook
+   newroot_setup_run_hook liram-rootfs-mounted
+
    # early setup (liram subtrees)
    inonfatal liram_setup_subtrees
+   newroot_setup_run_hook liram-subtree-setup
 
    # unpack remaining tarballs
    liram_unpack_etc || true
