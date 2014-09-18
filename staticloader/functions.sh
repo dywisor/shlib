@@ -1,10 +1,5 @@
 #!/bin/sh
 
-SHLIB_STATICLOADER_PRELINKED_ROOT="/tmp/XXX"
-SHLIB_STATICLOADER_MODULES_ROOT="${PWD}/lib"
-SHLIB_STATICLOADER_PRELINK_SUFFIX=".prelink.sh"
-
-
 shlib_staticloader_die() {
    echo "${1:+staticloader died: }${1:-staticloader died.}" 1>&2
    exit ${2:-240}

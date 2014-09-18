@@ -25,29 +25,35 @@ readonly EX_MODLOAD_ERROR=254
 parse_argv_remainder() {
    case "${1-}" in
       '')
-         target_prelink_dir="${DEFAULT_TARGET_PRELINK_DIR}"
-      ;;
-      @|_|-)
-         target_prelink_dir="${dst_root:?}"
-      ;;
-      *)
-         target_prelink_dir="${1}"
-      ;;
-   esac
-
-   case "${2-}" in
-      '')
          target_modules_dir="${DEFAULT_TARGET_MODULES_DIR}"
       ;;
       @|_|-)
          target_modules_dir="${src_root:?}"
       ;;
       *)
-         target_modules_dir="${2}"
+         target_modules_dir="${1}"
+      ;;
+   esac
+
+   case "${2-}" in
+      '')
+         target_prelink_dir="${DEFAULT_TARGET_PRELINK_DIR}"
+      ;;
+      @|_|-)
+         target_prelink_dir="${dst_root:?}"
+      ;;
+      *)
+         target_prelink_dir="${2}"
       ;;
    esac
 
    prelink_suffix="${3:-.prelink.sh}"
+
+   printf "++ %-20s = %s\n" src_root "${src_root:?}"
+   printf "++ %-20s = %s\n" dst_root "${dst_root:?}"
+   printf "++ %-20s = %s\n" target_prelink_dir "${target_prelink_dir:?}"
+   printf "++ %-20s = %s\n" target_modules_dir "${target_modules_dir:?}"
+   printf "++ %-20s = %s\n" prelink_suffix "${prelink_suffix:?}"
 }
 
 prelink_file_filter() {
