@@ -63,7 +63,7 @@ exclude_list_make_list() {
 #
 exclude_list_add() {
    local v0 ret
-   v0=()
+   newline_list_init_empty v0
 
    if exclude_list_make_list "$@"; then
       newline_list_add_list EXCLUDE_LIST v0; ret=${?}
