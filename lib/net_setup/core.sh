@@ -101,7 +101,7 @@ net_setup_dns() {
       # empty entries are discarded when creating this file
       #[ -s "${dnsf}" ] || net_setup_log_warn "dns config file is empty"
 
-      if { \
+      if ! { \
          rm -f -- "${resf}" && \
          while read -r namesrv; do
             [ -z "${namesrv}" ] || printf "%s %s\n" "nameserver" "${namesrv}"
