@@ -232,17 +232,21 @@ message_indent_call() {
 message_autoset_nocolor() {
    if [ "${NO_COLOR:-n}" != "y" ]; then
       if \
-         [ -e /NO_COLOR ] || [ -h /NO_COLOR ] || [ ! -c /dev/null ] || \
+         [ -e /NO_COLOR ] || [ -h /NO_COLOR ] || \
          [ ! -t 1 ] || [ ! -t 2 ]
       then
          NO_COLOR=y
-      else
+
+      elif [ -c /dev/null ]; then
          case "$(tty 2>/dev/null)" in
             ttyS*|/*/ttyS*)
                # stdin from serial console, disable color
                NO_COLOR=y
             ;;
          esac
+
+      elif tty | grep ttyS; then
+         NO_COLOR=y
       fi
    fi
 
