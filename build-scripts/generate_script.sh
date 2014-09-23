@@ -145,7 +145,10 @@ if [ "${LIST_SCRIPTS:-n}" = "y" ]; then
 	list_scripts
 fi
 
-[ -n "${IN_SCRIPT-}" ]   || die "${HELP_USAGE}"
+if [ -z "${IN_SCRIPT-}" ]; then
+	print_help 1>&2
+	die "bad usage" ${EX_USAGE}
+fi
 
 : ${FORCE:=n}
 
