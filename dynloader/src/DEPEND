@@ -3,3 +3,4 @@
 ./deploader.sh
 ./modloader.sh
 ./dynloader.sh
+./dynscript.sh

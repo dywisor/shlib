@@ -141,3 +141,7 @@ shlib_staticloader_main() {
       ;;
    esac
 }
+
+shlib_require() {
+	shlib_staticloader_load_modules "$@" || exit
+}
