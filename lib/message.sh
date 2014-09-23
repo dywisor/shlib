@@ -232,7 +232,7 @@ message_indent_call() {
 message_autoset_nocolor() {
    if [ "${NO_COLOR:-n}" != "y" ]; then
       if \
-         [ -e /NO_COLOR ] || [ -h /NO_COLOR ] || [ ! -c /dev/null ] \
+         [ -e /NO_COLOR ] || [ -h /NO_COLOR ] || [ ! -c /dev/null ] || \
          [ ! -t 1 ] || [ ! -t 2 ]
       then
          NO_COLOR=y
