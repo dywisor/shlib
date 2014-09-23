@@ -61,10 +61,10 @@ The following code snippet gives an idea of how to *install* shlib and shlibcc.
    [ -d "${PRJROOT}" ] || mkdir "${PRJROOT}"
 
    # get shlib
-   git clone --depth 1 git://github.com/dywisor/shlib.git "${PRJROOT}/shlib"
+   git clone git://github.com/dywisor/shlib.git "${PRJROOT}/shlib"
 
    # get local shlibcc
-   git clone --depth 1 git://github.com/dywisor/shlibcc.git "${PRJROOT}/shlibcc"
+   git clone git://github.com/dywisor/shlibcc.git "${PRJROOT}/shlibcc"
 
    cd "${PRJROOT}/shlib"
 
@@ -93,13 +93,19 @@ libary files, amongst others:
    | find-not-included.sh | Find and list modules that are not part of the   |
    |                      | big library file                                 |
    +----------------------+--------------------------------------------------+
+   | runscript-static     | Runs a shlib script after loading its            |
+   |                      | dependencies. Has to be created with             |
+   |                      | ``make srcdir-staticloader``.                    |
+   |                      | Relies on statically resolved module             |
+   |                      | dependencies, hence the name.                    |
+   +----------------------+--------------------------------------------------+
+   | runscript            | Similar to runscript-static, but dynamically     |
+   |                      | resolves dependencies. Needs bash and has to be  |
+   |                      | created with ``make dynloader``.                 |
+   +----------------------+--------------------------------------------------+
    | generate_script.sh   | Generate scripts                                 |
    +----------------------+--------------------------------------------------+
-   | loader.sh            | Load *shlib* modules dynamically. Do **not** use |
-   |                      | this as it has some restrictions.                |
-   +----------------------+--------------------------------------------------+
    | make_scripts.sh      | Build a series of scripts (or all scripts).      |
-   |                      | Used by the Makefile.                            |
    +----------------------+--------------------------------------------------+
 
 The actual content of the *shlib* repo is organized in four subdirectories:
@@ -230,12 +236,10 @@ Simply run
 ..  code:: sh
 
    make shlib
-   # optionally followed by
-   make verify
-   #or, as a single call, make shlib verify
 
 
-and copy ``./build/shlib_YYYY-MM-DD.sh`` to ``${dest_file}``.
+and copy ``./build/shlib/shlib.sh`` to ``${dest_file}`` or use
+``make install-shlib`` (see ``make help`` for details).
 
 You can also call *shlibcc* directly via
 
@@ -297,23 +301,6 @@ manual
    Result of using *shlibcc* directly (or not using it at all) plus *somehow*
    including the module code in a script file.
    Just listed here for completeness, you're on your own when using this type.
-
--------------------------------------
- Creating all of the example scripts
--------------------------------------
-
-There's an easy way to build all scripts found in the ``scripts`` directory:
-
-..  code:: sh
-
-   # create standalone scripts
-   make scripts-standalone
-
-   # create linked scripts
-   make DEST=<shile file> scripts-linked
-
-
-Any of the above commands creates all scripts in ``build/scripts``.
 
 
 --------------------------
