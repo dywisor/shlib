@@ -131,6 +131,7 @@ clean-src:
 
 PHONY += clean-dynloader
 clean-dynloader:
+	rm -f -- $(S)/runscript
 	$(MAKE) $(_DYNLOADER_MAKEOPTS) clean
 
 PHONY += clean-staticloader
@@ -163,6 +164,8 @@ src:
 PHONY += dynloader
 dynloader:
 	$(MAKE) $(_DYNLOADER_MAKEOPTS) all
+	rm -f -- $(S)/runscript
+	ln -s -- dynloader/runscript.bash $(S)/runscript
 
 PHONY += staticloader
 staticloader:
