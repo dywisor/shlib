@@ -27,6 +27,7 @@ Package: shlib-dynloader
 Architecture: all
 Depends: ${misc:Depends}
 Recommends: shlib-modules
+Conflicts: shlib-staticloader
 Description: shell module library loader
  shlib, the shell module library, is a project that aims to provide reusable
  shell code in modular form, thus allowing to create small scripts as well as
@@ -38,6 +39,23 @@ Description: shell module library loader
  liram, a distribution-agnostic approach to load a (Linux) system into tmpfs.
  .
  This package contains the dynamic module loader.
+
+Package: shlib-staticloader
+Architecture: all
+Depends: ${misc:Depends}
+Recommends: shlib-modules
+Conflicts: shlib-dynloader
+Description: static shell module library loader
+ shlib, the shell module library, is a project that aims to provide reusable
+ shell code in modular form, thus allowing to create small scripts as well as
+ big library files.
+ .
+ Its features range from basic functions like die() known from Perl,
+ generic iterators, file system manipulation and colored messages to more
+ complex functionality such as squashfs containers and initramfs code, including
+ liram, a distribution-agnostic approach to load a (Linux) system into tmpfs.
+ .
+ This package contains the static module loader.
 
 Package: shlib
 Architecture: all

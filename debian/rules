@@ -34,8 +34,11 @@ MY_SHLIB_MAKE = $(MAKE) \
 
 
 override_dh_auto_install:
-	$(MY_SHLIB_MAKE) DESTDIR=$(CURDIR)/debian/shlib-modules   install-src
-	$(MY_SHLIB_MAKE) DESTDIR=$(CURDIR)/debian/shlib-dynloader install-dynloader
+	$(MY_SHLIB_MAKE) DESTDIR=$(CURDIR)/debian/shlib-modules      install-src
+	$(MY_SHLIB_MAKE) DESTDIR=$(CURDIR)/debian/shlib-dynloader    install-dynloader
+	$(MY_SHLIB_MAKE) DESTDIR=$(CURDIR)/debian/shlib-staticloader install-staticloader
+	ln -s -- staticloader/modules/all.sh \
+		$(CURDIR)/debian/shlib-staticloader/usr/share/shlib/default/shlib.sh
 
 override_dh_auto_clean:
 	$(MY_SHLIB_MAKE) clean
@@ -43,5 +46,6 @@ override_dh_auto_clean:
 
 override_dh_auto_build:
 	$(MY_SHLIB_MAKE) dynloader
+	$(MY_SHLIB_MAKE) staticloader
 
 override_dh_auto_test:
