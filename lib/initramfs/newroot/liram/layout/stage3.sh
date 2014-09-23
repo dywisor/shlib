@@ -40,8 +40,20 @@
 # newroot_setup_all() after populating newroot.
 # Also exports boot-time variables such as LIRAM_DISK to NEWROOT as file.
 #
-# Runs the "liram-post-populate" hook just before returning.
 #
+# Hooks:
+# * liram-rootfs-mounted after creating the rootfs (+ its overlay)
+# * liram-subtree-setup  after mounting subtrees
+# * liram-post-populate  just before returning
+#
+#
+# NOTE:
+#  The name is misleading; this layout was initially written for booting
+#  Gentoo stage tarballs, but can handle any rootfs + rootfs-overlay
+#  tarball/squashfs setup and is a good choice for "live" systems.
+#
+# NOTE:
+#  kernel modules/firmware can be provided by passing a second initramfs file
 #
 
 #@section functions

@@ -14,8 +14,8 @@ As for the dependency file, simply symlink "<layout name>.depend" to
 The "<layout name>.sh" file should contain at least one function,
 int liram_populate_layout_<layout name>(), which somehow populates
 ${NEWROOT}. The actual implementation is up to you, see the existing
-layouts for working examples, namely "tv" and "default". I recommend you to
-look at the "tv" layout first as it is the more straightforward one.
+layouts for working examples, namely "squashed-rootfs", "stage3" and "default".
+The latter is probably the most straightforward one.
 
 The code file may also implement helper functions.
 Their naming convention is
