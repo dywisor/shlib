@@ -17,6 +17,8 @@ Usage:
   ${SCRIPT_NAME} [option...] <function> [arg...]
 
     Calls a systemd_hacks function with the given args.
+    A leading "systemd_hacks_" can be omitted from the function name.
+    See "${SCRIPT_NAME} help" for a list of functions.
 
   ${SCRIPT_NAME} [option...] -f <script file> [arg...]
 
@@ -29,6 +31,7 @@ Options:
   -L, --[systemd-]libdir     <dir>  - systemd's libdir  [${SYSTEMD_LIBDIR:-<unset>}]
   -C, --[systemd-]confdir    <dir>  - systemd's confdir [${SYSTEMD_CONFDIR:-<unset>}]
   -h, --help                        - prints this message
+  -c, --no-color                    - disable colored output [${NO_COLOR:-n}]
 
   libdir/confdir must be relative to the target dir, with a leading "/",
   e.g. /usr/lib/systemd.
@@ -55,6 +58,10 @@ systemd_hacks_script_argparse__globals() {
          [ -d "${2}"  ] || die "${arg} ${2} does not exist!" ${EX_USAGE}
          TARGET_DIR="${2%/}"; : ${TARGET_DIR:=/}
          doshift=2
+      ;;
+      '-c'|'--no-color')
+         NO_COLOR=y
+         message_bind_functions
       ;;
       *)
          return 1
