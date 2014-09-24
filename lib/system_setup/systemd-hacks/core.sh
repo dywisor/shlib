@@ -98,7 +98,7 @@ cat << EOF | systemd_hacks_print_function_help__pretty_print
 #         /usr/lib/systemd/system/rc-local.service
 #
 #    This works even if %SYSTEMD_LIBDIR is set to /lib/systemd (and vice versa).
-#    The function will print a warning ("path fixup") and chage the path
+#    The function will print a warning ("path fixup") and change the path
 #    accordingly.
 #
 #
@@ -111,7 +111,7 @@ cat << EOF | systemd_hacks_print_function_help__pretty_print
 # systemd_hacks_mask_units ( *unit )
 #
 #  Masks all listed units.
-#  Set SYSTEMD_HACKS_MASK_PHANTOMS=y if want to mask non-existent services.
+#  Set SYSTEMD_HACKS_MASK_PHANTOMS=y if you want to mask non-existent services.
 #
 #
 # systemd_hacks_move_units_to_libdir ( [unit_patterns:=<match all>] )
