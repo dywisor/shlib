@@ -10,5 +10,7 @@ liram/manage/logging
 liram/manage/mount
 liram/manage/util
 liram/manage/vars
+#liram/manage/vars_def
 
-virtually_yours
+#liram/manage/applets/pack
+#liram/manage/applets/core-update
