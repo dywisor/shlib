@@ -59,7 +59,7 @@ ZRAM__NEXT_FREE_DEV=
 #  if not already loaded.
 #
 #  Returns 0 on success (= requested # of devices is now available),
-#  1 of modprobe failed, 2 if not enough free devices available,
+#  1 if modprobe failed, 2 if not enough free devices available,
 #  and 64 if num_devices was invalid.
 #
 zram_load_module() {
@@ -606,7 +606,7 @@ zram_set_size() {
 #    **ZRAM_NAME, **ZRAM_FSNAME, **ZRAM_BLOCK, **ZRAM_DEV, **ZRAM_SIZE_M!
 # )
 #
-#  Unmounts/Deactivates %ZRAM_DEV and resetsd %ZRAM_BLOCK.
+#  Unmounts/Deactivates %ZRAM_DEV and resets %ZRAM_BLOCK.
 #
 #  Returns: success (true/false)
 #

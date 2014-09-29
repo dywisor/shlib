@@ -73,7 +73,7 @@ zram_swapon() {
    elif [ -z "${1}" ]; then
       prio=
    else
-      prio="-p ${1}"
+      prio="${1}"
    fi
 
    zram_log_info \

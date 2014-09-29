@@ -33,7 +33,7 @@ zram_autoswap() {
 # @private @stdout ~int zram_autoswap__print_cpu_core_count()
 #
 #  Prints the highest core id as reported by /proc/cpuinfo.
-#  Note that core cont := core id + 1 (not handled by this function!).
+#  Note that core count := <max core id> + 1 (not handled by this function!).
 #
 zram_autoswap__print_cpu_core_count() {
    < /proc/cpuinfo sed -rn -e \
