@@ -171,7 +171,7 @@ fi
 : ${SCRIPT_LIB_CHMOD:=0644}
 
 if [ -z "${SCRIPT_OUTFILE}" ] && [ "${SCRIPT_VERIFY}" = "y" ]; then
-	argparse_die "--verify needs --output"
+	die "--verify needs --output"
 fi
 
 if [ -e "${IN_SCRIPT}.depend" ]; then
@@ -183,11 +183,11 @@ fi
 
 if [ -n "${SCRIPT_LIB_OUTFILE}" ]; then
 	if [ -z "${NEEDS_SHLIB}" ]; then
-		argparse_die "--split-lib: ${IN_SCRIPT%.sh} has no dependencies."
+		die "--split-lib: ${IN_SCRIPT%.sh} has no dependencies."
 	elif [ -z "${SHLIB_TARGET-}" ]; then
-		argparse_die "--split-lib needs --shlib."
+		die "--split-lib needs --shlib."
 	elif [ -z "${SCRIPT_OUTFILE}" ]; then
-		argparse_die "--split-lib needs --output."
+		die "--split-lib needs --output."
 	fi
 fi
 
