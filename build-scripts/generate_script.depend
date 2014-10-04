@@ -4,6 +4,5 @@ autodie
 message
 scriptinfo
 misc/qwhich
-fs/dodir_minimal
 fs/path
 argparse_minimal
