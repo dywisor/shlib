@@ -1,3 +1,6 @@
+#@HEADER
+# initramfs/cmdline/parse: TODO: use argparse_minimal
+
 #@section functions
 
 # void cmdline_parse ( **CMDLINE_FILE=/proc/cmdline )
@@ -13,6 +16,33 @@ cmdline_parse() {
       F_ARGPARSE_SHORTOPT= \
       F_ARGPARSE_LONGOPT=
 
+   local line argv iter
+
+   # read cmdline files built into the initramfs image
+   for iter in /cmdline /liram/cmdline; do
+      if [ -f "${iter}" ]; then
+         # concat all non-empty, non-comment lines and store them in %argv
+         argv=
+         while read -r line; do
+            case "${line}" in
+               ''|'#'*)
+                  true
+               ;;
+               *)
+                  argv="${argv} ${line}"
+               ;;
+            esac
+         done < "${iter}"
+
+         # parse %argv
+         if [ -n "${argv}" ]; then
+            argparse_parse ${argv}
+            argv=
+         fi
+      fi
+   done
+
+   # read cmdline
    argparse_parse_from_file "${CMDLINE_FILE:-/proc/cmdline}"
 }
 
