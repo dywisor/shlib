@@ -73,6 +73,13 @@ newline_list_copy() {
    fi
 }
 
+# void __newline_list_join ( *values, **__joined_list! )
+#
+__newline_list_join() {
+   newline_list_init __joined_list
+   __joined_list=( "$@" )
+}
+
 # void newline_list_join ( *values, **v0! )
 #
 newline_list_join() {

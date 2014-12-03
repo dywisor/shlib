@@ -43,21 +43,29 @@ newline_list_copy() {
    eval ${2:-v0}="\${${1:?}?}"
 }
 
-# void newline_list_join ( *values, **v0! )
+# @private void __newline_list_join ( *values, **__joined_list! )
 #
-newline_list_join() {
-   v0=
+__newline_list_join() {
+   __joined_list=
    if [ $# -gt 0 ]; then
-      v0="${1}"
+      __joined_list="${1}"
       shift
       while [ $# -gt 0 ]; do
-         v0="${v0}${NEWLINE?}${1}"
+         __joined_list="${__joined_list}${NEWLINE?}${1}"
          shift
       done
       return 0
    else
       return 1
    fi
+}
+
+# void newline_list_join ( *values, **v0! )
+#
+newline_list_join() {
+   local __joined_list
+   __newline_list_join "$@"
+   v0="${__joined_list}"
 }
 
 # void newline_list_add_list ( varname, list_name )
@@ -91,12 +99,12 @@ newline_list_append_list() {
 # void newline_list_add ( varname, *values )
 #
 newline_list_add() {
-   local v0
+   local __joined_list
    local varname="${1:?}"
    shift
 
-   if newline_list_join "$@"; then
-      eval "${1}=\"${v0}${NEWLINE}\${${1}-}\""
+   if __newline_list_join "$@"; then
+      eval "${1}=\"${__joined_list}${NEWLINE}\${${1}-}\""
    else
       eval : "\${${varname}=}"
    fi
@@ -107,12 +115,12 @@ newline_list_add() {
 # void newline_list_append ( varname, *values )
 #
 newline_list_append() {
-   local v0
+   local __joined_list
    local varname="${1:?}"
    shift
 
-   if newline_list_join "$@"; then
-      eval "${varname}=\"\${${varname}}${NEWLINE?}${v0}\""
+   if __newline_list_join "$@"; then
+      eval "${varname}=\"\${${varname}}${NEWLINE?}${__joined_list}\""
    else
       eval : "\${${varname}=}"
    fi
