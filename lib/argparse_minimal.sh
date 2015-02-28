@@ -32,12 +32,23 @@ argparse_minimal_do_parse_global_options() {
          DEBUG=n
       ;;
       '-h'|'--help')
-         if [ $$ -ne 1 ] && function_defined print_help; then
-            print_help
-            if [ "${ARGPARSE_EXIT_AFTER_HELP:-y}" = "y" ]; then
-               exit 0
-            fi
+         if [ $$ -ne 1 ]; then
+            local func
+            for func in \
+               ${parser_namespace:?}__print_help \
+               print_help
+            do
+               if function_defined "${func}"; then
+                  "${func}"
+                  if [ "${ARGPARSE_EXIT_AFTER_HELP:-y}" = "y" ]; then
+                     exit 0
+                  fi
+                  return 0
+               fi
+            done
          fi
+
+         return 1
       ;;
       '--')
          breakparse=true

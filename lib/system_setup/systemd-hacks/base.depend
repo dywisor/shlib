@@ -3,6 +3,7 @@ autodie
 die
 message
 globbing
+list_has
 
 strutil/fnmatch
 misc/fnmatch

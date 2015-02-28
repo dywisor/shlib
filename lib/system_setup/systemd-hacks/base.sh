@@ -1,3 +1,13 @@
+#@section vars
+
+# list of all known unit types
+SYSTEMD_HACKS_UNIT_TYPES="\
+service socket device mount automount swap \
+target path timer snapshot slice scope"
+
+SYSTEMD_HACKS_UNIT_TYPES_LIBDIR_PREFERRED="\
+service socket timer"
+
 #@section const
 
 # semi-const __SYSTEMD_HACKS_TARGET_VARS
@@ -19,32 +29,39 @@ __SYSTEMD_HACKS_UNIT_VARS="${__SYSTEMD_HACKS_DEFAULT_UNIT_VARS}"
 
 #@section functions
 
-is_systemd_unit_type() {
-   case "${1#.}" in
-      service|socket|device|mount|automount|swap|target|\
-      path|timer|snapshot|slice|scope)
-         return 0
-      ;;
-   esac
-
-   return 1
-}
-
-is_systemd_unit_type_libdir_preferred() {
-   case "${1#.}" in
-      service|socket|timer)
-         return 0
-      ;;
-   esac
-
-   return 1
-}
-
-# get_fnmatch_unit_patterns ( *input, **unit_patterns! )
+# int is_systemd_unit_type ( word, **SYSTEMD_HACKS_UNIT_TYPES )
 #
-get_fnmatch_unit_patterns() {
-   unit_patterns=
-   local iter must_unset_noglob
+#  Returns 0 if %word or "."%word is a known systemd unit type, else 1.
+#
+is_systemd_unit_type() {
+   list_has "${1#.}" ${SYSTEMD_HACKS_UNIT_TYPES}
+}
+
+# int is_systemd_unit_type_libdir_preferred (
+#    word, **SYSTEMD_HACKS_UNIT_TYPES_LIBDIR_PREFERRED
+# )
+#
+#  Returns 0 if %word or "."%word i a known systemd unit type
+#  that should (preferably) be stored in systemd's libdir,
+#  else 1.
+#
+#  service, socket, timer
+#
+is_systemd_unit_type_libdir_preferred() {
+   list_has "${1#.}" ${SYSTEMD_HACKS_UNIT_TYPES_LIBDIR_PREFERRED}
+}
+
+# void fsuffix_fnmatch_patterns_with ( suffix, *input, **v0! )
+#
+#  Appends %suffix (".${suffix#.}") to all patterns in *input that do not
+#  have a file extension and stores the resulting pattern list in %v0.
+#
+fsuffix_fnmatch_patterns_with() {
+   : ${1:?}
+   v0=
+   local suffix iter must_unset_noglob
+
+   suffix=".${1#.}"; shift
 
    if check_globbing_enabled; then
       must_unset_noglob=true
@@ -57,10 +74,10 @@ get_fnmatch_unit_patterns() {
       for iter in ${1}; do
          case "${iter}" in
             *.*)
-               unit_patterns="${unit_patterns} ${iter}"
+               v0="${v0} ${iter}"
             ;;
             *)
-               unit_patterns="${unit_patterns} ${iter}.service"
+               v0="${v0} ${iter}${suffix}"
             ;;
          esac
       done
@@ -70,10 +87,28 @@ get_fnmatch_unit_patterns() {
 
    ! ${must_unset_noglob} || set +f
 
-   unit_patterns="${unit_patterns# }"
+   v0="${v0# }"
+}
+
+# void get_fnmatch_unit_patterns ( *input, **unit_patterns! )
+#
+#  Appends ".service" to each pattern in *input that has no file extenstion
+#  and stores the resulting pattern list in %unit_patterns.
+#
+get_fnmatch_unit_patterns() {
+   unit_patterns=
+   local v0
+
+   fsuffix_fnmatch_patterns_with .service "$@"
+   unit_patterns="${v0}"
 }
 
 # int if_fnmatch_unit_do ( unit_patterns, func, *args, **unit_name )
+#
+#  Calls %func(*args) if %unit_name is matched
+#  by any of the given unit patterns.
+#
+#  Returns 0 if no pattern matched, else passes the function's return value.
 #
 if_fnmatch_unit_do() {
    fnmatch_in_any "${unit_name?}" "${1}" || return 0
@@ -81,28 +116,72 @@ if_fnmatch_unit_do() {
    "$@"
 }
 
-get_systemd_libdir() {
-   libdir_root="${TARGET_DIR:?}/${SYSTEMD_LIBDIR#/}"
-   case "${1-}" in
+# void __systemd_hacks_join_relpath ( base, relpath= )
+#
+__systemd_hacks_join_relpath() {
+   v0=
+   case "${2-}" in
       ''|'/')
-         libdir="${libdir_root}"
+         v0="${1}"
       ;;
       *)
-         libdir="${libdir_root}/${1#/}"
+         v0="${1%/}/${2#/}"
       ;;
    esac
 }
 
+# void get_systemd_libdir_relpath ( [relpath], **SYSTEMD_LIBDIR, **v0! )
+#
+#  Returns a libdir path relative to the target's rootfs via %v0.
+#
+get_systemd_libdir_relpath() {
+   __systemd_hacks_join_relpath "/${SYSTEMD_LIBDIR#/}" "$@"
+}
+
+# void get_systemd_libdir (
+#    [relpath], **TARGET_DIR, **SYSTEMD_LIBDIR, **libdir_root!, **libdir!
+# )
+#
+#  Returns an absolute libdir path via %libdir.
+#
+get_systemd_libdir() {
+   local v0
+   libdir_root="${TARGET_DIR:?}/${SYSTEMD_LIBDIR#/}"
+   __systemd_hacks_join_relpath "${libdir_root}" "$@"
+   libdir="${v0}"
+}
+
+# void get_systemd_confdir_relpath ( [relpath], **SYSTEMD_CONFDIR, **v0! )
+#
+#  Returns a confdir path relative to the target's rootfs via %v0.
+#
+get_systemd_confdir_relpath() {
+   __systemd_hacks_join_relpath "/${SYSTEMD_CONFDIR#/}" "$@"
+}
+
+# void get_systemd_confdir (
+#    [relpath], **TARGET_DIR, **SYSTEMD_CONFDIR, **confdir_root!, **confdir!
+# )
+#
+#  Returns an absolute confdir path via %confdir.
+#
 get_systemd_confdir() {
-   confdir_root="${TARGET_DIR:?}/${SYSTEMD_CONFDIR#/}"
-   case "${1-}" in
-      ''|'/')
-         confdir="${confdir_root}"
-      ;;
-      *)
-         confdir="${confdir_root}/${1#/}"
-      ;;
-   esac
+   local v0
+   confdir_root="${TARGET_DIR:?}${SYSTEMD_CONFDIR#/}"
+   __systemd_hacks_join_relpath "${confdir_root}" "$@"
+   confdir="${v0}"
+}
+
+# void get_unit_confdir (
+#    unit_name, confdir_suffix:="d", **confdir_root!, **confdir!
+# )
+#
+get_unit_confdir() {
+   #@varcheck 1
+   local suffix
+   suffix="${2:-d}"
+
+   get_systemd_confdir "system/${1:?}.${suffix#.}"
 }
 
 # void get_systemd_target_dep_dir (
@@ -111,8 +190,8 @@ get_systemd_confdir() {
 # )
 #
 get_systemd_target_dep_dir() {
-   : ${1:?} ${2:?}
-   get_systemd_confdir "system/${1%.target}.target.${2}"
+   #@varcheck 1 2
+   get_unit_confdir "${1%.target}.target" "${2}"
 }
 
 # void get_systemd_target_wants_dir (

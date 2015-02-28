@@ -112,7 +112,7 @@ str_endswith() {
    shift
    while [ $# -gt 0 ]; do
       case "${s}" in
-         "${1}"*)
+         *"${1}")
             v0="${1}"
             return 0
          ;;

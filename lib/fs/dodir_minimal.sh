@@ -56,3 +56,17 @@ keepdir_clean() {
    local KEEPDIR=y
    dodir_clean "$@"
 }
+
+# int dodir_for_file ( *file )
+#
+dodir_for_file() {
+   while [ $# -gt 0 ]; do
+      case "${1}" in
+         ?*/*)
+            dodir_clean "${1%/*}" || return ${?}
+         ;;
+      esac
+      shift
+   done
+   return 0
+}

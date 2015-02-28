@@ -174,7 +174,7 @@ devfs__mdev_fixup_exe() {
 #
 devfs_mount_mdev() {
    local devfs
-   devfs__mdev_initvars
+   devfs__mdev_initvars "${@}"
 
    if [ "${MDEV_USE_TMPFS:-n}" != "y" ] && fstype_supported devtmpfs; then
       ${F_DOMOUNT_MP:-domount3} "${devfs}" \
@@ -203,7 +203,7 @@ devfs_mount_mdev() {
 #
 devfs_populate_mdev() {
    local devfs
-   devfs__mdev_initvars
+   devfs__mdev_initvars "${@}"
 
    [ -e /etc/mdev.conf ] || ${AUTODIE_NONFATAL-} touch /etc/mdev.conf
 

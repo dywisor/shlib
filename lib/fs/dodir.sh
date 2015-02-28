@@ -5,7 +5,7 @@
 
 #@section functions
 
-# int dodir (
+# @DEPRECATED int dodir (
 #    *dir,
 #    **DODIR_PREFIX=,
 #    **F_DODIR_CREATED=,
@@ -29,6 +29,8 @@
 #
 #  This function immediately returns a non-zero code if any F_DODIR_*
 #  function fails.
+#
+#  DEPRECATED: prefix functionality will be split from this function in future
 #
 dodir() {
    local fail=0 v0 d prefix=""
@@ -70,6 +72,14 @@ dodir() {
    done
 
    return ${fail}
+}
+
+# @FUTURE int dodir_prefix ( prefix, ... )
+#
+dodir_prefix() {
+   local DODIR_PREFIX
+   DODIR_PREFIX="${1?}"; shift
+   dodir "${@}"
 }
 
 # void dodir_zap_env()
