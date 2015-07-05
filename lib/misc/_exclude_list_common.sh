@@ -62,7 +62,8 @@ exclude_list_make_list() {
 # void exclude_list_add ( *values, **EXCLUDE_LIST_WORD, **EXCLUDE_LIST! )
 #
 exclude_list_add() {
-   local v0 ret
+   local v0
+   local ret
    newline_list_init_empty v0
 
    if exclude_list_make_list "$@"; then
@@ -71,14 +72,16 @@ exclude_list_add() {
       newline_list_init EXCLUDE_LIST; ret=${?}
    fi
 
-   newline_list_unset v0
+   newline_list_init_empty v0
    return ${ret}
 }
 
 # void exclude_list_append ( *values, **EXCLUDE_LIST_WORD, **EXCLUDE_LIST! )
 #
 exclude_list_append() {
-   local v0 ret
+   local v0
+   local ret
+   newline_list_init_empty v0
 
    if exclude_list_make_list "$@"; then
       newline_list_append_list EXCLUDE_LIST v0; ret=${?}
@@ -86,7 +89,7 @@ exclude_list_append() {
       newline_list_init EXCLUDE_LIST; ret=${?}
    fi
 
-   newline_list_unset v0
+   newline_list_init_empty v0
    return ${ret}
 }
 
